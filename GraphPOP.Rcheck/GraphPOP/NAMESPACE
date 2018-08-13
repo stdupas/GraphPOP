@@ -1,0 +1,41 @@
+exportPattern("^[[:alpha:]]+")
+exportMethods(
+    "[",
+    "cellNumA",
+    "coalescent_2_newick",
+    "Collisionijk",
+    "commute_time_digraph",
+    "commute_time_undigraph",
+    "compare",
+    "createDemographic",
+    "hitting_time_digraph",
+    "laplaceMatrix",
+    "linearizedFstDigraph",
+    "linearizedFstUndigraph",
+    "migrationMatrix",
+    "nCellA",
+    "ordinary_laplacian",
+    "runEnvDinModel",
+    "runNicheModel",
+    "simul_coal_200",
+    "simul_coalescent",
+    "transitionMatrixBackward",
+    "transitionMatrixForward",
+    "valuesA",
+    "xyFromCellA"
+)
+exportClasses(
+    "Demographic",
+     "EnvDinModel",
+     "Landscape",
+     "LandscapeHistory",
+     "MigrationModel",
+     "NicheModel",
+     "TransitionBackward",
+     "TransitionForward"
+)
+
+
+
+
+

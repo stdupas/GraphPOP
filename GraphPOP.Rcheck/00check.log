@@ -1,0 +1,161 @@
+* using log directory ‘/home/chaput/Documents/STAGE_article/GraphPOP/GraphPOP/GraphPOP.Rcheck’
+* using R version 3.2.3 (2015-12-10)
+* using platform: x86_64-pc-linux-gnu (64-bit)
+* using session charset: UTF-8
+* checking for file ‘GraphPOP/DESCRIPTION’ ... OK
+* checking extension type ... Package
+* this is package ‘GraphPOP’ version ‘1.0’
+* checking package namespace information ... OK
+* checking package dependencies ... NOTE
+Depends: includes the non-default packages:
+  ‘raster’ ‘matrixcalc’ ‘ape’ ‘stringr’ ‘markovchain’ ‘MASS’
+Adding so many packages to the search path is excessive and importing
+selectively is preferable.
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘GraphPOP’ can be installed ... WARNING
+Found the following significant warnings:
+  Warning: multiple methods tables found for ‘cellNumA’
+  Warning: multiple methods tables found for ‘coalescent_2_newick’
+  Warning: multiple methods tables found for ‘Collisionijk’
+  Warning: multiple methods tables found for ‘commute_time_digraph’
+  Warning: multiple methods tables found for ‘commute_time_undigraph’
+  Warning: multiple methods tables found for ‘compare’
+  Warning: multiple methods tables found for ‘createDemographic’
+  Warning: multiple methods tables found for ‘hitting_time_digraph’
+  Warning: multiple methods tables found for ‘laplaceMatrix’
+  Warning: multiple methods tables found for ‘linearizedFstDigraph’
+  Warning: multiple methods tables found for ‘linearizedFstUndigraph’
+  Warning: multiple methods tables found for ‘migrationMatrix’
+  Warning: multiple methods tables found for ‘nCellA’
+  Warning: multiple methods tables found for ‘ordinary_laplacian’
+  Warning: multiple methods tables found for ‘runEnvDinModel’
+  Warning: multiple methods tables found for ‘runNicheModel’
+  Warning: multiple methods tables found for ‘simul_coal_200’
+  Warning: multiple methods tables found for ‘simul_coalescent’
+  Warning: multiple methods tables found for ‘transitionMatrixBackward’
+  Warning: multiple methods tables found for ‘transitionMatrixForward’
+  Warning: multiple methods tables found for ‘valuesA’
+  Warning: multiple methods tables found for ‘xyFromCellA’
+See ‘/home/chaput/Documents/STAGE_article/GraphPOP/GraphPOP/GraphPOP.Rcheck/00install.out’ for details.
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... NOTE
+Malformed Description field: should contain one or more complete sentences.
+Non-standard license specification:
+  What license is it under?
+Standardizable: FALSE
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking dependencies in R code ... NOTE
+Packages in Depends field not imported from:
+  ‘MASS’ ‘ape’ ‘markovchain’ ‘matrixcalc’ ‘methods’ ‘raster’ ‘stringr’
+  These packages need to be imported from (in the NAMESPACE file)
+  for when this namespace is loaded but not attached.
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+EnvDinModel: no visible binding for global variable ‘nichemodelK’
+EnvDinModel: no visible binding for global variable ‘nichemodelR’
+EnvDinModel: no visible binding for global variable ‘m’
+Landscape: no visible binding for global variable ‘dateVector’
+Landscape: no visible binding for global variable ‘charVector’
+Landscape : <anonymous> : <anonymous>: no visible global function
+  definition for ‘res’
+LandscapeHistory: no visible binding for global variable
+  ‘listOfLandscape’
+MigrationModel: no visible binding for global variable ‘p’
+NicheModel: no visible binding for global variable ‘characterVector1’
+NicheModel: no visible binding for global variable ‘listOfNumeric’
+NicheModel: no visible binding for global variable ‘characterVector2’
+conQuadraticsKed: no visible global function definition for
+  ‘quadraticConcave’
+cellNumA,RasterLayer: no visible global function definition for
+  ‘values’
+coalescent_2_newick,list: no visible global function definition for
+  ‘str_replace’
+migrationMatrix,Landscape-MigrationModel: no visible global function
+  definition for ‘ncell’
+migrationMatrix,Landscape-MigrationModel : <anonymous>: no visible
+  global function definition for ‘res’
+migrationMatrix,Landscape-MigrationModel : <anonymous>: no visible
+  global function definition for ‘ncellA’
+nCellA,RasterLayer: no visible global function definition for ‘values’
+runEnvDinModel,Landscape-EnvDinModel: no visible global function
+  definition for ‘values’
+runNicheModel,Landscape-NicheModel : <anonymous>: no visible global
+  function definition for ‘setValues’
+runNicheModel,Landscape-NicheModel : <anonymous>: no visible global
+  function definition for ‘ncell’
+valuesA,RasterLayer: no visible global function definition for ‘values’
+valuesA,RasterStack: no visible global function definition for ‘values’
+xyFromCellA,RasterLayer: no visible global function definition for
+  ‘xyFromCell’
+xyFromCellA,RasterStack: no visible global function definition for
+  ‘xyFromCell’
+* checking for missing documentation entries ... WARNING
+Undocumented code objects:
+  ‘Collisionijk’ ‘Demographic’ ‘EnvDinModel’ ‘Landscape’
+  ‘LandscapeHistory’ ‘MigrationModel’ ‘NicheModel’ ‘TransitionBackward’
+  ‘cellNumA’ ‘coalescent_2_newick’ ‘commute_time_digraph’
+  ‘commute_time_undigraph’ ‘compare’ ‘conQuadratic’ ‘conQuadraticsKed’
+  ‘constant’ ‘createDemographic’ ‘envelinear’ ‘enveloppe’
+  ‘hitting_time_digraph’ ‘laplaceMatrix’ ‘linearizedFstDigraph’
+  ‘linearizedFstUndigraph’ ‘listOfMigrationShape’ ‘migrationMatrix’
+  ‘nCellA’ ‘nbpar’ ‘ordinary_laplacian’ ‘runEnvDinModel’
+  ‘runNicheModel’ ‘simul_coal_200’ ‘simul_coalescent’
+  ‘transitionMatrixBackward’ ‘transitionMatrixForward’ ‘validLandscape’
+  ‘validityMigrationModel’ ‘validityNicheModel’ ‘valuesA’ ‘xyFromCellA’
+Undocumented S4 classes:
+  ‘Demographic’ ‘EnvDinModel’ ‘Landscape’ ‘LandscapeHistory’
+  ‘MigrationModel’ ‘NicheModel’ ‘TransitionBackward’
+  ‘TransitionForward’
+Undocumented S4 methods:
+  generic 'Collisionijk' and siglist 'matrix'
+  generic '[' and siglist 'Demographic,character,missing,ANY'
+  generic '[' and siglist 'EnvDinModel,character,missing,ANY'
+  generic '[' and siglist 'Landscape,character,missing,ANY'
+  generic '[' and siglist 'MigrationModel,character,missing,ANY'
+  generic 'cellNumA' and siglist 'RasterLayer'
+  generic 'cellNumA' and siglist 'RasterStack'
+  generic 'coalescent_2_newick' and siglist 'list'
+  generic 'migrationMatrix' and siglist 'Landscape,MigrationModel'
+  generic 'nCellA' and siglist 'Demographic'
+  generic 'nCellA' and siglist 'RasterLayer'
+  generic 'nCellA' and siglist 'RasterStack'
+  generic 'runEnvDinModel' and siglist 'Landscape,EnvDinModel'
+  generic 'runNicheModel' and siglist 'Landscape,NicheModel'
+  generic 'simul_coal_200' and siglist 'Demographic,logical'
+  generic 'simul_coalescent' and siglist 'Demographic,logical'
+  generic 'transitionMatrixForward' and siglist 'list,character'
+  generic 'valuesA' and siglist 'RasterLayer'
+  generic 'valuesA' and siglist 'RasterStack'
+  generic 'xyFromCellA' and siglist 'RasterLayer'
+  generic 'xyFromCellA' and siglist 'RasterStack'
+All user-level objects in a package (including S4 classes and methods)
+should have documentation entries.
+See chapter ‘Writing R documentation files’ in the ‘Writing R
+Extensions’ manual.
+* checking examples ... NONE
+* checking PDF version of manual ... WARNING
+LaTeX errors when creating PDF version.
+This typically indicates Rd problems.
+* checking PDF version of manual without hyperrefs or index ... ERROR
+Re-running with no redirection of stdout/stderr.
+* DONE
+Status: 1 ERROR, 3 WARNINGs, 4 NOTEs

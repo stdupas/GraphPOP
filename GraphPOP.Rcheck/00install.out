@@ -1,0 +1,368 @@
+* installing *source* package ‘GraphPOP’ ...
+** R
+** preparing package for lazy loading
+
+> setGeneric(name = "xyFromCellA", def = function(object) {
++     return(standardGeneric("xyFromCellA"))
++ })
+[1] "xyFromCellA"
+
+> setGeneric(name = "cellNumA", def = function(object) {
++     return(standardGeneric("cellNumA"))
++ })
+[1] "cellNumA"
+
+> setGeneric(name = "nCellA", def = function(object) {
++     return(standardGeneric("nCellA"))
++ })
+[1] "nCellA"
+
+> setGeneric(name = "valuesA", def = function(object) {
++     return(standardGeneric("valuesA"))
++ })
+[1] "valuesA"
+
+> setGeneric(name = "runNicheModel", def = function(object, 
++     model) {
++     return(standardGeneric("runNicheModel"))
++ })
+[1] "runNicheModel"
+
+> setGeneric(name = "runEnvDinModel", def = function(object, 
++     model) {
++     return(standardGeneric("runEnvDinModel"))
++ })
+[1] "runEnvDinModel"
+
+> setGeneric(name = "migrationMatrix", def = function(object, 
++     model) {
++     return(standardGeneric("migrationMatrix"))
++ })
+[1] "migrationMatrix"
+
+> source("~/Documents/STAGE_article/GraphPOP/GraphPOP/GraphPOP/R/genericLandscape.R", 
++     echo = TRUE)
+
+> setGeneric(name = "xyFromCellA", def = function(object) {
++     return(standardGeneric("xyFromCellA"))
++ })
+[1] "xyFromCellA"
+
+> setGeneric(name = "cellNumA", def = function(object) {
++     return(standardGeneric("cellNumA"))
++ })
+[1] "cellNumA"
+
+> setGeneric(name = "nCellA", def = function(object) {
++     return(standardGeneric("nCellA"))
++ })
+[1] "nCellA"
+
+> setGeneric(name = "valuesA", def = function(object) {
++     return(standardGeneric("valuesA"))
++ })
+[1] "valuesA"
+
+> setGeneric(name = "runNicheModel", def = function(object, 
++     model) {
++     return(standardGeneric("runNicheModel"))
++ })
+[1] "runNicheModel"
+
+> setGeneric(name = "runEnvDinModel", def = function(object, 
++     model) {
++     return(standardGeneric("runEnvDinModel"))
++ })
+[1] "runEnvDinModel"
+
+> setGeneric(name = "migrationMatrix", def = function(object, 
++     model) {
++     return(standardGeneric("migrationMatrix"))
++ })
+[1] "migrationMatrix"
+
+> library(raster)
+
+> setMethod(f = "xyFromCellA", signature = "RasterLayer", 
++     definition = function(object) {
++         df = xyFromCell(object, cellNumA(object))
++ .... [TRUNCATED] 
+[1] "xyFromCellA"
+
+> setMethod(f = "xyFromCellA", signature = "RasterStack", 
++     definition = function(object) {
++         df = xyFromCell(object, cellNumA(object))
++ .... [TRUNCATED] 
+[1] "xyFromCellA"
+
+> setMethod(f = "cellNumA", signature = "RasterLayer", 
++     definition = function(object) {
++         which(!is.na(values(object)))
++     })
+[1] "cellNumA"
+
+> setMethod(f = "cellNumA", signature = "RasterStack", 
++     definition = function(object) {
++         cellNumA(object[[1]])
++     })
+[1] "cellNumA"
+
+> setMethod(f = "nCellA", signature = "RasterLayer", 
++     definition = function(object) {
++         length(na.omit(values(object)))
++     })
+[1] "nCellA"
+
+> setMethod(f = "nCellA", signature = "RasterStack", 
++     definition = function(object) {
++         nCellA(object[[1]])
++     })
+[1] "nCellA"
+
+> setMethod(f = "valuesA", signature = "RasterLayer", 
++     definition = function(object) {
++         select <- !is.na(values(object))
++         x =  .... [TRUNCATED] 
+[1] "valuesA"
+
+> setMethod(f = "valuesA", signature = "RasterStack", 
++     definition = function(object) {
++         x = na.omit(values(object))
++         colnames( .... [TRUNCATED] 
+[1] "valuesA"
+
+> validLandscape = function(object) {
++     if (length(object@period) != 2) 
++         stop("the period is  not valid because it contains more or less ..." ... [TRUNCATED] 
+
+> setClass("Landscape", contains = "RasterStack", slots = c(period = "Date", 
++     vars = "character", distanceMatrix = "matrix"), validity = validLa .... [TRUNCATED] 
+
+> Landscape <- function(rasterstack = rasterstack, period = dateVector, 
++     vars = charVector) {
++     if (class(rasterstack) != "RasterStack") 
++  .... [TRUNCATED] 
+
+> setClass("LandscapeHistory", contains = "list", validity = function(object) {
++     if (!is.list(object)) 
++         stop("error in lanscape list :  ..." ... [TRUNCATED] 
+
+> LandscapeHistory <- function(Landscapelist = listOfLandscape) {
++     li <- unlist(lapply(1:length(Landscapelist), function(x) Landscapelist[[x]]["p ..." ... [TRUNCATED] 
+
+> nbpar <- function(x) {
++     unlist(lapply(x, function(x) switch(x[], constant = 1, proportional = 1, 
++         enveloppe = 2, envelin = 2, quadrat .... [TRUNCATED] 
+
+> validityNicheModel = function(object) {
++     if (class(object@variables) != "character") 
++         stop("error in NicheModel variables : variables ..." ... [TRUNCATED] 
+
+> setClass("NicheModel", slots = c(variables = "ANY", 
++     parameterList = "ANY", reactNorms = "ANY"), validity = validityNicheModel)
+Note: the specification for class “NicheModel” in package ‘.GlobalEnv’ seems equivalent to one from package ‘GraphPOP’: not turning on duplicate class definitions for this class.
+
+> NicheModel <- function(variables = characterVector1, 
++     parameterList = listOfNumeric, reactNorms = characterVector2) {
++     names(parameterLis .... [TRUNCATED] 
+
+> listOfMigrationShape <- c("fat_tail1", "gaussian", 
++     "exponential", "contiguous", "contiguous8", "island", "fat_tail2", 
++     "contiguous_long ..." ... [TRUNCATED] 
+
+> validityMigrationModel = function(object) {
++     if (!is.character(object@shapeDisp)) 
++         stop("error in  MigrationModel shapeDisp : ShapeDi ..." ... [TRUNCATED] 
+
+> setClass("MigrationModel", slots = c(shapeDisp = "ANY", 
++     pDisp = "ANY"), validity = validityMigrationModel)
+Note: the specification for class “MigrationModel” in package ‘.GlobalEnv’ seems equivalent to one from package ‘GraphPOP’: not turning on duplicate class definitions for this class.
+
+> MigrationModel <- function(shape = character, param = p) {
++     new("MigrationModel", shapeDisp = shape, pDisp = param)
++ }
+
+> setClass("EnvDinModel", slots = c(K = "ANY", R = "ANY", 
++     migration = "ANY"), validity = function(object) {
++     if (class(object@K) != "Niche ..." ... [TRUNCATED] 
+Note: the specification for class “EnvDinModel” in package ‘.GlobalEnv’ seems equivalent to one from package ‘GraphPOP’: not turning on duplicate class definitions for this class.
+
+> EnvDinModel <- function(K = nichemodelK, R = nichemodelR, 
++     migration = m) {
++     new("EnvDinModel", K = K, R = R, migration = migration)
++ }
+
+> setClass("TransitionBackward", contains = "matrix", 
++     validity = function(object) {
++         if (all(nrow(object) == 0)) 
++             stop(" ..." ... [TRUNCATED] 
+
+> TransitionBackward <- function(matrix) {
++     if (nrow(matrix) != ncol(matrix)) 
++         stop("The matrix is not square")
++     if (class(rowname .... [TRUNCATED] 
+
+> setMethod(f = "[", signature = c(x = "EnvDinModel", 
++     i = "character", j = "missing"), definition = function(x, 
++     i, j, drop) {
++     swit .... [TRUNCATED] 
+[1] "["
+
+> setMethod(f = "[", signature = c(x = "MigrationModel", 
++     i = "character", j = "missing"), definition = function(x, 
++     i, j, drop) {
++     s .... [TRUNCATED] 
+[1] "["
+
+> setMethod(f = "[", signature = c(x = "Landscape", 
++     i = "character", j = "missing"), definition = function(x, 
++     i, j, drop) {
++     switch .... [TRUNCATED] 
+[1] "["
+
+> setMethod("runNicheModel", signature = c("Landscape", 
++     "NicheModel"), definition = function(object, model) {
++     Y = lapply(model@variables, .... [TRUNCATED] 
+[1] "runNicheModel"
+
+> enveloppe <- function(X, p) {
++     if (length(p) != 2) 
++         stop("The parameter is  not valid because it contains more or less than two value ..." ... [TRUNCATED] 
+
+> envelinear <- function(X, p) {
++     if (length(p) != 2) 
++         stop("The parameter is  not valid because it contains more or less than two valu ..." ... [TRUNCATED] 
+
+> constant <- function(X, p) {
++     X[] <- p
++ }
+
+> conQuadratic <- function(X, p) {
++     if (length(p) != 2) 
++         stop("The parameter is  not valid because it contains more or less than two va ..." ... [TRUNCATED] 
+
+> conQuadraticsKed <- function(X, p) {
++     quadraticConcave(X, p) * envelinear(X, p)
++ }
+
+> setMethod(f = "runEnvDinModel", signature = c("Landscape", 
++     "EnvDinModel"), definition = function(object, model) {
++     R <- values(runNicheM .... [TRUNCATED] 
+[1] "runEnvDinModel"
+
+> setMethod(f = "migrationMatrix", signature = c("Landscape", 
++     "MigrationModel"), definition = function(object, model) {
++     Ndim = 1 + all(nc .... [TRUNCATED] 
+[1] "migrationMatrix"
+
+> setGeneric(name = "transitionMatrixBackward", def = function(object, 
++     model) {
++     return(standardGeneric("transitionMatrixBackward"))
++ })
+[1] "transitionMatrixBackward"
+
+> setGeneric(name = "transitionMatrixForward", def = function(param, 
++     meth) {
++     return(standardGeneric("transitionMatrixForward"))
++ })
+[1] "transitionMatrixForward"
+
+> setGeneric(name = "createDemographic", def = function(object, 
++     model) {
++     return(standardGeneric("createDemographic"))
++ })
+[1] "createDemographic"
+
+> setGeneric(name = "laplaceMatrix", def = function(object) {
++     return(standardGeneric("laplaceMatrix"))
++ })
+[1] "laplaceMatrix"
+
+> setGeneric(name = "ordinary_laplacian", def = function(object) {
++     return(standardGeneric("ordinary_laplacian"))
++ })
+[1] "ordinary_laplacian"
+
+> setGeneric(name = "hitting_time_digraph", def = function(object) {
++     return(standardGeneric("hitting_time_digraph"))
++ })
+[1] "hitting_time_digraph"
+
+> setGeneric(name = "commute_time_digraph", def = function(object) {
++     return(standardGeneric("commute_time_digraph"))
++ })
+[1] "commute_time_digraph"
+
+> setGeneric(name = "simul_coalescent", def = function(demographic, 
++     printCoal) {
++     return(standardGeneric("simul_coalescent"))
++ })
+[1] "simul_coalescent"
+
+> setGeneric(name = "simul_coal_200", def = function(demographic, 
++     printCoal) {
++     return(standardGeneric("simul_coal_200"))
++ })
+[1] "simul_coal_200"
+
+> setGeneric(name = "compare", def = function(demographic, 
++     popSize, printCoal) {
++     return(standardGeneric("compare"))
++ })
+[1] "compare"
+
+> setGeneric(name = "Collisionijk", def = function(Hitting_mat) {
++     return(standardGeneric("Collisionijk"))
++ })
+[1] "Collisionijk"
+
+> setGeneric(name = "linearizedFstDigraph", def = function(transition, 
++     popSize) {
++     return(standardGeneric("linearizedFstDigraph"))
++ })
+[1] "linearizedFstDigraph"
+
+> setGeneric(name = "coalescent_2_newick", def = function(coalescent) {
++     return(standardGeneric("coalescent_2_newick"))
++ })
+[1] "coalescent_2_newick"
+
+> setGeneric(name = "linearizedFstUndigraph", def = function(transition, 
++     popSize) {
++     return(standardGeneric("linearizedFstUndigraph"))
++ } .... [TRUNCATED] 
+[1] "linearizedFstUndigraph"
+
+> setGeneric(name = "commute_time_undigraph", def = function(object) {
++     return(standardGeneric("commute_time_undigraph"))
++ })
+[1] "commute_time_undigraph"
+Found more than one class "TransitionBackward" in cache; using the first, from namespace 'GraphPOP'
+** help
+No man pages found in package  ‘GraphPOP’ 
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded
+Warning: multiple methods tables found for ‘cellNumA’
+Warning: multiple methods tables found for ‘coalescent_2_newick’
+Warning: multiple methods tables found for ‘Collisionijk’
+Warning: multiple methods tables found for ‘commute_time_digraph’
+Warning: multiple methods tables found for ‘commute_time_undigraph’
+Warning: multiple methods tables found for ‘compare’
+Warning: multiple methods tables found for ‘createDemographic’
+Warning: multiple methods tables found for ‘hitting_time_digraph’
+Warning: multiple methods tables found for ‘laplaceMatrix’
+Warning: multiple methods tables found for ‘linearizedFstDigraph’
+Warning: multiple methods tables found for ‘linearizedFstUndigraph’
+Warning: multiple methods tables found for ‘migrationMatrix’
+Warning: multiple methods tables found for ‘nCellA’
+Warning: multiple methods tables found for ‘ordinary_laplacian’
+Warning: multiple methods tables found for ‘runEnvDinModel’
+Warning: multiple methods tables found for ‘runNicheModel’
+Warning: multiple methods tables found for ‘simul_coal_200’
+Warning: multiple methods tables found for ‘simul_coalescent’
+Warning: multiple methods tables found for ‘transitionMatrixBackward’
+Warning: multiple methods tables found for ‘transitionMatrixForward’
+Warning: multiple methods tables found for ‘valuesA’
+Warning: multiple methods tables found for ‘xyFromCellA’
+* DONE (GraphPOP)
