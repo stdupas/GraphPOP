@@ -18,22 +18,23 @@ setClass("envDynData",
          # - 0 : the cell is not connected to any other cell 
          # - n!=0 : the cell is connected to the cells having the same value
          contains = "RasterStack",
-         representation (connectionType="character"),
+         representation(connectionType="character"),
          prototype({r1<- raster(ncol=2, nrow=2)
          r1[] <- rep(2:5,1)
          r2<- raster(ncol=2, nrow=2)
-         r2[] <- c(TRUE,FALSE,TRUE,FALSE)
+         r2[] <- c(1,2,1,2)
          s<- stack(x=c(r1,r2))
-         names(s)<-c("t","con")
+         names(s)<-c("t","group")
          extent(s)<-c(0,2,0,2)
          s},connectionType=c("raster","groups"))
 )
 
+connectionTypes=c("raster","vector","groups")
 
 setValidity("envDynData",
             function(object){
               if (length(object@connectionType)!=length(oject)) return("the length of connectionType slot informing the type of connection data and the length of rasters stack differ")
-              if (!all(object@connectionType%in%c("raster","vector","groups"))) return("connectionType argument character value was not any of 'raster', 'vector', or 'group'")
+              if (!all(object@connectionType%in%connectionTypes)) return("connectionType argument character value was not any of 'raster', 'vector', or 'group'")
                 return(TRUE)
             })
 
@@ -46,7 +47,7 @@ envDynData<-function(rasterstack=rasterstack,connectionType=typeCon){
 }
 
 setClass("envDynHistory",
-         slots = c(envDynHist="list",dates="Date"),
+         representation(envDynHist="list",dates="Date"),
          validity = function(object){
            if (any(lapply(object@envDynHist,FUN = function(x) class(x)!="environment"))) stop("the list envDynList has to be of class envDynData")
          })
@@ -64,49 +65,47 @@ npNiche <- function(x) {unlist(lapply(x,function(x) switch(x[],
 ))
 }
 
+validityNicheModel=function(object){
+  if(class(object@var)!="character")stop("error in NicheModel variables : variables just accept character!")
+  if(!is.list(object@parameterList))stop("error in NicheModel parameterList : parameterList just accept list!")
+  if (!all(object@reactNorms%in%reactionNorm))stop(paste("reaction norm should be one of the following :",paste(reactionNorm,collapse = ", ")))
+  if(FALSE%in%lapply(object@parameterList,is.numeric))stop("error in NicheModel parameter list : Parameter list just accept numeric!")
+  if(!all(names(object@reactNorms)%in%object@var))stop("error in NicheModel : number of variables and number of reaction norms do not correspond")
+  notMatching <- (unlist(lapply(1:length(object@parameterList),function(x) npNiche(object@reactNorms[x]) != length(object@parameterList[[x]]))))
+  if (any(notMatching)) stop(paste("
+                                            error in number of parameter given in nicheModel parameterList 
+                                            according to reactionNorm:
+                                            constant=1,
+                                            enveloppe=2,
+                                            envelin=2,
+                                            conQuadratic=2,
+                                            conQuadraticSkw=2
+                                            number of paremeters and reactionNorm do not match for variable ",which(notMatching),". ",sep=""))
+  TRUE
+}
+
 setClass("nicheModel",
-         slots = c(var="character",reactNorms="character",parameterList="list"),
+         representation(var="character",reactNorms="character",parameterList="list"),
          # defines the reaction norm for each variable, without interaction in this version
          # var : the variable names to which the niche model applies
          # reactNorms : the reaction norm for the variable (there should be one reaction norm per variable)
          # parameterList: the list of numerical parameters vectors for each reaction norm, there should be a parameter vector for each reaction norm
-         validity=function(object){
-           if(class(object@var)!="character")stop("error in NicheModel variables : variables just accept character!")
-           if(!is.list(object@parameterList))stop("error in NicheModel parameterList : parameterList just accept list!")
-           if (!all(object@reactNorms)%in%reactionNorm)
-           if(FALSE%in%lapply(object@parameterList,is.numeric))stop("error in NicheModel parameter list : Parameter list just accept numeric!")
-           if(!all(object@var)%in%names(object@reactNorms))stop("error in NicheModel : number of variables and number of reaction norms do not correspond")
-           notMatching <- (unlist(lapply(1:length(object@parameterList),function(x) nbpar(object@reactNorms[x]) != length(object@parameterList[[x]]))))
-           if (any(notMatching)) stop(paste("error in NicheModel : number of paremeters and reactionNorm do not match for variable ",which(notMatching),". ",sep=""))
-           TRUE
-         },
-         prototype(
-           vari<-c("temp")
-           paraK<-list(c(0,5),2)
-           paraR<-list(2,2)
+         prototype({
+           vari="temp"
+           paraK<-list(temp=c(0,5),temp=2)
            reaK<-c(temp="envelin",temp="constant")
-           reaR<-c(temp="constant",temp="constant")
-         )
+           new("nicheModel",var=vari,reactNorms=reaK,parameterList=paraK)
+         }         ),
+         validity = validityNicheModel
 )
 
-prototype({
-  r1<- raster(ncol=2, nrow=2)
-  r1[] <- rep(2:5,1)
-  r2<- raster(ncol=2, nrow=2)
-  r2[] <- c(TRUE,FALSE,TRUE,FALSE)
-  s<- stack(x=c(r1,r2))
-  names(s)<-c("temp","connect")
-  extent(s)<-c(0,2,0,2)
-  s
-},connectionType=c("raster","groups"))
-
-nicheModel<-function(var=characterVector1,reactNorms=characterVector2,parameterList=listOfNumeric){#,form=formul){
+nicheModel<-function(var="temp",reactNorms=c(temp="envelin",temp="constant"),parameterList=list(temp=c(0,5),temp=2)){#,form=formul){
   names(parameterList)=var
   names(reactNorms)=var
   new("nicheModel",var=var,reactNorms=reactNorms,parameterList=parameterList)#,form=form)
 }
 
-migrationShape<- c("classes","routes","fat_tail1","gaussian","exponential","contiguous","contiguous8","island","fat_tail2","contiguous_long_dist_mixt","gaussian_long_dist_mixt")
+migrationShapes<- c("vector","groups","fat_tail1","gaussian","exponential","contiguous","contiguous8","island","fat_tail2","contiguous_long_dist_mixt","gaussian_long_dist_mixt")
 
 npMig <- function(x) {unlist(lapply(x,function(x) switch(x[],
                                                          fat_tail1=2,
@@ -122,32 +121,60 @@ npMig <- function(x) {unlist(lapply(x,function(x) switch(x[],
 }
 
 validitymigrationModel=function(object){
-  if(!is.character(object@shapeDisp))stop("error in  migrationModel shapeDisp : ShapeDisp just accept character!")
-  if(length(object@shapeDisp)!=1)stop("error in  migrationModel shapeDisp : ShapeDisp is  not valid because it contains more or less than one shape!")
-  if(!object@shapeDisp%in%listOfMigrationShape)stop("error in  migrationModel shapeDisp : the given shape not exist for migrationModel !")
+  #if(!is.character(object@shapeDisp))stop("error in  migrationModel shapeDisp : ShapeDisp just accept character!")
+  whichSlotHasDifferentSize = sapply(c("var","shapeDisp","pDisp"),FUN = function(x) {length(slot(object,x))!=length(object@connectionType)})
+  if(any(whichSlotHasDifferentSize)) stop(paste("error in  migrationModel; the slot(s)",
+                                               paste(c("var","shapeDisp","pDisp")[whichSlotHasDifferentSize],collapse = " and "), 
+                                               " is not valid because it has different length than connectionType slot, which is ",
+                                               length(object@connectionType),sep = ""))
+  whichIsNotOkAsRasterConnectionType = sapply(1:length(object@connectionType),FUN = function(x) {
+                                                object@connectionType[x]=="raster"&!object@shapeDisp[x]%in%c("fat_tail1",
+                                                                                                             "gaussian",
+                                                                                                             "exponential",
+                                                                                                             "contiguous",
+                                                                                                             "contiguous8",
+                                                                                                             "island",
+                                                                                                            "fat_tail2",
+                                                                                                             "contiguous_long_dist_mixt",
+                                                                                                             "gaussian_long_dist_mixt")})
+  if(any(whichIsNotOkAsRasterConnectionType)) {
+    stop(paste("the migration model(s)",paste(whichIsNotOkAsRasterConnectionType,collapse=" and "),
+               "should apply to raster connectionType as suggested by the connectionType slot"))
+    }
+  if(!any(object@shapeDisp%in%migrationShapes))stop(paste("error in  migrationModel : the parameter shapeDisp must have one of the following values: '",paste(migrationShapes,collapse=", "),"'",sep=""))
   if(FALSE%in%lapply(object@pDisp,is.numeric))stop("error in migrationModel pDisp : pDisp just accept numeric!")
-  if(nbpar(object@shapeDisp)!=length(object@pDisp))stop("error in migrationModel : number of paremeters and shapeDisp do not match for variable")
+  for (i in which(object@connectionType=="raster")) {# checks for migrations in raster environment if the number of parameters of the dispersal kernel correspond to the value given by npNiche function
+    if (npMig(object@shapeDisp[i])!=length(object@pDisp[[i]])) {
+      stop(paste("error in migrationModel : number of paremeters and shapeDisp do not match for variable",i))}
+  }
   TRUE
 }
 
 setClass("migrationModel",
-         slots = c(var="character",shapeDisp="migrationShape",pDisp="list"),
+         representation(connectionType="character",var="character",shapeDisp="character",pDisp="list"),
+         prototype = new("migrationModel",connectionType=c("raster","groups"),var=c("","grouping"),shapeDisp=c("gaussian","groups"),pDisp=list(1/1.96,.5)),
          validity = validitymigrationModel
 )
 
 
 
-migrationModel<-function(shape=character,param=p){
-  new("migrationModel",shapeDisp=shape,pDisp=param)
+migrationModel<-function(connectionType="raster",var="",shape="gaussian",param=list(1/1.96)){
+  new("migrationModel",connectionType=connectionType,var=var,shapeDisp=shape,pDisp=param)
 }
 
+validityEnvDynModel=function(object){
+             if(class(object@K)!="NicheModel")stop("Error in envDynModel K : K just accept NicheModel !")
+             if(class(object@R)!="NicheModel")stop("Error in envDynModel R : R just accept NicheModel !")
+             if(class(object@migration)!="migrationModel")stop("Error in envDynModel migration : migration just accept migrationModel !")
+           }
+
 setClass("envDynModel",
-         slots=c(K="nicheModel",R="nicheModel",mig="migrationModel")
-         #         validity=function(object){
-         #           if(class(object@K)!="NicheModel")stop("Error in envDynModel K : K just accept NicheModel !")
-         #           if(class(object@R)!="NicheModel")stop("Error in envDynModel R : R just accept NicheModel !")
-         #           if(class(object@migration)!="migrationModel")stop("Error in envDynModel migration : migration just accept migrationModel !")
-         #         }
+         contains = "envDynData",
+         representation(K="nicheModel",R="nicheModel",mig="migrationModel"),
+#         prototype = {
+#           Kslot = new()
+#         },
+         validity=validityEnvDynModel
 )
 
 envDynModel<-function(K,R,migration){
