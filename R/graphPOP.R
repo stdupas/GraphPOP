@@ -8,107 +8,278 @@ library(raster)
 
 ############## CLASS AND VALIDITY ####
 
+### Generics for handling landscapes removing NA cells
 
+setClass("geoEnvData",
+         contains = "RasterStack",
+         prototype=prototype(stack(x=c(temp=raster(matrix(2:5,nrow=2),xmn=0,xmx=2,ymn=0,ymx=2,crs=crs("+proj=longlat")),pops=raster(matrix(rep(1:2,2),nrow=2),xmn=0,xmx=2,ymn=0,ymx=2))))
+)
+
+geoEnvData <- function(rasterStack=NULL,Array=array(c(2:5,rep(1:2,2)),dim=c(2,2,2),dimnames = list(1:2,1:2,c("temp","pops"))),CRS="+proj=longlat",xmn=0,xmx=2,ymn=0,ymx=2){
+  if (is.null(rasterStack)) rasterStack=stack(apply(Array,3,function(x) raster(matrix(x),xmn=xmn,xmx=xmx,ymn=ymn,ymx=ymx,crs=CRS)))
+  new("geoEnvData",rasterStack)
+}
+
+setGeneric(name="NAcells",
+           def=function(object){
+             return(standardGeneric("NAcells"))
+           })
+
+setGeneric(
+  name = "Acells",
+  def=function(object){return(standardGeneric("Acells"))}
+)
+
+setGeneric(
+  name = "xyA",
+  def=function(object){return(standardGeneric("xyA"))}
+)
+
+setGeneric(
+  name = "nCellA",
+  def=function(object){return(standardGeneric("nCellA"))}
+)
+
+setGeneric(
+  name = "valuesA",
+  def=function(object){return(standardGeneric("valuesA"))}
+)
+
+#### Methods
+
+setMethod("NAcells",
+          signature=c("geoEnvData"),
+          definition = function(object){
+            which(is.na(values(object[[1]])))
+          }
+)
+setMethod("Acells",
+          signature=c("geoEnvData"),
+          definition = function(object){
+            which(!is.na(values(object[[1]])))
+          }
+)
+
+setMethod("xyA",
+          signature = "geoEnvData",
+          definition = function(object){
+            df=xyFromCell(object,Acells(object))
+            rownames(df) <- Acells(object)
+            df
+          }
+)
+
+setMethod(
+  f = "nCellA",
+  signature = "geoEnvData",
+  definition = function(object){
+    length(Acells(object))
+  }
+)
+
+setMethod(
+  f = "valuesA",
+  signature = "geoEnvData",
+  definition = function(object){
+    select <- Acells(object)
+    x=values(object)[select]
+    names(x) <- select
+    x
+  }
+)
+
+setClass("socioecoEnvData",
+         contains = "RasterStack",
+         representation(categories="character")
+         )
+
+validitysocioecoEnvData=function(object){
+  if (ncell(object)!=dim(object)[2]) stop("the socioecoClass must be one dimentional rasterStack : ncategories cols and 1 row")
+  if (ncell(object)!=length(object@categories)) stop("the number of cells and the number of categories should not differ in socioecoEnvData")
+  return(TRUE)
+}
+
+
+setValidity("socioecoEnvData",validitysocioecoEnvData)
+
+a=new("socioecoEnvData",stack(raster(matrix(1:4,nrow=1))),categories=c("susa","bogota","villapinzon","lacalera"))
+
+socioecoEnvData<-function(categories=c("group1","group2"),Values=c(1:4), Nlayers= 2, layerNames=c("cuidado","alimentación"),Array=NULL,rasterStack=NULL){
+  if (is.null(rasterStack)) {
+    if (is.null(Array)) Array = array(Values,dim = c(1,length(categories),Nlayers),dimnames = list(1:1,categories,layerNames))
+    rasterStack = stack(apply(Array,3,function(x){raster(x)}))
+  }
+  new("socioecoEnvData",rasterStack,categories=categories)
+}
+
+setMethod("show",
+          "socioecoEnvData",
+          function(object) {
+            cat("class\t\t: socioecoEnvData\n")
+            cat("# of categ.\t:",ncell(object), "\n")
+            cat("# of layers\t:",nlayers(object),"\n")
+            cat("categories\t:",object@categories,"\n")}
+          cat("layer names\t:",names(object),"\n")
+)
+
+
+setClass("socioecoEnvDataList",
+         contains = "list"
+)
+
+validitysocioecoEnvDataList=function(object){
+if (any(unlist(lapply(object,FUN = function(x) (class(x)!="socioecoEnvData"))))) stop("socioecoEnvDataList is a list of object of class socioecoEnvData")
+  return(TRUE)
+}
+
+
+setValidity("socioecoEnvDataList",validitysocioecoEnvDataList)
+
+a=new("socioecoEnvDataList",
+      list(mercado=new("socioecoEnvData",stack(raster(matrix(1:4,nrow=1))),categories=c("susa","bogota","villapinzon","lacalera")),
+           sistema=new("socioecoEnvData",stack(raster(matrix(1:2,nrow=1))),categories=c("ageoeco","convencional"))
+           )
+      )
+      
+socioecoEnvDataList<-function(listofSocioecoEnvData=NULL,listofCategories=list(c("susa","bogota","villapinzon","lacalera"),c("ageoeco","convencional","pequeño")),listofValues=list(c(1:4),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("apoyoAlcaldía",c("pesticidas","abono")),listofArray=NULL,listofRasterStack=NULL)
+  {
+  if (is.null(listofSocioecoEnvData)) {
+    if (is.null(listofRasterStack)) {
+      if (is.null(listofArray)) listofArray = lapply(1:length(Nlayers),function(i) array(data = listofValues[[i]],dim=c(1,length(listofCategories[[i]]),Nlayers[i]) , dimnames= list(1,listofCategories[[i]],listofLayerNames[[i]])))
+    }
+    listofRasterStack = lapply(1:length(listofArray),function(i) {stack(apply(listofArray[[i]],3,function(x){raster(x)}))})
+  }
+  listofSocioecoEnvData = lapply(1:length(listofRasterStack),function(i) socioecoEnvData(categories = listofCategories[[i]],rasterStack = listofRasterStack[[i]]))
+  new("socioecoEnvDataList",listofSocioecoEnvData)
+}
+
+
+
+
+stackConnectionType
 setClass("envDynData",
          # envDynData are raster layers containing information about environmental variables
          # and or connectivity variables that will allow to buil niche models and friction models
-         # the layers that contain environmental variable have a connectionType = FALSE
-         # the layers that contain connected type variable have a connectionType = TRUE
+         # the layers that contain geographic information related to geographiccoordinates are called connectionType=geographic
+         # the layers that contain other type of information characterizing ecological populations by groups (ethnic groups, market exchanges, plant varieties for pests and diseases) have a connectionType = grouping
          # connected class variables are coded as follows; when cell value is :
          # - 0 : the cell is not connected to any other cell 
          # - n!=0 : the cell is connected to the cells having the same value
-         contains = "RasterStack",
-         representation(connectionType="character"),
-         prototype({r1<- raster(ncol=2, nrow=2)
-         r1[] <- rep(2:5,1)
-         r2<- raster(ncol=2, nrow=2)
-         r2[] <- c(1,2,1,2)
-         s<- stack(x=c(r1,r2))
-         names(s)<-c("t","group")
-         extent(s)<-c(0,2,0,2)
-         s},connectionType=c("raster","groups"))
+         representation(socioecoData="socioecoEnvDataList"),
+         contains = "geoEnvData",
+         prototype = prototype(geoEnvData(),
+                               socioecoData=socioecoEnvDataList())
 )
 
-connectionTypes=c("raster","vector","groups")
 
-setValidity("envDynData",
-            function(object){
-              if (length(object@connectionType)!=length(oject)) return("the length of connectionType slot informing the type of connection data and the length of rasters stack differ")
-              if (!all(object@connectionType%in%connectionTypes)) return("connectionType argument character value was not any of 'raster', 'vector', or 'group'")
-                return(TRUE)
-            })
 
-envDynData<-function(rasterstack=rasterstack,connectionType=typeCon){
-  if(class(rasterstack)!="RasterStack")stop("error in Landscape rasterstack : rasterstack just accept RasterStack!")
-  if (length(rasterstack@layers)==0)stop("there is no raster in the stack")
-  if(class(connectionType)!="logical")stop("the slot connectionType should contain FALSE/TRUE values")
-  if(length(connectionType)!=length(rasterstack@layers))stop("the length of rasterstack and slot connectionType should be identical")
-  new("landscape",rasterstack,connectionType=typeCon)
+connectionTypes=c("geographic","grouping","routes")
+
+#setValidity("envDynData",
+ #           function(object){
+  #            if (length(object@stackConnectionType)!=nlayers(object)) return("the length of stackConnectionType slot informing the type of connection data and the number of layers of stack differ")
+   #           if (!all(object@stackConnectionType%in%connectionTypes)) return("stackConnectionType argument character value was not any of 'raster', 'vector', or 'group'")
+    #            return(TRUE)
+     #       })
+
+envDynData<-function(x=NULL,socioecoList=NULL)
+{
+  if (is.null(x)) geo=new("envDynData") else {
+      if (class(x)=="array") {
+        if (is.null(stackConnectionType)) stackConnectionType=rep("geographic",dim(x)[3]) 
+      geo=new("geoEnvData",
+          {Stack=stack(sapply(1:dim(x)[3],function(i) raster(x[,,i])),layers=envLayerNames)
+          names(Stack)=envLayerNames
+          extent(Stack)=Extent
+          crs(Stack) <- Crs
+          Stack})}
+   else if (class(x)=="RasterStack") {
+    if(is.null(stackConnectionType)) stackConnectionType=rep("geographic",nlayers(rasterstack)) 
+    
+    #  if(class(rasterstack)!="RasterStack")stop("error in Landscape rasterstack : rasterstack just accept RasterStack!")
+    #  if (length(rasterstack@layers)==0)stop("there is no raster in the stack")
+    #  if(class(stackConnectionType)!="logical")stop("the slot stackConnectionType should contain FALSE/TRUE values")
+    #  if(length(stackConnectionType)!=length(rasterstack@layers))stop("the length of rasterstack and slot stackConnectionType should be identical")
+    geo=new("geoEnvData",rasterstack)} else stop("x should be raster, RasterStack, array or empty")
+  }
+  if (is.null(socioecoList)) socioecoList=socioecoEnvDataList()
+  new("envDynData",geo,socioecoData=socioecoList)
 }
 
-setClass("envDynHistory",
-         representation(envDynHist="list",dates="Date"),
-         validity = function(object){
-           if (any(lapply(object@envDynHist,FUN = function(x) class(x)!="environment"))) stop("the list envDynList has to be of class envDynData")
-         })
+setMethod("show",
+          "envDynData",
+          function(object) {
+            cat("An object of class 'envDynData'\n")
+            cat("inher. class\t: geoEnvData\n")
+            cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object),",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
+            cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
+            cat("extent\t\t:",extent(object)[1],",",extent(object)[2],",",extent(object)[3],",",extent(object)[4],", (xmin, xmax, ymin, ymax)")
+            cat("crs\t\t:",as.character(crs(object)))
+            cat("names\t\t:",names(object),sep = ",")
+            cat("slot. socioecoData\n\n")
+            cat(show(object@socioecoData))
+            }
+          )
 
-reactionNorm = c("constant","enveloppe","envelin","conQuadratic","conQuadraticSkw")
+
+
+setClass("envDynHistory",
+         representation(envDynList="list",dayBeforePresent="numeric"),
+         validity = function(object){
+           if (any(lapply(object@envDynHist,FUN = function(x) class(x)!="envDynData"))) stop("the list envDynList has to be of class envDynData")
+         },
+         prototype=prototype(envDynList=list(envDynData(),envDynData()),dayBeforePresent=c(200,5000)))
+
+reactionNorm = c("scaling","enveloppe","envelin","conQuadratic","conQuadraticSkw")
 
 npNiche <- function(x) {unlist(lapply(x,function(x) switch(x[],
-                                                           constant=1,
-                                                           #                                                         proportional=1,
+                                                           scaling=1,
                                                            enveloppe=2,
                                                            envelin=2,
-                                                           #                                                         quadratic=4,
                                                            conQuadratic=2,
                                                            conQuadraticSkw=2)
 ))
 }
 
 validityNicheModel=function(object){
-  if(class(object@var)!="character")stop("error in NicheModel variables : variables just accept character!")
-  if(!is.list(object@parameterList))stop("error in NicheModel parameterList : parameterList just accept list!")
+  if(class(object@varNiche)!="character")stop("error in NicheModel variables : variables just accept character!")
+  if(!is.list(object@pNiche))stop("error in NicheModel pNiche : pNiche just accept list!")
   if (!all(object@reactNorms%in%reactionNorm))stop(paste("reaction norm should be one of the following :",paste(reactionNorm,collapse = ", ")))
-  if(FALSE%in%lapply(object@parameterList,is.numeric))stop("error in NicheModel parameter list : Parameter list just accept numeric!")
-  if(!all(names(object@reactNorms)%in%object@var))stop("error in NicheModel : number of variables and number of reaction norms do not correspond")
-  notMatching <- (unlist(lapply(1:length(object@parameterList),function(x) npNiche(object@reactNorms[x]) != length(object@parameterList[[x]]))))
+  if(FALSE%in%lapply(object@pNiche,is.numeric))stop("error in NicheModel parameter list : Parameter list just accept numeric!")
+#  if(!all(names(object@reactNorms)%in%object@varNiche))stop("error in NicheModel : names of reactionNorm slot are not all included in var slot")
+  notMatching <- (unlist(lapply(1:length(object@pNiche),function(x) npNiche(object@reactNorms[x]) != length(object@pNiche[[x]]))))
   if (any(notMatching)) stop(paste("
-                                            error in number of parameter given in nicheModel parameterList 
+                                            error in number of parameter given in nicheModel pNiche 
                                             according to reactionNorm:
-                                            constant=1,
+                                            scaling=1,
                                             enveloppe=2,
                                             envelin=2,
                                             conQuadratic=2,
                                             conQuadraticSkw=2
                                             number of paremeters and reactionNorm do not match for variable ",which(notMatching),". ",sep=""))
+  if (length(object@varNiche)!=length(object@reactNorms)) stop("there should be the same number of elements in reactNorms and varNiche since reactNorm[i] is applied to varNiche[i]")
+  if (length(object@reactNorms)!=length(object@pNiche)) stop("there should be the same number of elements in pNiche and reactNorms since pNiche[[i]] is used in reactNorm[i] function")
   TRUE
 }
 
 setClass("nicheModel",
-         representation(var="character",reactNorms="character",parameterList="list"),
+         representation(varNiche="character",reactNorms="character",pNiche="list"),
          # defines the reaction norm for each variable, without interaction in this version
          # var : the variable names to which the niche model applies
-         # reactNorms : the reaction norm for the variable (there should be one reaction norm per variable)
-         # parameterList: the list of numerical parameters vectors for each reaction norm, there should be a parameter vector for each reaction norm
-         prototype({
-           vari="temp"
-           paraK<-list(temp=c(0,5),temp=2)
-           reaK<-c(temp="envelin",temp="constant")
-           new("nicheModel",var=vari,reactNorms=reaK,parameterList=paraK)
-         }         ),
-         validity = validityNicheModel
+         # reactNorms : the reaction norms for the variables as a vector. The names of the entries correspond to the variables the reaction norm uses, and the value corresponds to the type of reaction norm
+         # pNiche: the list of numerical parameters vectors for each reaction norm, there should be a parameter vector for each reaction norm. The names of the vector components correspond to the values of the reaction norm slot
+         prototype(varNiche=c("temp","temp"),reactNorms=c("envelin","scaling"),pNiche=list(envelin=c(2,4),scaling=100))
 )
 
-nicheModel<-function(var="temp",reactNorms=c(temp="envelin",temp="constant"),parameterList=list(temp=c(0,5),temp=2)){#,form=formul){
-  names(parameterList)=var
-  names(reactNorms)=var
-  new("nicheModel",var=var,reactNorms=reactNorms,parameterList=parameterList)#,form=form)
+setValidity("nicheModel", validityNicheModel)
+
+nicheModel<-function(varNiche=c("temp","temp"),reactNorms=c("envelin","scaling"),pNiche=list(c(3,4),100)){#,form=formul){
+  names(pNiche)=reactNorms
+  new("nicheModel",varNiche=varNiche,reactNorms=reactNorms,pNiche=pNiche)#,form=form)
 }
 
-migrationShapes<- c("vector","groups","fat_tail1","gaussian","exponential","contiguous","contiguous8","island","fat_tail2","contiguous_long_dist_mixt","gaussian_long_dist_mixt")
-
 npMig <- function(x) {unlist(lapply(x,function(x) switch(x[],
-                                                         fat_tail1=2,
+                                                         popSep=0,
                                                          gaussian=1,
                                                          exponential=1,
                                                          contiguous=1,
@@ -120,80 +291,359 @@ npMig <- function(x) {unlist(lapply(x,function(x) switch(x[],
 ))
 }
 
+migrationShapes<-c("popSep","fat_tail1","gaussian","exponential","contiguous","contiguous8", "island","fat_tail2","contiguous_long_dist_mixt","gaussian_long_dist_mixt")
+# popSep : dispersion within groups is panmictic
+
+validitymigrationModel=function(object){TRUE}
+
 validitymigrationModel=function(object){
-  #if(!is.character(object@shapeDisp))stop("error in  migrationModel shapeDisp : ShapeDisp just accept character!")
-  whichSlotHasDifferentSize = sapply(c("var","shapeDisp","pDisp"),FUN = function(x) {length(slot(object,x))!=length(object@connectionType)})
+  #if(!is.character(object@shapeMig))stop("error in  migrationModel shapeMig : shapeMig just accept character!")
+  whichSlotHasDifferentSize = sapply(c("varMig","shapeMig","pMig"),FUN = function(x) {length(slot(object,x))!=length(object@modelConnectionType)})
+  if (sum(object@pMixt)!=1) warning("pMixt parameter should sum to 1")
   if(any(whichSlotHasDifferentSize)) stop(paste("error in  migrationModel; the slot(s)",
-                                               paste(c("var","shapeDisp","pDisp")[whichSlotHasDifferentSize],collapse = " and "), 
-                                               " is not valid because it has different length than connectionType slot, which is ",
-                                               length(object@connectionType),sep = ""))
-  whichIsNotOkAsRasterConnectionType = sapply(1:length(object@connectionType),FUN = function(x) {
-                                                object@connectionType[x]=="raster"&!object@shapeDisp[x]%in%c("fat_tail1",
-                                                                                                             "gaussian",
-                                                                                                             "exponential",
-                                                                                                             "contiguous",
-                                                                                                             "contiguous8",
-                                                                                                             "island",
-                                                                                                            "fat_tail2",
-                                                                                                             "contiguous_long_dist_mixt",
-                                                                                                             "gaussian_long_dist_mixt")})
-  if(any(whichIsNotOkAsRasterConnectionType)) {
-    stop(paste("the migration model(s)",paste(whichIsNotOkAsRasterConnectionType,collapse=" and "),
-               "should apply to raster connectionType as suggested by the connectionType slot"))
+                                               paste(c("varMig","shapeMig","pMig","pMixt")[whichSlotHasDifferentSize],collapse = " and "), 
+                                               " is not valid because it has different length than modelConnectionType slot, which is ",
+                                               length(object@modelConnectionType),sep = ""))
+  whichIsNotShapeMig = sapply(1:length(object@modelConnectionType),FUN = function(i) {
+    !object@shapeMig[i]%in%migrationShapes})
+  if(any(whichIsNotShapeMig)) {
+    stop(paste("the shapeMig '",paste(object@shapeMig[whichIsNotShapeMig],collapse="' and '"),
+               "' is not a valid shapeMig",sep=""))
     }
-  if(!any(object@shapeDisp%in%migrationShapes))stop(paste("error in  migrationModel : the parameter shapeDisp must have one of the following values: '",paste(migrationShapes,collapse=", "),"'",sep=""))
-  if(FALSE%in%lapply(object@pDisp,is.numeric))stop("error in migrationModel pDisp : pDisp just accept numeric!")
-  for (i in which(object@connectionType=="raster")) {# checks for migrations in raster environment if the number of parameters of the dispersal kernel correspond to the value given by npNiche function
-    if (npMig(object@shapeDisp[i])!=length(object@pDisp[[i]])) {
-      stop(paste("error in migrationModel : number of paremeters and shapeDisp do not match for variable",i))}
+  if(!any(object@shapeMig%in%migrationShapes))stop(paste("error in  migrationModel : the parameter shapeMig must have one of the following values: '",paste(migrationShapes,collapse=", "),"'",sep=""))
+  if(FALSE%in%lapply(object@pMig,is.numeric))stop("error in migrationModel pMig : pMig just accept numeric vectors")
+  for (i in 1:length(object@varMig)) {# checks for correct number of migration parameters
+    if(npMig(object@shapeMig[i])!=length(object@pMig[[i]])) {
+      stop(paste("error in migrationModel : number of paremeters and shapeMig do not match for varMig",object@shapeMig[i]))}
   }
   TRUE
 }
-
+#proportion of individual produced in each attibuted cell that migrates to each attributed cell of the raster
 setClass("migrationModel",
-         representation(connectionType="character",var="character",shapeDisp="character",pDisp="list"),
-         prototype = new("migrationModel",connectionType=c("raster","groups"),var=c("","grouping"),shapeDisp=c("gaussian","groups"),pDisp=list(1/1.96,.5)),
-         validity = validitymigrationModel
+         representation(modelConnectionType="character",varMig="character",shapeMig="character",pMig="list",pMixt="numeric"),
+         # describes migration model : depending on distance or grouping
+         # pMixt : a proportion of the individual migrates acording to each model
+         # models are described in successive components of modelConnectionType, varMig, shapeMig, pMig and pMixt slots
+         # if modelConnectionType = dist and shapeMig=island the model is an island model in which each cell is an island and a proportion of propagules migrates to the pool with a proportion given by the parameter
+         # if modelConnectionType = group and shapeMig=island  the model is an island model in which each group is an island and a proportion of propagules migrates to the pool with a proportion given by the parameter there is a possiblity of dispersion models within groups according to the shapeDisp
+         prototype(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1/1.96,numeric(0)),pMixt=c(.5,.5)),
+         # this prototype, migrationModel is a mixture of two components : migration related to distance in the first component and migration related to groups in the second component. Probability of migration between two points is a mixture of probablity given by the dist gaussian model and the group popSep model. 
+         # the group popSep model means island model where cells of the raster belong to pops according to their group variable and mix panmictically within groups according to the popSep model
+         # the dist gaussian model means dispersion between two points in the raster is given by gaussian distribution
 )
 
+setValidity("migrationModel", validitymigrationModel)
 
 
-migrationModel<-function(connectionType="raster",var="",shape="gaussian",param=list(1/1.96)){
-  new("migrationModel",connectionType=connectionType,var=var,shapeDisp=shape,pDisp=param)
+migrationModel<-function(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","island"),pMig=list(gaussian=1/1.96,island=.2),pMixt=c(0.5,0.5)){
+  #if(length(pMixt)==length(shapeMig)) pMixt=(pMixt/sum(pMixt))[1:(length(pMixt)-1)] # pMixt requires length(shapeMig)-1 parameters only, since the sum of mixture parameters =1
+  new("migrationModel",modelConnectionType=modelConnectionType,varMig=varMig,shapeMig=shapeMig,pMig=pMig,pMixt=pMixt)
 }
 
-validityEnvDynModel=function(object){
-             if(class(object@K)!="NicheModel")stop("Error in envDynModel K : K just accept NicheModel !")
-             if(class(object@R)!="NicheModel")stop("Error in envDynModel R : R just accept NicheModel !")
-             if(class(object@migration)!="migrationModel")stop("Error in envDynModel migration : migration just accept migrationModel !")
-           }
 
-setClass("envDynModel",
+envDynData(x=NULL,stackConnectionType=NULL,envLayerNames=NULL,Extent=extent(c(0,1,0,1)))
+nicheModel(varNiche=c("temp","temp"),reactNorms=c(temp="envelin",temp="scaling"),pNiche=list(envelin=c(3,4),scaling=100))
+migrationModel(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(gaussian=1/1.96,popSep=numeric(0)),pMixt=c(.5,.5))
+#stack(x=c(temp=raster(matrix(2:5,nrow=2),xmn=0,xmx=2,ymn=0,ymx=2),pops=raster(matrix(rep(1:2,2),nrow=2),xmn=0,xmx=2,ymn=0,ymx=2)))
+
+connectionType=c("geographic","grouping") # two types of connection geo is related to geographic distance, grouping
+
+validityenvDynDataModel=function(object){
+  if(class(object@Kmodel)!="nicheModel")stop("Error in envDynDataModel Kmodel : Kmodel just accept NicheModel !")
+  if(class(object@Rmodel)!="nicheModel")stop("Error in envDynDataModel Rmodel : Rmodel just accept NicheModel !")
+  if(class(object@migModel)!="migrationModel")stop("Error in envDynDataModel migration : migration just accept migrationModel !")
+  TRUE
+}
+
+
+setClass("envDynDataModel",
          contains = "envDynData",
-         representation(K="nicheModel",R="nicheModel",mig="migrationModel"),
-#         prototype = {
-#           Kslot = new()
-#         },
-         validity=validityEnvDynModel
+         representation(Kmodel="nicheModel",Rmodel="nicheModel",migModel="migrationModel"),
+         #validity=validityenvDynDataModel,
+         #prototype = {
+         prototype(envDynData=new("envDynData"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),migModel=new("migrationModel"))
+         # }
 )
 
-envDynModel<-function(K,R,migration){
-  new("envDynModel",K=K,R=R,migration=migration)
+envDynDataModel<-function(EnvDynData=NULL,nicheK=NULL,nicheR=NULL,migModel=NULL,
+                      EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
+                      stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
+                      varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
+                      varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
+                      modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
+{
+  if (is.null(EnvDynData)) EnvDynData=new("envDynData",EnvStack,stackConnectionType=stackConnectionType)
+  if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
+  if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
+  if (is.null(migModel)) migModel= migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
+  new("envDynDataModel",EnvDynData,Kmodel=nicheK,Rmodel=nicheR,migModel=migModel)
 }
+
+setValidity("envDynDataModel", validityenvDynDataModel)
+
+setMethod("show",
+          "nicheModel",
+          function(object) {
+            cat("class\t\t: nicheModel\n")
+            cat("varNiche\t: ")
+            cat(object@varNiche,sep = ", ")
+            cat("\nreactNorms\t: ")
+            cat(object@reactNorms,sep=", ")
+            cat("\n")
+            for (i in 1:length(object@pNiche)) {
+              cat("pNiche [[",i,"]]\t: ",sep="") 
+              cat(object@pNiche[[i]],sep = ", ")
+              cat("\n")
+            }
+          }
+)
+
+
+setMethod("show",
+          "migrationModel",
+          function(object) {
+            cat("class\t\t: migrationModel\n")
+            cat("connection Type\t: ")
+            cat(object@modelConnectionType,sep="\t")
+            cat("\ndata variables\t: ")
+            cat(object@varMig,sep="\t")
+            cat("\nshapeMig\t: ")
+            cat(object@shapeMig,sep="\t")
+            cat("\n")
+            for (i in 1:length(object@pMig)){
+              cat("pMig [[",i,"]]\t: ", sep="")
+              cat(object@pMig[[i]],"\n")
+            }
+            cat("mixture param \t: ")
+            cat(object@pMixt,sep="\t")
+          })
+
+setMethod("show",
+          "envDynDataModel",
+          function(object) {
+            cat("class\t\t: envDynDataModel\n\n")
+            cat("Data (Inherited)\n")
+            cat("class\t\t: envDynData\n")
+            cat("dimension\t:",dim(object), "(nrow, ncol, nlayers) \n")
+            cat("number of cells\t: ")
+            cat(ncell(object),nCellA(object),sep=", ")
+            cat(" (total, attributed) \n")
+            cat("resolution\t: ")
+            cat(c(extent(object)[2]-extent(object)[1],extent(object)[4]-extent(object)[3])/dim(object)[1:2],sep=", ")
+            cat(" (x, y)\n")
+            cat("extent\t\t: ")
+            cat(extent(object)[1:4],sep=", ")
+            cat("\ncrs\t\t:",as.character(crs(object)),"\n")
+            cat("names\t\t:",names(object),"\n")
+            cat("min values\t: ")
+            cat(min(object)[1:nlayers(object)],sep=", ")
+            cat("\nmax values\t: ")
+            cat(max(object)[1:nlayers(object)],sep=", ")
+            cat("\n\nKmodel\n")
+            show(object@Kmodel)
+            cat("\nRmodel\n")
+            show(object@Rmodel)
+            cat("\nmigModel\n")
+            show(object@migModel)
+          }
+) 
+
+
+enveloppe <- function(X,p){
+  if(length(p)!=2)stop("The parameter of envelope must have two dimensions")
+  else X>=p[1]&X<=p[2]
+}
+
+envelinear <- function(X, p) {
+  if(length(p)!=2)stop("The parameter of envelinear must have two dimensions, p[1] is the value at Y = 0, p[2] is the value of X at Y = 1")
+  else (X-p[1])/(p[2]-p[1])*enveloppe(X,p)
+}
+
+scaling <- function(X,p){X[]<-p}
+
+conQuadratic <- function(X,p)
+{
+  if(length(p)!=2)stop("The parameter is  not valid because it contains more or less than two values")
+  else -4*(X-p[2])*(X-p[1])/((p[2]-p[1])^2)*enveloppe(X,p)
+}
+
+conQuadraticSkw <- function(X,p){
+  conQuadratic(X,p)*envelinear(X,p)
+  X
+}
+
+setGeneric(
+  name = "buildRKlandscape",
+  def=function(object){return(standardGeneric("buildRKlandscape"))}
+)
+
+setMethod("buildRKlandscape",
+          signature=c("envDynDataModel"),
+          definition = function(object){                  #X=object, p=,shape=
+            Ki=lapply(1:length(object@Kmodel@varNiche),function(i){
+              switch(object@Kmodel@reactNorms[[i]],
+                     scaling=setValues(object[[i]],object@Kmodel@pNiche[[i]]),
+                     enveloppe = enveloppe(object[[object@Kmodel@varNiche[i]]],object@Kmodel@pNiche[[i]]),
+                     envelin=envelinear(object[[i]],object@Kmodel@pNiche[[i]]),
+                     conQuadratic=conQuadratic(object[[i]],object@Kmodel@pNiche[[i]]),
+                     conQuadraticSkw=conQuadraticSkw(object[[i]],object@Kmodel@pNiche[[i]]),
+                     stop("This reaction norm does not exist for a niche object !")
+              )})
+            Ri=lapply(1:length(object@Rmodel@varNiche),function(i){
+              switch(object@Rmodel@reactNorms[[i]],
+                       scaling=setValues(object[[i]],object@Rmodel@pNiche[[i]]),
+                       enveloppe = enveloppe(object[[object@Rmodel@varNiche[i]]],object@Rmodel@pNiche[[i]]),
+                       envelin=envelinear(object[[i]],object@Rmodel@pNiche[[i]]),
+                       conQuadratic=conQuadratic(object[[i]],object@Rmodel@pNiche[[i]]),
+                       conQuadraticSkw=conQuadraticSkw(object[[i]],object@Rmodel@pNiche[[i]]),
+                       stop("This variable does not exist for Nicheobject !")
+              )})
+            if (length(Ri)==1) R=Ri[[1]] else R=prod(stack(Ri))
+            if (length(Ki)==1) K=Ki[[1]] else K=prod(stack(Ki))
+            crs(R)<-crs(object)
+            extent(R)<-extent(object)
+            result=stack(R,K)
+            names(result)<-c("R","K")
+            result
+            # the niche function makes the product of the different layers results
+            # typically the scaling times the shape (enveloppe, envelin, ocnQuadratic or conQuadraticSkw)
+          }
+)
+
+setGeneric(
+  name = "buildGeodist",
+  def=function(object){return(standardGeneric("buildGeodist"))}
+)
+
+setMethod(
+  f="buildGeodist",
+  signature=c("envDynDataModel"),
+  definition=function(object)
+  {
+    Ndim = 1+all(ncell(object)!=dim(object)[1:2]) # if the landscape is a line one cell width Ndim=1, otherwise Ndim=2
+    #if model["shapeMig"]=="contiguous" matrix()
+    geoDist = unlist(apply(xyA(object),1,
+                           function(x){
+                             values(distanceFromPoints(object,x))
+                             }))[Acells(object),]
+    geoDist[which(geoDist==0)]<-sqrt(2*min(geoDist[which(geoDist!=0)])^2)/3
+    # The distance between points within the same cell is one third 
+    #
+    return(geoDist)
+  }
+)
+
+setGeneric(
+  name = "buildMigrationMatrix",
+  def=function(object){return(standardGeneric("buildMigrationMatrix"))}
+)
+
+
+setMethod(
+  f="buildMigrationMatrix",
+  signature=c("envDynDataModel"),
+  definition=function(object)
+  {
+    Ndim = 1+all(ncell(object)!=dim(object)[1:2]) # if the landscape is a line one cell width Ndim=1, otherwise Ndim=2
+    #if model["shapeMig"]=="contiguous" matrix()
+    migration=list()
+    for (i in which(object@migModel@modelConnectionType=="geographic"))
+    {
+      migration[[i]] = apply(buildGeodist(object), c(1,2),
+                             function(x)(switch(object@migModel@shapeMig[i],
+                                                gaussian = dnorm(x, mean = 0, sd = object@migModel@pMig[[i]][1], log = FALSE),
+                                                exponential = (dexp(x, rate = 1/object@migModel@pMig[[i]][1], log = FALSE)),
+                                                contiguous = apply(xyA(object),1,function(x){((abs(xyA(object)[,"x"]-x["x"])==res(object)[1])&(xyA(object)[,"y"]==x["y"])|(abs(xyA(object)[,"y"]-x["y"])==res(object)[1])&(xyA(object)[,"x"]==x["x"]))*object@migModel@pMig[[1]][1]/4})+diag(nCellA(object))*(1-object@migModel@pMig[[1]][1]),
+                                                contiguous8 = apply(xyA(object),1,function(x){((abs(xyA(object)[,"x"]-x["x"])==res(object)[1])&(xyA(object)[,"y"]==x["y"])|(abs(xyA(object)[,"y"]-x["y"])==res(object)[1])&(xyA(object)[,"x"]==x["x"]|(abs(xyA(object)[,"x"]-x["x"])==res(object)[1])))*object@migModel@pMig[[1]][1]/8})+diag(nCellA(object))*(1-object@migModel@pMig[[1]][1]),
+                                                island = diag(nCellA(object))*(1-object@migModel@pMig[[i]][1])+(1-diag(nCellA(object)))*(object@migModel@pMig[[i]][1])/(nCellA(object)-1),
+                                                fat_tail2 = x^object@migModel@pMig[[i]][2]*exp(-2*x/(object@migModel@pMig[[i]][1]^0.5))
+                                                #contiguous_long_dist_mixt = model["pMig"]["plongdist"]/ncellA(object)+(x==0)*(1-model["pMig"]["pcontiguous"]-model["pMig"]["plongdist"])+((x>0)-(x>1.4*res(object)[1]))*(model["pMig"]["pcontiguous"]/2),
+                                                #gaussian_long_dist_mixt = model["pMig"][2]/ncellA(object) + (dnorm(x, mean = 0, sd = object@migModel@pMig[[i]][1], log = FALSE))
+                             )))
+      migration[[i]]<-migration[[i]]/sum(migration[[i]])
+    }
+    for (i in which(object@migModel@modelConnectionType=="grouping"))
+    {
+      migration[[i]] = switch(object@migModel@shapeMig[i],
+                                                popSep = sapply(valuesA(object)[,i],function(x) {x==valuesA(object)[,i]})
+                             )
+      migration[[i]]<-migration[[i]]/sum(migration[[i]])
+    }
+    return(apply(array(unlist(migration), dim = c(nCellA(object),nCellA(object), length(migration))),c(1,2),function(x){sum(x*object@migModel@pMixt)}))
+  }
+)
+
+a=envDynDataModel(EnvStack = stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
+b=buildMigrationMatrix(a)
 
 setClass("envDynLandscape",
-         contains=c(envDynModel="envDynModel"),
-         slots = c(K="raster",R="raster",m="matrix",transFor="transitionMatrixForward",transBack="transitionMatrixBackward",environment="landscape"),
-#         validity=function(object){
-#           if(class(object@K)!="raster")stop("Error in envDynLandscape: K should be of class raster")
-#           if(class(object@R)!="raster")stop("Error in envDynLandscape: R should be of class raster")
-#           if(class(object@migration)!="matrix")stop("Error in envDynLandscape: migration should be of class matrix")
-#         }
+         contains=c(envDynDataModel="envDynDataModel"),
+         slots = c(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
 )
 
-envDynLandscape<-function(K,R,migMat,transForMat,transBackMat,environment,envDynModel){
-  new("envDynLandscape",K=K,R=R,m=migMat,transFor=transForMat,transBack=transBackMat,environment=environment,envDynModel)
+envDynLandscape<-function(EnvDynDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migrationMatrix=NULL,transitionForward=NULL,transitionBackward=NULL,
+                          EnvDynData=NULL,
+                          EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
+                          stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
+                          varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
+                          varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
+                          modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5)){
+  if (is.null(EnvDynDataModel)) {
+    if (is.null(EnvDynData)) EnvDynData=new("envDynData",EnvStack,stackConnectionType=stackConnectionType)
+    EnvDynDataModel=envDynDataModel(EnvDynData = EnvDynData,nicheK = nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK),nicheR = nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR), migModel = migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt))}
+  if (is.null(RKlandscape)) RKlandscape=buildRKLandscape(EnvDynDataModel)
+  if (is.null(geoDist)) geoDist=buildGeodist(EnvDynDataModel)
+  if (is.null(migrationMatrix)) RKlandscape=buildMigrationMatrix(EnvDynDataModel)
+  if (is.null(transitionForward)) transitionForward=buildTransitionForward(EnvDynDataModel)
+  if (is.null(transitionBackward)) transitionBackward=buildTransitionBackward(EnvDynDataModel)
+  new("envDynLandscape",EnvDynDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
 }
+
+setGeneric(
+  name = "transitionBackward",
+  def=function(K,R,mig){return(standardGeneric("getTransitionBackward"))}
+)
+
+
+setMethod(f="transitionBackward",
+          signature=c("numeric","numeric","matrix"),
+          definition=function(R,K,mig){
+            if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
+            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * K * t(mig)}
+            if ((length(R)==1)&(length(K)>1)){transition = R * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
+            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * lpar$K * t(mig)}
+            if ((length(R)>1)&(length(K)>1)) {transition = t(matrix(R,nrow=length(R),ncol=length(R))) * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
+            t<-transition/t(sapply(rowSums(transition),function(x)rep(x,ncol(transition))))
+            TransitionBackward(t)
+          }
+)
+
+
+setMethod(
+  f="transitionMatrixForward",
+  signature=c("numeric","numeric","matrix","character"),
+  definition=function(R,K,mig,meth)
+  {
+    rs = matrix(R,nrow=length(R),ncol=length(R))
+    Ku = t(matrix(K,nrow=length(K),ncol=length(K)))
+    leave = mig*(1+rs)*t(Ku); leave = leave - diag(leave)
+    tMF<-switch (meth,
+                 non_overlap = mig * rs * Ku / colSums(rs * t(Ku) * mig),
+                 overlap = mig * (1+rs) * Ku / (colSums((1+rs) * t(Ku) * mig - t(leave))),
+                 stop("error in creation of transitionMatrixForward : the method does not exist !")
+    )
+    new(Class = "TransitionForward",tMF)
+  }
+)
+
+
+
+,transFor="transitionMatrixForward",transBack="getTransitionBackward",environment="landscape"
+
+
+######################### |          | ############################### 
+######################### | To TRASH | ############################### 
+######################### V          V ############################### 
 
 setClass("TransitionBackward",
          contains = "matrix",
@@ -238,8 +688,8 @@ Demographic<-setClass("Demographic",
 ############## METHODS #####
 
 setGeneric(
-  name = "transitionMatrixBackward",
-  def=function(K,R,mig){return(standardGeneric("transitionMatrixBackward"))}
+  name = "getTransitionBackward",
+  def=function(K,R,mig){return(standardGeneric("getTransitionBackward"))}
 )
 
 setGeneric(
@@ -253,13 +703,13 @@ setGeneric(
 )
 
 setGeneric(
-  name = "laplaceMatrix",
-  def=function(object){return(standardGeneric("laplaceMatrix"))}
+  name = "getLaplacian",
+  def=function(object){return(standardGeneric("getLaplacian"))}
 )
 
 setGeneric(
-  name = "ordinary_laplacian",
-  def=function(object){return(standardGeneric("ordinary_laplacian"))}
+  name = "getOrdinaryLaplacian",
+  def=function(object){return(standardGeneric("getOrdinaryLaplacian"))}
 )
 
 
@@ -274,13 +724,13 @@ setGeneric(
 )
 
 setGeneric(
-  name = "simul_coalescent",
-  def=function(demographic,printCoal){return(standardGeneric("simul_coalescent"))}
+  name = "simulCoal",
+  def=function(demographic,printCoal){return(standardGeneric("simulCoal"))}
 )
 
 setGeneric(
-  name = "simul_multi_coal",
-  def=function(demographic,printCoal,iteration){return(standardGeneric("simul_multi_coal"))}
+  name = "simulMultiCoal",
+  def=function(demographic,printCoal,iteration){return(standardGeneric("simulMultiCoal"))}
 )
 
 setGeneric(
@@ -330,7 +780,7 @@ setMethod(
 
 setMethod(
   f ="[",
-  signature = c(x="envDynModel" ,i="character",j="missing"),
+  signature = c(x="envDynDataModel" ,i="character",j="missing"),
   definition = function (x ,i ,j , drop ){
     switch ( EXPR =i,
              "K" ={return(x@K)} ,
@@ -346,8 +796,23 @@ setMethod(
   signature = c(x="migrationModel" ,i="character",j="missing"),
   definition = function (x ,i ,j , drop ){
     switch ( EXPR =i,
-             "pDisp" ={return(x@pDisp)} ,
-             "shapeDisp" ={return(x@shapeDisp)} ,
+             "pMig" ={return(x@pMig)} ,
+             "shapeMig" ={return(x@shapeMig)} ,
+             stop("This slots doesn't exist!")
+    )
+  }
+)
+
+
+
+setMethod(
+  f ="[",
+  signature = c(x="landscape" ,i="character",j="missing"),
+  definition = function (x ,i ,j , drop ){
+    switch ( EXPR =i,
+             "period" ={return(x@period)} ,
+             "distanceMatrix" ={return(x@distanceMatrix)} ,
+             "vars" ={return(x@vars)} ,
              stop("This slots doesn't exist!")
     )
   }
@@ -366,17 +831,17 @@ setMethod(
   }
 )
 
-setMethod("runNicheModel",
+setMethod("buildRKLandscape",
           signature=c("landscape","NicheModel"),
           definition = function(object,model){                  #X=object, p=,shape=
             Y=lapply(model@variables,function(x){
               switch(model@reactNorms[[x]],
-                     constant={setValues(object[[x]],rep(model@parameterList[[x]],ncell(object[[x]])))},
-                     #proportional = {values(object[[x]])=object[[x]]*model@parameterList[[x]]},
-                     enveloppe = {object[[x]]=enveloppe(object[[x]],model@parameterList[[x]])},
-                     envelin={object[[x]]=envelinear(object[[x]],model@parameterList[[x]])},
-                     conQuadratic={object[[x]]=conQuadratic(object[[x]],model@parameterList[[x]])},
-                     conQuadraticSkw={object[[x]]=conQuadraticSkw(object[[x]],model@parameterList[[x]])},#conquadraticskewed=conquadraticskewed(object[,,(model@variables==x)],p),
+                     scaling={setValues(object[[x]],rep(model@pNiche[[x]],ncell(object[[x]])))},
+                     #proportional = {values(object[[x]])=object[[x]]*model@pNiche[[x]]},
+                     enveloppe = {object[[x]]=enveloppe(object[[x]],model@pNiche[[x]])},
+                     envelin={object[[x]]=envelinear(object[[x]],model@pNiche[[x]])},
+                     conQuadratic={object[[x]]=conQuadratic(object[[x]],model@pNiche[[x]])},
+                     conQuadraticSkw={object[[x]]=conQuadraticSkw(object[[x]],model@pNiche[[x]])},#conquadraticskewed=conquadraticskewed(object[,,(model@variables==x)],p),
                      #conquadraticsq=conquadraticsq(object[,,(model@variables==x)],p),
                      #conquadraticskewedsq=conquadraticskewedsq(object[,,(model@variables==x)],p)
                      stop("This variable does not exist for NicheModel !")
@@ -399,7 +864,7 @@ envelinear <- function(X, p) {
   else (X-p[1])/(p[2]-p[1])*enveloppe(X,p)
 }
 
-constant <- function(X,p){X[]<-p}
+scaling <- function(X,p){X[]<-p}
 
 conQuadratic <- function(X,p)
 {
@@ -413,25 +878,25 @@ conQuadraticSkw <- function(X,p){
 }
 
 ######### CREER TRANSITION MATRIX ###############################################################################
-setMethod(f="runEnvDynModel",
-          signature=c("landscape","envDynModel"),
+setMethod(f="runenvDynDataModel",
+          signature=c("landscape","envDynDataModel"),
           definition=function(object,model){
-            R<-runNicheModel(object,model["R"])
-            K<-runNicheModel(object,model["K"])
+            R<-buildRKLandscape(object,model["R"])
+            K<-buildRKLandscape(object,model["K"])
             migrationMat<-migrationMatrix(object,model["migration"])
-            b<-transitionMatrixBackward(K=values(K),R=values(R),mig=migrationMat)      
+            b<-getTransitionBackward(K=values(K),R=values(R),mig=migrationMat)      
             f<-transitionMatrixForward(K=values(K),R=values(R),mig=migrationMat,meth = "non_overlap") # creates the forward transition matrix between cells
             envDynLandscape(K=K,R=R,migration=migrationMat,transForMat = f,transBackMat = b)
           }
 )
 
-setMethod(f="runEnvDynModel",
+setMethod(f="runenvDynDataModel",
           signature=c("enDynLandscape"),
           definition=function(object){
-            R<-runNicheModel(object["R"])
+            R<-buildRKLandscape(object["R"])
             K<-runNich
             m<-migrationMatrix(object,model["m"])
-            f <-transitionMatrixBackward(K=K,R=R,mig=m)      
+            f <-getTransitionBackward(K=K,R=R,mig=m)      
             b <-transitionMatrixForward(K=K,R=R,mig=m,meth = "non_overlap") # creates the forward transition matrix between cells
             envDynLandscape(K=K,R=R,migration=m,transForMat = f,transBackMat = b)
           }
@@ -444,23 +909,23 @@ setMethod(
   definition=function(object,model)
   {
     Ndim = 1+all(ncell(object)!=dim(object)[1:2])
-    #if model["shapeDisp"]=="contiguous" matrix()
+    #if model["shapeMig"]=="contiguous" matrix()
     migration = apply(object["distanceMatrix"], c(1,2),
-                      function(x)(switch(model["shapeDisp"],
-                                         fat_tail1 = 1/(1+x^model["pDisp"][2]/model["pDisp"][1]),
-                                         gaussian = (dnorm(x, mean = 0, sd = model["pDisp"][1], log = FALSE)),
-                                         exponential = (dexp(x, rate = 1/model["pDisp"][1], log = FALSE)),
-                                         contiguous = (x==0)*(1-model["pDisp"][1])+((x>0)-(x>1.4*res(object)[1]))*(model["pDisp"][1]/(2*Ndim)),
-                                         contiguous8 = (x==0)*(1-object["pDisp"][1])+((x>0)-(x>2*res(object)[1]))*(model["pDisp"][1]/(4*Ndim)),
-                                         island = (x==0)*(1-model["pDisp"][1])+(x>0)*(model["pDisp"][1]),
-                                         fat_tail2 = x^model["pDisp"][2]*exp(-2*x/(model["pDisp"][1]^0.5)),
-                                         contiguous_long_dist_mixt = model["pDisp"]["plongdist"]/ncellA(object)+(x==0)*(1-model["pDisp"]["pcontiguous"]-model["pDisp"]["plongdist"])+((x>0)-(x>1.4*res(object)[1]))*(model["pDisp"]["pcontiguous"]/2),
-                                         gaussian_long_dist_mixt = model["pDisp"][2]/ncellA(object) + (dnorm(x, mean = 0, sd = model["pDisp"][1], log = FALSE))
+                      function(x)(switch(model["shapeMig"],
+                                         fat_tail1 = 1/(1+x^model["pMig"][2]/model["pMig"][1]),
+                                         gaussian = (dnorm(x, mean = 0, sd = model["pMig"][1], log = FALSE)),
+                                         exponential = (dexp(x, rate = 1/model["pMig"][1], log = FALSE)),
+                                         contiguous = (x==0)*(1-model["pMig"][1])+((x>0)-(x>1.4*res(object)[1]))*(model["pMig"][1]/(2*Ndim)),
+                                         contiguous8 = (x==0)*(1-object@migModel@pMig[[i]][1])+((x>0)-(x>2*res(object)[1]))*(model["pMig"][1]/(4*Ndim)),
+                                         island = (x==0)*(1-model["pMig"][1])+(x>0)*(model["pMig"][1]),
+                                         fat_tail2 = x^object@migModel@pMig[[i]][2]*exp(-2*x/(model["pMig"][1]^0.5)),
+                                         contiguous_long_dist_mixt = model["pMig"]["plongdist"]/ncellA(object)+(x==0)*(1-model["pMig"]["pcontiguous"]-model["pMig"]["plongdist"])+((x>0)-(x>1.4*res(object)[1]))*(model["pMig"]["pcontiguous"]/2),
+                                         gaussian_long_dist_mixt = object@migModel@pMig[[i]][2]/ncellA(object) + (dnorm(x, mean = 0, sd = model["pMig"][1], log = FALSE))
                       )))
     return(migration)
   }
 )
-setMethod(f="transitionMatrixBackward",
+setMethod(f="getTransitionBackward",
           signature=c("numeric","numeric","matrix"),
           definition=function(R,K,mig){
             if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
@@ -529,10 +994,10 @@ setMethod(f="sampleLandscape",
 setMethod(f="demographic",
           signature=c("envDynLandscape","integer"),
           definition=function(envDynLand,sampleCells){
-            #lpar<-runEnvDynModel(object,model)             # creates the environmental dynamic model with the landscape and parameters
-            #b<-transitionMatrixBackward(object,lpar)      
+            #lpar<-runenvDynDataModel(object,model)             # creates the environmental dynamic model with the landscape and parameters
+            #b<-getTransitionBackward(object,lpar)      
             #f<-transitionMatrixForward(lpar,"non_overlap") # creates the forward transition matrix between cells
-            #sample according to envDynModel@K 
+            #sample according to envDynDataModel@K 
             new(Class = "Demographic",object=envDynLand,sampleCells=sampleCells)
           }
 )
@@ -547,7 +1012,7 @@ setMethod(
 
 
 setMethod(
-  f = "laplaceMatrix",
+  f = "getLaplacian",
   signature = "TransitionBackward",
   definition = function(object){
     matrixD = diag(rep(1,dim(object)[1])) # diagonal equals to 1
@@ -559,7 +1024,7 @@ setMethod(
 )
 
 setMethod(
-  f="ordinary_laplacian",
+  f="getOrdinaryLaplacian",
   signature = "TransitionBackward",
   definition = function(object){
     markovB<-new("markovchain", states=dimnames(transition)[[1]], transitionMatrix=transition)
@@ -595,7 +1060,7 @@ setMethod(
 
 ############################################
 setMethod(
-  f="simul_coalescent", ## simulates a coalescent 
+  f="simulCoal", ## simulates a coalescent 
   signature=c("Demographic","logical"),
   definition=function(demographic,printCoal)
   {
@@ -679,10 +1144,10 @@ setMethod(
 )
 
 setMethod(
-  f="simul_multi_coal",
+  f="simulMultiCoal",
   signature=c("Demographic","logical","numeric"),
   definition=function(demographic,printCoal,iteration){
-    lapply(1:iteration,function(x)simul_coalescent(demographic,printCoal))
+    lapply(1:iteration,function(x)simulCoal(demographic,printCoal))
   }
 )
 
@@ -690,7 +1155,7 @@ setMethod(
   f="compare",
   signature=c("Demographic","Landscape","logical","numeric","character"),
   definition=function(demographic,popSize,printCoal,iteration,fname){
-    coalescent<-simul_multi_coal(demographic,printCoal,iteration)
+    coalescent<-simulMultiCoal(demographic,printCoal,iteration)
     lcoal<-lapply(1:iteration,function(n){
       coal_2<-coalescent_2_newick(coalescent[[n]][[1]])
       cat(coal_2, file = "ex.tre", sep = "\n")
@@ -712,7 +1177,7 @@ setMethod(
     if (fname!="") pdf(fname)
     for(i in 1:4){
       plot(bionj(mat[[i]]),main=title(switch(EXPR=as.character(i),
-                                        "1"=paste("Simul_coalescent, t/10^",log10timescale),,
+                                        "1"=paste("simulCoal, t/10^",log10timescale),,
                                         "2"="linearizedFstDigraph",
                                         "3"="linearizedFstUnDigraph",
                                         "4"="Stepping_Stone"))
@@ -746,7 +1211,7 @@ setMethod(
   definition = function(object){
     x=na.omit(values(object))
     colnames(x)=names(x)
-    rownames(x) <- cellNumA(object)
+    rownames(x) <- Acells(object)
     x
   }
 )
@@ -797,7 +1262,7 @@ setMethod(
   f="commute_time_undigraph",
   signature = "TransitionBackward",
   definition = function(object){
-    laplacian = laplaceMatrix(object)
+    laplacian = getLaplacian(object)
     inverseMP = ginv(laplacian) # generalized inverse matrix  (Moore Penrose)
     diag = diag(inverseMP) # get diagonal of the inverse matrix
     mii = matrix(diag, nrow =dim(inverseMP), ncol = dim(inverseMP))
