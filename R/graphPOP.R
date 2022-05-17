@@ -118,8 +118,9 @@ setMethod("show",
             cat("class\t\t: socioecoEnvData\n")
             cat("# of categ.\t:",ncell(object), "\n")
             cat("# of layers\t:",nlayers(object),"\n")
-            cat("categories\t:",object@categories,"\n")}
-          cat("layer names\t:",names(object),"\n")
+            cat("categories\t:",object@categories,"\n")
+            cat("var names\t:",names(object),"\n")}
+          
 )
 
 
@@ -141,7 +142,8 @@ a=new("socioecoEnvDataList",
            )
       )
       
-socioecoEnvDataList<-function(listofSocioecoEnvData=NULL,listofCategories=list(c("susa","bogota","villapinzon","lacalera"),c("ageoeco","convencional","pequeño")),listofValues=list(c(1:4),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("apoyoAlcaldía",c("pesticidas","abono")),listofArray=NULL,listofRasterStack=NULL)
+socioecoEnvDataList<-function(listofSocioecoEnvData=NULL,listofCategories=list(c("susa","bogota","villapinzon","lacalera"),c("ageoeco","convencional","pequeño")),
+                              Names=c("mercado","sistema"),listofValues=list(c(1:4),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("apoyoAlcaldía",c("pesticidas","abono")),listofArray=NULL,listofRasterStack=NULL)
   {
   if (is.null(listofSocioecoEnvData)) {
     if (is.null(listofRasterStack)) {
@@ -150,13 +152,45 @@ socioecoEnvDataList<-function(listofSocioecoEnvData=NULL,listofCategories=list(c
     listofRasterStack = lapply(1:length(listofArray),function(i) {stack(apply(listofArray[[i]],3,function(x){raster(x)}))})
   }
   listofSocioecoEnvData = lapply(1:length(listofRasterStack),function(i) socioecoEnvData(categories = listofCategories[[i]],rasterStack = listofRasterStack[[i]]))
+  names(listofSocioecoEnvData)=Names
   new("socioecoEnvDataList",listofSocioecoEnvData)
 }
 
+setMethod("show",
+          "socioecoEnvDataList",
+          function(object) {
+            cat("class\t\t: socioecoEnvDataList\n")
+            cat("# of elements\t:",length(object), "\n\n")
+            for (i in 1:length(object))
+              {
+              cat("element",i,"\t:",names(object)[i],"\n")
+              cat("class\t\t:",class(object[[i]]),"\n")
+              cat("# of categ.\t:",ncell(object[[i]]), "\n")
+              cat("# of layers\t:",nlayers(object[[i]]),"\n")
+              cat("categories\t:",object[[i]]@categories,"\n")
+              cat("var names\t:",names(object[[i]]),"\n\n")}
+          }
+)
+
+setGeneric("categories",
+           def=function(object){return(standardGeneric("categories"))})
+
+setMethod("categories",
+          "socioecoEnvDataList",
+          function(object) {lapply(object, function(object){object@categories})}
+          )
+
+setMethod("variable.names",
+          "socioecoEnvData",
+          function(object) {names(object)})
 
 
+setMethod("variable.names",
+          "socioecoEnvDataList",
+          function(object) {lapply(object, function(object){names(object)})}
+)
 
-stackConnectionType
+#stackConnectionType
 setClass("envDynData",
          # envDynData are raster layers containing information about environmental variables
          # and or connectivity variables that will allow to buil niche models and friction models
@@ -182,9 +216,20 @@ connectionTypes=c("geographic","grouping","routes")
     #            return(TRUE)
      #       })
 
+#
+# envDynData has 2 components
+# a geographic and/or a socioeconomic that permits to generate 
+# transition matrix individuals among demes defined 
+# by geographic and socioeconomic variables
+
 envDynData<-function(x=NULL,socioecoList=NULL)
 {
-  if (is.null(x)) geo=new("envDynData") else {
+  #
+  # envDynData has 2 components
+  # a geographic and/or a socioeconomic that permits to generate 
+  # transition matrix individuals among demes defined 
+  # by geographic and socioeconomic variables
+  if (is.null(x)) geo=new("geoEnvData") else {
       if (class(x)=="array") {
         if (is.null(stackConnectionType)) stackConnectionType=rep("geographic",dim(x)[3]) 
       geo=new("geoEnvData",
@@ -210,26 +255,50 @@ setMethod("show",
           "envDynData",
           function(object) {
             cat("An object of class 'envDynData'\n")
-            cat("inher. class\t: geoEnvData\n")
+            cat("- geoEnvData inherited class:\n")
             cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object),",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
             cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
-            cat("extent\t\t:",extent(object)[1],",",extent(object)[2],",",extent(object)[3],",",extent(object)[4],", (xmin, xmax, ymin, ymax)")
-            cat("crs\t\t:",as.character(crs(object)))
-            cat("names\t\t:",names(object),sep = ",")
-            cat("slot. socioecoData\n\n")
+            cat("\nextent\t\t:",extent(object)[1],",",extent(object)[2],",",extent(object)[3],",",extent(object)[4],", (xmin, xmax, ymin, ymax)")
+            cat("\ncrs\t\t:",as.character(crs(object)))
+            cat("\nnames\t\t: ")
+            cat(names(object),sep = ", ")
+            cat("\n\n- socioecoEnvDataList slot:\n")
             cat(show(object@socioecoData))
             }
           )
 
+setMethod("ncell",
+          signature = "envDynData",
+          function(x) {
+            return(c(geoCells=nCellA(x),socioCells=sapply(x@socioecoData,FUN = function(x) ncell(x))))
+            }
+          )
 
 
 setClass("envDynHistory",
-         representation(envDynList="list",dayBeforePresent="numeric"),
+         # to represent environmental dynamic data history
+         contains="list",
+         representation(dayBeforePresent="numeric"),
          validity = function(object){
-           if (any(lapply(object@envDynHist,FUN = function(x) class(x)!="envDynData"))) stop("the list envDynList has to be of class envDynData")
+           if (any(lapply(object,FUN = function(x) class(x)!="envDynData"))) stop("the list envDynList has to be of class envDynData")
+           if (any(object@dayBeforePresent>0)) stop("the dayBeforePresent should be negative")
+           if (length(object@dayBeforePresent)>1) for (i in 2:length(object@dayBeforePresent)) {if (object@dayBeforePresent[i]>=object@dayBeforePresent[i-1]) stop("the envDynDataList should order from recent to past")}
          },
-         prototype=prototype(envDynList=list(envDynData(),envDynData()),dayBeforePresent=c(200,5000)))
+         prototype=prototype(list(envDynData(),envDynData()),dayBeforePresent=c(-200,-5000))
+)
 
+
+setMethod("show",
+          "envDynHistory",
+          function(object){
+            cat("An object of class \"envDynHistory\":\nEnvDynData ordered from present (up to day = 0) to past\n\n")
+            for (i in 1:length(object)) {
+              cat("\n",i,") Period -",i,":\n\n",sep="")           
+              cat("starting day\t: ",object@dayBeforePresent[i],"\n\n",sep="")
+              show(object[[i]])
+            }
+          }
+          )
 reactionNorm = c("scaling","enveloppe","envelin","conQuadratic","conQuadraticSkw")
 
 npNiche <- function(x) {unlist(lapply(x,function(x) switch(x[],
@@ -294,9 +363,9 @@ npMig <- function(x) {unlist(lapply(x,function(x) switch(x[],
 migrationShapes<-c("popSep","fat_tail1","gaussian","exponential","contiguous","contiguous8", "island","fat_tail2","contiguous_long_dist_mixt","gaussian_long_dist_mixt")
 # popSep : dispersion within groups is panmictic
 
-validitymigrationModel=function(object){TRUE}
+validitygeoMigrationModel=function(object){TRUE}
 
-validitymigrationModel=function(object){
+validitygeoMigrationModel=function(object){
   #if(!is.character(object@shapeMig))stop("error in  migrationModel shapeMig : shapeMig just accept character!")
   whichSlotHasDifferentSize = sapply(c("varMig","shapeMig","pMig"),FUN = function(x) {length(slot(object,x))!=length(object@modelConnectionType)})
   if (sum(object@pMixt)!=1) warning("pMixt parameter should sum to 1")
@@ -319,7 +388,7 @@ validitymigrationModel=function(object){
   TRUE
 }
 #proportion of individual produced in each attibuted cell that migrates to each attributed cell of the raster
-setClass("migrationModel",
+setClass("geoMigrationModel",
          representation(modelConnectionType="character",varMig="character",shapeMig="character",pMig="list",pMixt="numeric"),
          # describes migration model : depending on distance or grouping
          # pMixt : a proportion of the individual migrates acording to each model
@@ -332,18 +401,121 @@ setClass("migrationModel",
          # the dist gaussian model means dispersion between two points in the raster is given by gaussian distribution
 )
 
-setValidity("migrationModel", validitymigrationModel)
+setValidity("geoMigrationModel", validitymigrationModel)
 
 
-migrationModel<-function(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","island"),pMig=list(gaussian=1/1.96,island=.2),pMixt=c(0.5,0.5)){
+geoMigrationModel<-function(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","island"),pMig=list(gaussian=1/1.96,island=.2),pMixt=c(0.5,0.5)){
+  #if(length(pMixt)==length(shapeMig)) pMixt=(pMixt/sum(pMixt))[1:(length(pMixt)-1)] # pMixt requires length(shapeMig)-1 parameters only, since the sum of mixture parameters =1
+  new("migrationModel",modelConnectionType=modelConnectionType,varMig=varMig,shapeMig=shapeMig,pMig=pMig,pMixt=pMixt)
+}
+
+validitysocioMigrationModel=function(object){TRUE}
+
+validitysocioMigrationModel=function(object){
+  #if(!is.character(object@shapeMig))stop("error in  migrationModel shapeMig : shapeMig just accept character!")
+  whichSlotHasDifferentSize = sapply(c("varMig","shapeMig","pMig"),FUN = function(x) {length(slot(object,x))!=length(object@modelConnectionType)})
+  if (sum(object@pMixt)!=1) warning("pMixt parameter should sum to 1")
+  if(any(whichSlotHasDifferentSize)) stop(paste("error in  migrationModel; the slot(s)",
+                                                paste(c("varMig","shapeMig","pMig","pMixt")[whichSlotHasDifferentSize],collapse = " and "), 
+                                                " is not valid because it has different length than modelConnectionType slot, which is ",
+                                                length(object@modelConnectionType),sep = ""))
+  whichIsNotShapeMig = sapply(1:length(object@modelConnectionType),FUN = function(i) {
+    !object@shapeMig[i]%in%migrationShapes})
+  if(any(whichIsNotShapeMig)) {
+    stop(paste("the shapeMig '",paste(object@shapeMig[whichIsNotShapeMig],collapse="' and '"),
+               "' is not a valid shapeMig",sep=""))
+  }
+  if(!any(object@shapeMig%in%migrationShapes))stop(paste("error in  migrationModel : the parameter shapeMig must have one of the following values: '",paste(migrationShapes,collapse=", "),"'",sep=""))
+  if(FALSE%in%lapply(object@pMig,is.numeric))stop("error in migrationModel pMig : pMig just accept numeric vectors")
+  for (i invaliditysocioMigrationModel=function(object){TRUE}
+       
+       validitysocioMigrationModel=function(object){
+         #if(!is.character(object@shapeMig))stop("error in  migrationModel shapeMig : shapeMig just accept character!")
+         whichSlotHasDifferentSize = sapply(c("varMig","shapeMig","pMig"),FUN = function(x) {length(slot(object,x))!=length(object@modelConnectionType)})
+         if (sum(object@pMixt)!=1) warning("pMixt parameter should sum to 1")
+         if(any(whichSlotHasDifferentSize)) stop(paste("error in  migrationModel; the slot(s)",
+                                                       paste(c("varMig","shapeMig","pMig","pMixt")[whichSlotHasDifferentSize],collapse = " and "), 
+                                                       " is not valid because it has different length than modelConnectionType slot, which is ",
+                                                       length(object@modelConnectionType),sep = ""))
+         whichIsNotShapeMig = sapply(1:length(object@modelConnectionType),FUN = function(i) {
+           !object@shapeMig[i]%in%migrationShapes})
+         if(any(whichIsNotShapeMig)) {
+           stop(paste("the shapeMig '",paste(object@shapeMig[whichIsNotShapeMig],collapse="' and '"),
+                      "' is not a valid shapeMig",sep=""))
+         }
+         if(!any(object@shapeMig%in%migrationShapes))stop(paste("error in  migrationModel : the parameter shapeMig must have one of the following values: '",paste(migrationShapes,collapse=", "),"'",sep=""))
+         if(FALSE%in%lapply(object@pMig,is.numeric))stop("error in migrationModel pMig : pMig just accept numeric vectors")
+         for (i in 1:length(object@varMig)) {# checks for correct number of migration parameters
+           if(npMig(object@shapeMig[i])!=length(object@pMig[[i]])) {
+             stop(paste("error in migrationModel : number of paremeters and shapeMig do not match for varMig",object@shapeMig[i]))}
+         }
+         TRUE
+       }
+       #proportion of individual produced in each attibuted cell that migrates to each attributed cell of the raster
+       setClass("socioMigrationModel",
+                representation(modelConnectionType="character",varMig="character",shapeMig="character",pMig="list",pMixt="numeric"),
+                # describes migration model : depending on distance or grouping
+                # pMixt : a proportion of the individual migrates acording to each model
+                # models are described in successive components of modelConnectionType, varMig, shapeMig, pMig and pMixt slots
+                # if modelConnectionType = dist and shapeMig=island the model is an island model in which each cell is an island and a proportion of propagules migrates to the pool with a proportion given by the parameter
+                # if modelConnectionType = group and shapeMig=island  the model is an island model in which each group is an island and a proportion of propagules migrates to the pool with a proportion given by the parameter there is a possiblity of dispersion models within groups according to the shapeDisp
+                prototype(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1/1.96,numeric(0)),pMixt=c(.5,.5)),
+                # this prototype, migrationModel is a mixture of two components : migration related to distance in the first component and migration related to groups in the second component. Probability of migration between two points is a mixture of probablity given by the dist gaussian model and the group popSep model. 
+                # the group popSep model means island model where cells of the raster belong to pops according to their group variable and mix panmictically within groups according to the popSep model
+                # the dist gaussian model means dispersion between two points in the raster is given by gaussian distribution
+       )
+       
+       setValidity("socioMigrationModel", validitymigrationModel)
+       
+       
+       socioMigrationModel<-function(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","island"),pMig=list(gaussian=1/1.96,island=.2),pMixt=c(0.5,0.5)){
+         #if(length(pMixt)==length(shapeMig)) pMixt=(pMixt/sum(pMixt))[1:(length(pMixt)-1)] # pMixt requires length(shapeMig)-1 parameters only, since the sum of mixture parameters =1
+         new("migrationModel",modelConnectionType=modelConnectionType,varMig=varMig,shapeMig=shapeMig,pMig=pMig,pMixt=pMixt)
+       }
+       
+       1:length(object@varMig)) {# checks for correct number of migration parameters
+    if(npMig(object@shapeMig[i])!=length(object@pMig[[i]])) {
+      stop(paste("error in migrationModel : number of paremeters and shapeMig do not match for varMig",object@shapeMig[i]))}
+  }
+  TRUE
+}
+#proportion of individual produced in each attibuted cell that migrates to each attributed cell of the raster
+setClass("socioMigrationModel",
+         representation(varMig="character",shapeMig="character",pMig="list",pMixt="numeric"),
+         # describes migration model : depending on distance or grouping
+         # pMixt : a proportion of the individual migrates acording to each model
+         # models are described in successive components of modelConnectionType, varMig, shapeMig, pMig and pMixt slots
+         # if modelConnectionType = dist and shapeMig=island the model is an island model in which each cell is an island and a proportion of propagules migrates to the pool with a proportion given by the parameter
+         # if modelConnectionType = group and shapeMig=island  the model is an island model in which each group is an island and a proportion of propagules migrates to the pool with a proportion given by the parameter there is a possiblity of dispersion models within groups according to the shapeDisp
+         prototype(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1/1.96,numeric(0)),pMixt=c(.5,.5)),
+         # this prototype, migrationModel is a mixture of two components : migration related to distance in the first component and migration related to groups in the second component. Probability of migration between two points is a mixture of probablity given by the dist gaussian model and the group popSep model. 
+         # the group popSep model means island model where cells of the raster belong to pops according to their group variable and mix panmictically within groups according to the popSep model
+         # the dist gaussian model means dispersion between two points in the raster is given by gaussian distribution
+)
+
+setValidity("socioMigrationModel", validitymigrationModel)
+
+
+socioMigrationModel<-function(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","island"),pMig=list(gaussian=1/1.96,island=.2),pMixt=c(0.5,0.5)){
   #if(length(pMixt)==length(shapeMig)) pMixt=(pMixt/sum(pMixt))[1:(length(pMixt)-1)] # pMixt requires length(shapeMig)-1 parameters only, since the sum of mixture parameters =1
   new("migrationModel",modelConnectionType=modelConnectionType,varMig=varMig,shapeMig=shapeMig,pMig=pMig,pMixt=pMixt)
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
 envDynData(x=NULL,stackConnectionType=NULL,envLayerNames=NULL,Extent=extent(c(0,1,0,1)))
 nicheModel(varNiche=c("temp","temp"),reactNorms=c(temp="envelin",temp="scaling"),pNiche=list(envelin=c(3,4),scaling=100))
-migrationModel(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(gaussian=1/1.96,popSep=numeric(0)),pMixt=c(.5,.5))
+geoMigrationModel(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(gaussian=1/1.96,popSep=numeric(0)),pMixt=c(.5,.5))
 #stack(x=c(temp=raster(matrix(2:5,nrow=2),xmn=0,xmx=2,ymn=0,ymx=2),pops=raster(matrix(rep(1:2,2),nrow=2),xmn=0,xmx=2,ymn=0,ymx=2)))
 
 connectionType=c("geographic","grouping") # two types of connection geo is related to geographic distance, grouping
