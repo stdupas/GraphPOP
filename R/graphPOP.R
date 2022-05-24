@@ -192,7 +192,7 @@ setMethod("categories",
 )
 
 setMethod("categories",
-          "envDynData",
+          "envData",
           function(object){list(geo=Acells(object),
                socioeco=categories(object@socioecoData))}
 )
@@ -215,15 +215,10 @@ setMethod("variable.names",
           function(object) {lapply(object, function(x){names(x)})}
 )
 
-setMethod("variable.names",
-          "envDynData",
-          function(object) {list(geo=names(object),socioeco=variable.names(object@socioecoData))  
-            }
-)
 
 #stackConnectionType
-setClass("envDynData",
-         # envDynData are raster layers containing information about environmental variables
+setClass("envData",
+         # envData are raster layers containing information about environmental variables
          # and or connectivity variables that will allow to buil niche models and friction models
          # the layers that contain geographic information related to geographiccoordinates are called connectionType=geographic
          # the layers that contain other type of information characterizing ecological populations by groups (ethnic groups, market exchanges, plant varieties for pests and diseases) have a connectionType = grouping
@@ -240,7 +235,7 @@ setClass("envDynData",
 
 connectionTypes=c("geographic","grouping","routes")
 
-#setValidity("envDynData",
+#setValidity("envData",
  #           function(object){
   #            if (length(object@stackConnectionType)!=nlayers(object)) return("the length of stackConnectionType slot informing the type of connection data and the number of layers of stack differ")
    #           if (!all(object@stackConnectionType%in%connectionTypes)) return("stackConnectionType argument character value was not any of 'raster', 'vector', or 'group'")
@@ -248,15 +243,15 @@ connectionTypes=c("geographic","grouping","routes")
      #       })
 
 #
-# envDynData has 2 components
+# envData has 2 components
 # a geographic and/or a socioeconomic that permits to generate 
 # transition matrix individuals among demes defined 
 # by geographic and socioeconomic variables
 
-envDynData<-function(x=NULL,socioecoList=NULL)
+envData<-function(x=NULL,socioecoList=NULL)
 {
   #
-  # envDynData has 2 components
+  # envData has 2 components
   # a geographic and/or a socioeconomic that permits to generate 
   # transition matrix individuals among demes defined 
   # by geographic and socioeconomic variables
@@ -273,15 +268,20 @@ envDynData<-function(x=NULL,socioecoList=NULL)
     geo=new("geoEnvData",rasterstack)} else if (class(x)=="geoEnvData") {geo=x} else stop("x should be raster, RasterStack, array or empty")
   }
   if (is.null(socioecoList)) socioecoList=socioecoEnvDataList()
-  new("envDynData",geo,socioecoData=socioecoList)
+  new("envData",geo,socioecoData=socioecoList)
 }
 
-envDynData(x = geoEnvData(),socioecoList=socioecoEnvDataList())
+envData(x = geoEnvData(),socioecoList=socioecoEnvDataList())
 
+setMethod("variable.names",
+          "envData",
+          function(object) {list(geo=names(object),socioeco=variable.names(object@socioecoData))  
+          }
+)
 setMethod("show",
-          "envDynData",
+          "envData",
           function(object) {
-            cat("An object of class 'envDynData'\n")
+            cat("An object of class 'envData'\n")
             cat("- geoEnvData inherited class:\n")
             cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object),",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
             cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
@@ -295,33 +295,19 @@ setMethod("show",
           )
 
 setMethod("ncell",
-          signature = "envDynData",
+          signature = "envData",
           function(x) {
             return(c(geoCells=nCellA(x),socioCells=sapply(x@socioecoData,FUN = function(x) ncell(x))))
             }
           )
 
 
-setClass("envDynHistory",
-         # to represent environmental dynamic data history
-         contains="list",
-         representation(pastStartingTimes="numeric",timeUnit="character",endingDate="Date"),
-         prototype=prototype(list(envDynData(),envDynData()),pastStartingTimes=c(-200,-5000),timeUnit="Day",endingDate=date())
-)
-
-validityEnvDynHistory = function(object){
-  if (any(lapply(object,FUN = function(x) class(x)!="envDynData"))) stop("the list envDynList has to be of class envDynData")
-  if (any(object@pastStartingTimes>0)) stop("the pastStartingTimes should be negative")
-  if (length(object@pastStartingTimes)!=(length(object))) stop("slot pastStartingTimes should include all the starting dates between period, which is length(object)")
-  if (length(object@pastStartingTimes)>1) for (i in 2:length(object@pastStartingTimes)) {if (object@pastStartingTimes[i]>=object@pastStartingTimes[i-1]) stop("the envDynDataList should order from recent to past")}
-}
-
 setValidity("envDynHistory",validityEnvDynHistory)
 
 setMethod("show",
           "envDynHistory",
           function(object){
-            cat("An object of class \"envDynHistory\":\nEnvDynData ordered from most recent to most remote in the past\n\n", sep="")
+            cat("An object of class \"envDynHistory\":\nenvData ordered from most recent to most remote in the past\n\n", sep="")
             cat("ending date \t:", object@endingDate,"\n")
             cat("time unit\t:",object@timeUnit,"\n")
             for (i in 1:length(object)) {
@@ -360,8 +346,8 @@ validityNicheModel=function(object){
                                             conQuadratic=2,
                                             conQuadraticSkw=2
                                             number of paremeters and reactionNorm do not match for variable ",which(notMatching),". ",sep=""))
-  if (length(object@varNiche)!=length(object@reactNorms)) stop("there should be the same number of elements in reactNorms and varNiche since reactNorm[i] is applied to varNiche[i]")
-  if (length(object@reactNorms)!=length(object@pNiche)) stop("there should be the same number of elements in pNiche and reactNorms since pNiche[[i]] is used in reactNorm[i] function")
+  if (length(object@varNiche)!=length(object@reactNorms)) stop("there should be the same number of elements in reactNorms and varNiche since reactNorms[i] is applied to varNiche[i]")
+  if (length(object@reactNorms)!=length(object@pNiche)) stop("there should be the same number of elements in pNiche and reactNorms since pNiche[[i]] is used in reactNorms[i] function")
   TRUE
 }
 
@@ -497,14 +483,26 @@ setMethod("variable.names",
 
 setMethod("model.extract",
           "nicheModel",
-          function(frame,component){
+          function(frame,component="reactNorms"){
             switch(component,
                    varNiche=frame@varNiche,
                    reactNorms=frame@reactNorms)
           }
 )
 
-a=envDynData(x = geoEnvData(),socioecoList=socioecoEnvDataList())
+setGeneric("model",
+  def=function(object){
+    return(standardGeneric("model"))
+  })
+
+
+setMethod("model",
+           "nicheModel",
+           function(object){
+             list(reactNorms=object@reactNorms,varNiche=object@varNiche)
+           })
+
+a=envData(x = geoEnvData(),socioecoList=socioecoEnvDataList())
 b=nicheModel(varNiche=c("temp","temp"),reactNorms=c(temp="envelin",temp="scaling"),pNiche=list(envelin=c(3,4),scaling=100))
 c=geoMigrationModel(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(gaussian=1/1.96,popSep=numeric(0)),pMixt=c(.5,.5))
 d=socioecoMigrationModel()
@@ -512,38 +510,99 @@ d=socioecoMigrationModel()
 
 #connectionType=c("geographic","grouping") # two types of connection geo is related to geographic distance, grouping
 
-validityenvDynDataModel=function(object){
-  if()
-  if(class(object@Kmodel)!="nicheModel")stop("Error in envDynDataModel Kmodel : Kmodel just accept NicheModel !")
-  if(class(object@Rmodel)!="nicheModel")stop("Error in envDynDataModel Rmodel : Rmodel just accept NicheModel !")
-  if(class(object@geoMigModel)!="geoMigrationModel")stop("Error in envDynDataModel migration : migration just accept migrationModel !")
+
+setClass("envDataSeries",
+         # to represent environmental dynamic data history
+         contains="envData",
+         representation(pastEnvData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt"),
+         prototype(envData(),pastEnvData=list(envData(),envData()),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
+)
+
+a=new("envDataSeries")
+
+envDataSeries <- function(envData,)
+
+setMethod("show",
+          "envDataSeries",
+          function(object){
+            cat("An object of class 'envDataSeries':\n\n")
+            if (length(object@parsingTimes)==2) {
+              cat("unique envData :")
+              cat("(Time frame from", as.character(object@zeroTime),"to",object@parsingTimes[2],object@timeUnit,")")
+              cat("\nTime units\t:",object@timeUnit)
+            }
+            
+            if (length(object@parsingTimes)==0) {
+              cat("unique envData (no time frame) :\n")
+            }
+
+            if (length(object@parsingTimes)>2) {
+              cat("most recent envData  :\n")
+              cat("(Time frame from", as.character(object@zeroTime),"to",object@parsingTimes[2], object@timeUnit,")")
+              cat("\nTime units\t:",object@timeUnit,"\n")
+            }
+            
+            cat("(Inherited class):\n")
+            cat("\nAn object of class 'envData'\n")
+            cat("- geoEnvData inherited class:\n")
+            cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object),",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
+            cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
+            cat("\nextent\t\t:",extent(object)[1],",",extent(object)[2],",",extent(object)[3],",",extent(object)[4],", (xmin, xmax, ymin, ymax)")
+            cat("\ncrs\t\t:",as.character(crs(object)))
+            cat("\nnames\t\t: ")
+            cat(names(object),sep = ", ")
+            cat("\n\n- socioecoEnvDataList slot:\n")
+            cat(show(object@socioecoData)) 
+            if (length(object@parsingTimes)>2) {for(i in 1:length(object@pastEnvData)){
+              cat("\n\nPast envData:\n")
+              cat("Past period #:\t",i,"\nEnvData From", object@parsingTimes[i+1],"to",object@parsingTimes[i+2],"time units)\n")
+              cat("(Time units\t: ",object@timeUnit," )\n",sep="")
+              show(object@pastEnvData[[i]])
+            }}
+          }
+          )
+
+validityenvDataSeries = function(object){
+  
+  if ()
+  if (any(object@parsingTimes>0)) stop("the pastStartingTimes should be negative")
+  if (length(object@parsingTimes)!=(length(object))) stop("slot pastStartingTimes should include all the starting dates between period, which is length(object)")
+  if (length(object@parsingTimes)>1) for (i in 2:length(object@pastStartingTimes)) {if (object@pastStartingTimes[i]>=object@pastStartingTimes[i-1]) stop("the envDataList should order from recent to past")}
+}
+
+
+
+validityenvDataModel=function(object){
+  if(class(object@Kmodel)!="nicheModel")stop("Error in envDataModel Kmodel : Kmodel just accept NicheModel !")
+  if(class(object@Rmodel)!="nicheModel")stop("Error in envDataModel Rmodel : Rmodel just accept NicheModel !")
+  if(class(object@geoMigModel)!="geoMigrationModel")stop("Error in envDataModel migration : migration just accept migrationModel !")
   TRUE
 }
 
 
-setClass("envDynDataModel",
-         contains = "envDynData",
+setClass("envDataModel",
+         contains = "envData",
          representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
-         #validity=validityenvDynDataModel,
-         prototype(envDynData=new("envDynData"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
+         #validity=validityenvDataModel,
+         prototype(envData=new("envData"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
       
 )
 
-envDynDataModel<-function(EnvDynData=NULL,nicheK=NULL,nicheR=NULL,migModel=NULL,
+envDataModel<-function(envData=NULL,nicheK=NULL,nicheR=NULL,migModel=NULL,
                       EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
                       stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
                       varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
                       varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
                       modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
 {
-  if (is.null(EnvDynData)) EnvDynData=new("envDynData",EnvStack,stackConnectionType=stackConnectionType)
+  if (is.null(envData)) envData=new("envData",EnvStack,stackConnectionType=stackConnectionType)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
-  new("envDynDataModel",EnvDynData,Kmodel=nicheK,Rmodel=nicheR,migModel=migModel)
+  new("envDataModel",envData,Kmodel=nicheK,Rmodel=nicheR,migModel=migModel)
 }
 
-setValidity("envDynDataModel", validityenvDynDataModel)
+setValidity("envDataModel", validityenvDataModel)
 
 setMethod("show",
           "nicheModel",
@@ -583,11 +642,11 @@ setMethod("show",
           })
 
 setMethod("show",
-          "envDynDataModel",
+          "envDataModel",
           function(object) {
-            cat("class\t\t: envDynDataModel\n\n")
+            cat("class\t\t: envDataModel\n\n")
             cat("Data (Inherited)\n")
-            cat("class\t\t: envDynData\n")
+            cat("class\t\t: envData\n")
             cat("dimension\t:",dim(object), "(nrow, ncol, nlayers) \n")
             cat("number of cells\t: ")
             cat(ncell(object),nCellA(object),sep=", ")
@@ -642,7 +701,7 @@ setGeneric(
 )
 
 setMethod("buildRKlandscape",
-          signature=c("envDynDataModel"),
+          signature=c("envDataModel"),
           definition = function(object){                  #X=object, p=,shape=
             Ki=lapply(1:length(object@Kmodel@varNiche),function(i){
               switch(object@Kmodel@reactNorms[[i]],
@@ -681,7 +740,7 @@ setGeneric(
 
 setMethod(
   f="buildGeodist",
-  signature=c("envDynDataModel"),
+  signature=c("envDataModel"),
   definition=function(object)
   {
     Ndim = 1+all(ncell(object)!=dim(object)[1:2]) # if the landscape is a line one cell width Ndim=1, otherwise Ndim=2
@@ -705,7 +764,7 @@ setGeneric(
 
 setMethod(
   f="buildMigrationMatrix",
-  signature=c("envDynDataModel"),
+  signature=c("envDataModel"),
   definition=function(object)
   {
     Ndim = 1+all(ncell(object)!=dim(object)[1:2]) # if the landscape is a line one cell width Ndim=1, otherwise Ndim=2
@@ -737,30 +796,30 @@ setMethod(
   }
 )
 
-a=envDynDataModel(EnvStack = stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
+a=envDataModel(EnvStack = stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
 b=buildMigrationMatrix(a)
 
 setClass("envDynLandscape",
-         contains=c(envDynDataModel="envDynDataModel"),
+         contains=c(envDataModel="envDataModel"),
          slots = c(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
 )
 
-envDynLandscape<-function(EnvDynDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migrationMatrix=NULL,transitionForward=NULL,transitionBackward=NULL,
-                          EnvDynData=NULL,
+envDynLandscape<-function(envDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migrationMatrix=NULL,transitionForward=NULL,transitionBackward=NULL,
+                          envData=NULL,
                           EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
                           stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
                           varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
                           varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
                           modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5)){
-  if (is.null(EnvDynDataModel)) {
-    if (is.null(EnvDynData)) EnvDynData=new("envDynData",EnvStack,stackConnectionType=stackConnectionType)
-    EnvDynDataModel=envDynDataModel(EnvDynData = EnvDynData,nicheK = nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK),nicheR = nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR), migModel = migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt))}
-  if (is.null(RKlandscape)) RKlandscape=buildRKLandscape(EnvDynDataModel)
-  if (is.null(geoDist)) geoDist=buildGeodist(EnvDynDataModel)
-  if (is.null(migrationMatrix)) RKlandscape=buildMigrationMatrix(EnvDynDataModel)
-  if (is.null(transitionForward)) transitionForward=buildTransitionForward(EnvDynDataModel)
-  if (is.null(transitionBackward)) transitionBackward=buildTransitionBackward(EnvDynDataModel)
-  new("envDynLandscape",EnvDynDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
+  if (is.null(envDataModel)) {
+    if (is.null(envData)) envData=new("envData",EnvStack,stackConnectionType=stackConnectionType)
+    envDataModel=envDataModel(envData = envData,nicheK = nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK),nicheR = nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR), migModel = migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt))}
+  if (is.null(RKlandscape)) RKlandscape=buildRKLandscape(envDataModel)
+  if (is.null(geoDist)) geoDist=buildGeodist(envDataModel)
+  if (is.null(migrationMatrix)) RKlandscape=buildMigrationMatrix(envDataModel)
+  if (is.null(transitionForward)) transitionForward=buildTransitionForward(envDataModel)
+  if (is.null(transitionBackward)) transitionBackward=buildTransitionBackward(envDataModel)
+  new("envDynLandscape",envDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
 }
 
 setGeneric(
@@ -944,7 +1003,7 @@ setMethod(
 
 setMethod(
   f ="[",
-  signature = c(x="envDynDataModel" ,i="character",j="missing"),
+  signature = c(x="envDataModel" ,i="character",j="missing"),
   definition = function (x ,i ,j , drop ){
     switch ( EXPR =i,
              "K" ={return(x@K)} ,
@@ -1042,8 +1101,8 @@ conQuadraticSkw <- function(X,p){
 }
 
 ######### CREER TRANSITION MATRIX ###############################################################################
-setMethod(f="runenvDynDataModel",
-          signature=c("landscape","envDynDataModel"),
+setMethod(f="runenvDataModel",
+          signature=c("landscape","envDataModel"),
           definition=function(object,model){
             R<-buildRKLandscape(object,model["R"])
             K<-buildRKLandscape(object,model["K"])
@@ -1054,7 +1113,7 @@ setMethod(f="runenvDynDataModel",
           }
 )
 
-setMethod(f="runenvDynDataModel",
+setMethod(f="runenvDataModel",
           signature=c("enDynLandscape"),
           definition=function(object){
             R<-buildRKLandscape(object["R"])
@@ -1158,10 +1217,10 @@ setMethod(f="sampleLandscape",
 setMethod(f="demographic",
           signature=c("envDynLandscape","integer"),
           definition=function(envDynLand,sampleCells){
-            #lpar<-runenvDynDataModel(object,model)             # creates the environmental dynamic model with the landscape and parameters
+            #lpar<-runenvDataModel(object,model)             # creates the environmental dynamic model with the landscape and parameters
             #b<-getTransitionBackward(object,lpar)      
             #f<-transitionMatrixForward(lpar,"non_overlap") # creates the forward transition matrix between cells
-            #sample according to envDynDataModel@K 
+            #sample according to envDataModel@K 
             new(Class = "Demographic",object=envDynLand,sampleCells=sampleCells)
           }
 )
