@@ -12,7 +12,7 @@ library(raster)
 
 setClass("geoEnvData",
          contains = "RasterStack",
-         prototype=prototype(stack(stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),pops=raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3)))))
+         prototype=prototype(stack(stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),pops=raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat"))))))
 )
 new("geoEnvData",stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),pops=raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))))
 
@@ -60,6 +60,7 @@ setMethod("Acells",
             which(!is.na(values(object[[1]])))
           }
 )
+
 
 setMethod("xyA",
           signature = "geoEnvData",
@@ -124,6 +125,12 @@ setMethod("show",
           
 )
 
+setMethod("Acells",
+          signature=c("socioecoGroupData"),
+          definition = function(object){
+            which(!is.na(values(object[[1]])))
+          }
+)
 
 setClass("socioecoGroupDataList",
          contains = "list",
@@ -176,25 +183,24 @@ setMethod("show",
           }
 )
 
+setMethod("Acells",
+          signature=c("socioecoGroupDataList"),
+          definition = function(object){
+            lapply(object, function(x){Acells(x)})
+          }
+)
+
 setGeneric("categories",
            def=function(object){return(standardGeneric("categories"))})
 
 setMethod("categories",
-          "socioecoGroupDataList",
-          function(object) {lapply(object, function(object){object@categories})}
-          )
-
+          "socioecoGroupData",
+          function(object){list(socioeco=object@categories)}
+)
 setMethod("categories",
           "socioecoGroupDataList",
-          function(object) {lapply(object, function(x){x@categories})}
+          function(object) {lapply(object, function(x){categories(x)})}
 )
-
-setMethod("categories",
-          "socioecoEnvData",
-          function(object){list(geo=Acells(object),
-               socioeco=categories(object@socioecoData))}
-)
-
 
 setMethod("categories",
           "geoEnvData",
