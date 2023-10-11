@@ -89,34 +89,34 @@ setMethod(
   }
 )
 
-setClass("socioecoEnvData",
+setClass("socioecoGroupData",
          contains = "RasterStack",
          representation(categories="character")
          )
 
-validitysocioecoEnvData=function(object){
+validitysocioecoGroupData=function(object){
   #if (ncell(object)!=dim(object)[2]) stop("the socioecoClass must be one dimentional rasterStack : ncategories cols and 1 row")
-  if (ncell(object)!=length(object@categories)) stop("the number of cells and the number of categories should not differ in socioecoEnvData")
+  if (ncell(object)!=length(object@categories)) stop("the number of cells and the number of categories should not differ in socioecoGroupData")
   return(TRUE)
 }
 
 
-setValidity("socioecoEnvData",validitysocioecoEnvData)
+setValidity("socioecoGroupData",validitysocioecoGroupData)
 
-a=new("socioecoEnvData",stack(raster(matrix(1:4,nrow=1))),categories=c("susa","bogota","villapinzon","lacalera"))
+a=new("socioecoGroupData",stack(raster(matrix(1:4,nrow=1))),categories=c("susa","bogota","villapinzon","lacalera"))
 
-socioecoEnvData<-function(categories=c("group1","group2"),Values=c(1:4), Nlayers= 2, layerNames=c("cuidado","alimentación"),Array=NULL,rasterStack=NULL){
+socioecoGroupData<-function(categories=c("group1","group2"),Values=c(1:4), Nlayers= 2, layerNames=c("cuidado","alimentación"),Array=NULL,rasterStack=NULL){
   if (is.null(rasterStack)) {
     if (is.null(Array)) Array = array(Values,dim = c(1,length(categories),Nlayers),dimnames = list(1:1,categories,layerNames))
     rasterStack = stack(apply(Array,3,function(x){raster(x)}))
   }
-  new("socioecoEnvData",rasterStack,categories=categories)
+  new("socioecoGroupData",rasterStack,categories=categories)
 }
 
 setMethod("show",
-          "socioecoEnvData",
+          "socioecoGroupData",
           function(object) {
-            cat("class\t\t: socioecoEnvData\n")
+            cat("class\t\t: socioecoGroupData\n")
             cat("# of categ.\t:",ncell(object), "\n")
             cat("# of layers\t:",nlayers(object),"\n")
             cat("categories\t:",object@categories,"\n")
@@ -125,47 +125,45 @@ setMethod("show",
 )
 
 
-setClass("socioecoEnvDataList",
+setClass("socioecoGroupDataList",
          contains = "list",
-         prototype = prototype(list(
-           
-         ))
-)
+         prototype = prototype(list(mercado=new("socioecoGroupData",stack(list(probabilidadEnfermedad=raster(matrix(1:2,nrow=1)))),categories=c("Corrabastos","Semillas identidad")),
+           sistema=new("socioecoGroupData",stack(list(pesticidas=raster(matrix(c(0,2,0),nrow=1)),abono=raster(matrix(c(0,2,2),nrow=1)))),categories=c("ageoeco","convencional","pequeño"))
+              )
+         )
+        )
 
-validitysocioecoEnvDataList=function(object){
-if (any(unlist(lapply(object,FUN = function(x) (class(x)!="socioecoEnvData"))))) stop("socioecoEnvDataList is a list of object of class socioecoEnvData")
+validitysocioecoGroupDataList=function(object){
+if (any(unlist(lapply(object,FUN = function(x) (class(x)!="socioecoGroupData"))))) stop("socioecoGroupDataList is a list of object of class socioecoGroupData")
   return(TRUE)
 }
 
 
-setValidity("socioecoEnvDataList",validitysocioecoEnvDataList)
-#listofSocioecoEnvData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
+setValidity("socioecoGroupDataList",validitysocioecoGroupDataList)
+#listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
 #Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad","pesticidas","abono"),listofArray=NULL,listofRasterStack=NULL)
 
-a=new("socioecoEnvDataList",
-      list(mercado=new("socioecoEnvData",stack(list(probabilidadEnfermedad=raster(matrix(1:2,nrow=1)))),categories=c("Corrabastos","Semillas identidad")),
-           sistema=new("socioecoEnvData",stack(list(pesticidas=raster(matrix(c(0,2,0),nrow=1)),abono=raster(matrix(c(0,2,2),nrow=1)))),categories=c("ageoeco","convencional","pequeño"))
-           )
-      )
+a=new("socioecoGroupDataList")
+     
       
-socioecoEnvDataList<-function(listofSocioecoEnvData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
+socioecoGroupDataList<-function(listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
                               Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad",c("pesticidas","abono")),listofArray=NULL,listofRasterStack=NULL)
   {
-  if (is.null(listofSocioecoEnvData)) {
+  if (is.null(listofsocioecoGroupData)) {
     if (is.null(listofRasterStack)) {
       if (is.null(listofArray)) listofArray = lapply(1:length(Nlayers),function(i) array(data = listofValues[[i]],dim=c(1,length(listofCategories[[i]]),Nlayers[i]) , dimnames= list(1,listofCategories[[i]],listofLayerNames[[i]])))
     }
     listofRasterStack = lapply(1:length(listofArray),function(i) {stack(apply(listofArray[[i]],3,function(x){raster(x)}))})
   }
-  listofSocioecoEnvData = lapply(1:length(listofRasterStack),function(i) socioecoEnvData(categories = listofCategories[[i]],rasterStack = listofRasterStack[[i]]))
-  names(listofSocioecoEnvData)=Names
-  new("socioecoEnvDataList",listofSocioecoEnvData)
+  listofsocioecoGroupData = lapply(1:length(listofRasterStack),function(i) socioecoGroupData(categories = listofCategories[[i]],rasterStack = listofRasterStack[[i]]))
+  names(listofsocioecoGroupData)=Names
+  new("socioecoGroupDataList",listofsocioecoGroupData)
 }
 
 setMethod("show",
-          "socioecoEnvDataList",
+          "socioecoGroupDataList",
           function(object) {
-            cat("class\t\t: socioecoEnvDataList\n")
+            cat("class\t\t: socioecoGroupDataList\n")
             cat("# of elements\t:",length(object), "\n\n")
             for (i in 1:length(object))
               {
@@ -182,17 +180,17 @@ setGeneric("categories",
            def=function(object){return(standardGeneric("categories"))})
 
 setMethod("categories",
-          "socioecoEnvDataList",
+          "socioecoGroupDataList",
           function(object) {lapply(object, function(object){object@categories})}
           )
 
 setMethod("categories",
-          "socioecoEnvDataList",
+          "socioecoGroupDataList",
           function(object) {lapply(object, function(x){x@categories})}
 )
 
 setMethod("categories",
-          "envData",
+          "socioecoEnvData",
           function(object){list(geo=Acells(object),
                socioeco=categories(object@socioecoData))}
 )
@@ -206,36 +204,36 @@ setMethod("categories",
 
 
 setMethod("variable.names",
-          "socioecoEnvData",
+          "socioecoGroupData",
           function(object) {names(object)})
 
 
 setMethod("variable.names",
-          "socioecoEnvDataList",
+          "socioecoGroupDataList",
           function(object) {lapply(object, function(x){names(x)})}
 )
 
 
 #stackConnectionType
-setClass("envData",
-         # envData are raster layers containing information about environmental variables
+setClass("socioecoEnvData",
+         # socioecoEnvData are raster layers containing information about environmental variables
          # and or connectivity variables that will allow to buil niche models and friction models
          # the layers that contain geographic information related to geographiccoordinates are called connectionType=geographic
          # the layers that contain other type of information characterizing ecological populations by groups (ethnic groups, market exchanges, plant varieties for pests and diseases) have a connectionType = grouping
          # connected class variables are coded as follows; when cell value is :
          # - 0 : the cell is not connected to any other cell 
          # - n!=0 : the cell is connected to the cells having the same value
-         representation(socioecoData="socioecoEnvDataList"),
+         representation(socioecoData="socioecoGroupDataList"),
          contains = "geoEnvData",
          prototype = prototype(geoEnvData(),
-                               socioecoData=socioecoEnvDataList())
+                               socioecoData=socioecoGroupDataList())
 )
 
 
 
 connectionTypes=c("geographic","grouping","routes")
 
-#setValidity("envData",
+#setValidity("socioecoEnvData",
  #           function(object){
   #            if (length(object@stackConnectionType)!=nlayers(object)) return("the length of stackConnectionType slot informing the type of connection data and the number of layers of stack differ")
    #           if (!all(object@stackConnectionType%in%connectionTypes)) return("stackConnectionType argument character value was not any of 'raster', 'vector', or 'group'")
@@ -243,15 +241,15 @@ connectionTypes=c("geographic","grouping","routes")
      #       })
 
 #
-# envData has 2 components
+# socioecoEnvData has 2 components
 # a geographic and/or a socioeconomic that permits to generate 
 # transition matrix individuals among demes defined 
 # by geographic and socioeconomic variables
 
-envData<-function(x=NULL,socioecoList=NULL)
+socioecoEnvData<-function(x=NULL,socioecoList=NULL)
 {
   #
-  # envData has 2 components
+  # socioecoEnvData has 2 components
   # a geographic and/or a socioeconomic that permits to generate 
   # transition matrix individuals among demes defined 
   # by geographic and socioeconomic variables
@@ -267,21 +265,21 @@ envData<-function(x=NULL,socioecoList=NULL)
    else if (class(x)=="RasterStack") {
     geo=new("geoEnvData",rasterstack)} else if (class(x)=="geoEnvData") {geo=x} else stop("x should be raster, RasterStack, array or empty")
   }
-  if (is.null(socioecoList)) socioecoList=socioecoEnvDataList()
-  new("envData",geo,socioecoData=socioecoList)
+  if (is.null(socioecoList)) socioecoList=socioecoGroupDataList()
+  new("socioecoEnvData",geo,socioecoData=socioecoList)
 }
 
-envData(x = geoEnvData(),socioecoList=socioecoEnvDataList())
+socioecoEnvData(x = geoEnvData(),socioecoList=socioecoGroupDataList())
 
 setMethod("variable.names",
-          "envData",
+          "socioecoEnvData",
           function(object) {list(geo=names(object),socioeco=variable.names(object@socioecoData))  
           }
 )
 setMethod("show",
-          "envData",
+          "socioecoEnvData",
           function(object) {
-            cat("An object of class 'envData'\n")
+            cat("An object of class 'socioecoEnvData'\n")
             cat("- geoEnvData inherited class:\n")
             cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object),",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
             cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
@@ -289,13 +287,13 @@ setMethod("show",
             cat("\ncrs\t\t:",as.character(crs(object)))
             cat("\nnames\t\t: ")
             cat(names(object),sep = ", ")
-            cat("\n\n- socioecoEnvDataList slot:\n")
+            cat("\n\n- socioecoGroupDataList slot:\n")
             cat(show(object@socioecoData))
             }
           )
 
 setMethod("ncell",
-          signature = "envData",
+          signature = "socioecoEnvData",
           function(x) {
             return(c(geoCells=nCellA(x),socioCells=sapply(x@socioecoData,FUN = function(x) ncell(x))))
             }
@@ -441,12 +439,12 @@ validitysocioecoMigrationModel=function(object){
 #proportion of individual produced in each attibuted cell that migrates to each attributed cell of the raster
 setClass("socioecoMigrationModel",
          representation(weight="numeric",varMig="character",shapeMig="character",pMig="list"),
-         # describes migration model in multiple dimensions given by the variables of the socioEcoEnvData
+         # describes migration model in multiple dimensions given by the variables of the socioecoGroupData
          # 
-         # these socioecoEnvData provide distance measure between socioecoCategories
+         # these socioecoGroupData provide distance measure between socioecoCategories
          # for instance 
          # weigth represents the coefficient given to socioecoMigration Matrix relative to geoMigration matrix
-         # varMig represents the names of the socioecoEnvDataList used to calculate migration rates
+         # varMig represents the names of the socioecoGroupDataList used to calculate migration rates
          # shapeMig represents the model used to transform varMig into migration rates
          # pMig represent the parameters to transform varMig into distance
          prototype(weight=1,varMig=c("Español","Chibcha","Corrabastos","Semillas_Comerciales","Guardianes_de_semilla"),shapeMig=c("euclideanInverse"),pMig=list(Español=1,Chibcha=1,Corrabastos=1,Semillas_Comerciales=1,Guardianes_de_semilla=1)),
@@ -502,7 +500,7 @@ setMethod("model",
              list(reactNorms=object@reactNorms,varNiche=object@varNiche)
            })
 
-a=envData(x = geoEnvData(),socioecoList=socioecoEnvDataList())
+a=socioecoEnvData(x = geoEnvData(),socioecoList=socioecoGroupDataList())
 b=nicheModel(varNiche=c("temp","temp"),reactNorms=c(temp="envelin",temp="scaling"),pNiche=list(envelin=c(3,4),scaling=100))
 c=geoMigrationModel(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(gaussian=1/1.96,popSep=numeric(0)),pMixt=c(.5,.5))
 d=socioecoMigrationModel()
@@ -511,39 +509,39 @@ d=socioecoMigrationModel()
 #connectionType=c("geographic","grouping") # two types of connection geo is related to geographic distance, grouping
 
 
-setClass("envDataSeries",
+setClass("socioecoEnvDataSeries",
          # to represent environmental dynamic data history
-         contains="envData",
-         representation(pastEnvData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt"),
-         prototype(envData(),pastEnvData=list(envData(),envData()),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
+         contains="socioecoEnvData",
+         representation(pastSocioecoEnvData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt"),
+         prototype(socioecoEnvData(),pastSocioecoEnvData=list(socioecoEnvData(),socioecoEnvData()),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
 )
 
-a=new("envDataSeries")
+a=new("socioecoEnvDataSeries")
 
-envDataSeries <- function(envData,)
+#socioecoEnvDataSeries <- function(socioecoEnvData)
 
 setMethod("show",
-          "envDataSeries",
+          "socioecoEnvDataSeries",
           function(object){
-            cat("An object of class 'envDataSeries':\n\n")
+            cat("An object of class 'socioecoEnvDataSeries':\n\n")
             if (length(object@parsingTimes)==2) {
-              cat("unique envData :")
+              cat("unique socioecoEnvData :")
               cat("(Time frame from", as.character(object@zeroTime),"to",object@parsingTimes[2],object@timeUnit,")")
               cat("\nTime units\t:",object@timeUnit)
             }
             
             if (length(object@parsingTimes)==0) {
-              cat("unique envData (no time frame) :\n")
+              cat("unique socioecoEnvData (no time frame) :\n")
             }
 
             if (length(object@parsingTimes)>2) {
-              cat("most recent envData  :\n")
+              cat("most recent socioecoEnvData  :\n")
               cat("(Time frame from", as.character(object@zeroTime),"to",object@parsingTimes[2], object@timeUnit,")")
               cat("\nTime units\t:",object@timeUnit,"\n")
             }
             
             cat("(Inherited class):\n")
-            cat("\nAn object of class 'envData'\n")
+            cat("\nAn object of class 'socioecoEnvData'\n")
             cat("- geoEnvData inherited class:\n")
             cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object),",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
             cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
@@ -551,58 +549,56 @@ setMethod("show",
             cat("\ncrs\t\t:",as.character(crs(object)))
             cat("\nnames\t\t: ")
             cat(names(object),sep = ", ")
-            cat("\n\n- socioecoEnvDataList slot:\n")
+            cat("\n\n- socioecoGroupDataList slot:\n")
             cat(show(object@socioecoData)) 
-            if (length(object@parsingTimes)>2) {for(i in 1:length(object@pastEnvData)){
-              cat("\n\nPast envData:\n")
-              cat("Past period #:\t",i,"\nEnvData From", object@parsingTimes[i+1],"to",object@parsingTimes[i+2],"time units)\n")
+            if (length(object@parsingTimes)>2) {for(i in 1:length(object@pastsocioecoEnvData)){
+              cat("\n\nPast socioecoEnvData:\n")
+              cat("Past period #:\t",i,"\nsocioecoEnvData From", object@parsingTimes[i+1],"to",object@parsingTimes[i+2],"time units)\n")
               cat("(Time units\t: ",object@timeUnit," )\n",sep="")
-              show(object@pastEnvData[[i]])
+              show(object@pastsocioecoEnvData[[i]])
             }}
           }
           )
 
-validityenvDataSeries = function(object){
-  
-  if ()
+validitysocioecoEnvDataSeries = function(object){
   if (any(object@parsingTimes>0)) stop("the pastStartingTimes should be negative")
   if (length(object@parsingTimes)!=(length(object))) stop("slot pastStartingTimes should include all the starting dates between period, which is length(object)")
-  if (length(object@parsingTimes)>1) for (i in 2:length(object@pastStartingTimes)) {if (object@pastStartingTimes[i]>=object@pastStartingTimes[i-1]) stop("the envDataList should order from recent to past")}
+  if (length(object@parsingTimes)>1) for (i in 2:length(object@pastStartingTimes)) {if (object@pastStartingTimes[i]>=object@pastStartingTimes[i-1]) stop("the socioecoEnvDataList should order from recent to past")}
 }
 
 
 
-validityenvDataModel=function(object){
-  if(class(object@Kmodel)!="nicheModel")stop("Error in envDataModel Kmodel : Kmodel just accept NicheModel !")
-  if(class(object@Rmodel)!="nicheModel")stop("Error in envDataModel Rmodel : Rmodel just accept NicheModel !")
-  if(class(object@geoMigModel)!="geoMigrationModel")stop("Error in envDataModel migration : migration just accept migrationModel !")
+validitysocioecoEnvDataModel=function(object){
+  if(class(object@Kmodel)!="nicheModel")stop("Error in socioecoEnvDataModel Kmodel : Kmodel just accept NicheModel !")
+  if(class(object@Rmodel)!="nicheModel")stop("Error in socioecoEnvDataModel Rmodel : Rmodel just accept NicheModel !")
+  if(class(object@geoMigModel)!="geoMigrationModel")stop("Error in socioecoEnvDataModel migration : migration just accept migrationModel !")
   TRUE
 }
 
 
-setClass("envDataModel",
-         contains = "envData",
+setClass("socioecoEnvDataModel",
+         contains = "socioecoEnvDataSeries",
          representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
-         #validity=validityenvDataModel,
-         prototype(envData=new("envData"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
+         #validity=validitysocioecoEnvDataModel,
+         prototype(socioecoEnvData=new("socioecoEnvData"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
       
 )
 
-envDataModel<-function(envData=NULL,nicheK=NULL,nicheR=NULL,migModel=NULL,
+socioecoEnvDataModel<-function(socioecoEnvDataList=NULL,nicheK=NULL,nicheR=NULL,migModel=NULL,
                       EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
                       stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
                       varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
                       varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
                       modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
 {
-  if (is.null(envData)) envData=new("envData",EnvStack,stackConnectionType=stackConnectionType)
+  if (is.null(socioecoEnvDataList)) socioecoEnvDataList=new(list("socioecoEnvData","socioecoEnvData"),EnvStack,stackConnectionType=stackConnectionType)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
-  new("envDataModel",envData,Kmodel=nicheK,Rmodel=nicheR,migModel=migModel)
+  new("socioecoEnvDataModel",socioecoEnvDataList,Kmodel=nicheK,Rmodel=nicheR,migModel=migModel)
 }
 
-setValidity("envDataModel", validityenvDataModel)
+setValidity("socioecoEnvDataModel", validityenvDataModel)
 
 setMethod("show",
           "nicheModel",
@@ -861,7 +857,7 @@ setMethod(
 
 
 
-,transFor="transitionMatrixForward",transBack="getTransitionBackward",environment="landscape"
+##,transFor="transitionMatrixForward",transBack="getTransitionBackward",environment="landscape"
 
 
 ######################### |          | ############################### 
