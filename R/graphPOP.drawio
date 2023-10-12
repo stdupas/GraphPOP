@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-10-12T20:44:47.569Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0" etag="kw0ucRp1Ue3q_gjVFMcE" version="22.0.0" type="github">
+<mxfile host="app.diagrams.net" modified="2023-10-12T21:03:51.362Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0" etag="q8LerfTlTVRXEdb1wGr7" version="22.0.0" type="github">
   <diagram name="Page-1" id="Z6gb0_KSrEABv9Jm1-kw">
     <mxGraphModel dx="1080" dy="605" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -68,16 +68,16 @@
           <mxGeometry y="78" width="160" height="26" as="geometry" />
         </mxCell>
         <mxCell id="euh3f-BjxaFIM77-lD3N-1" value="socioecoGroupData" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="300" y="910" width="160" height="128" as="geometry" />
+          <mxGeometry x="300" y="910" width="180" height="128" as="geometry" />
         </mxCell>
-        <mxCell id="euh3f-BjxaFIM77-lD3N-2" value="&lt;div&gt;+ data: rasterStack[,]&lt;/div&gt;&lt;div&gt;+ categorías: char[]&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="euh3f-BjxaFIM77-lD3N-1">
-          <mxGeometry y="26" width="160" height="34" as="geometry" />
+        <mxCell id="euh3f-BjxaFIM77-lD3N-2" value="&lt;div&gt;+ groupValues: rasterStack[,]&lt;/div&gt;&lt;div&gt;+ groupNames: char[]&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="euh3f-BjxaFIM77-lD3N-1">
+          <mxGeometry y="26" width="180" height="34" as="geometry" />
         </mxCell>
         <mxCell id="euh3f-BjxaFIM77-lD3N-3" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="euh3f-BjxaFIM77-lD3N-1">
-          <mxGeometry y="60" width="160" height="8" as="geometry" />
+          <mxGeometry y="60" width="180" height="8" as="geometry" />
         </mxCell>
         <mxCell id="euh3f-BjxaFIM77-lD3N-4" value="&lt;div&gt;+ Acells: int[]&lt;/div&gt;&lt;div&gt;+ valuesA: data.frame&lt;/div&gt;&lt;div&gt;+ variable.names: char[]&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="euh3f-BjxaFIM77-lD3N-1">
-          <mxGeometry y="68" width="160" height="60" as="geometry" />
+          <mxGeometry y="68" width="180" height="60" as="geometry" />
         </mxCell>
         <mxCell id="euh3f-BjxaFIM77-lD3N-5" value="nicheModel" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="620" y="533" width="170" height="130" as="geometry" />
