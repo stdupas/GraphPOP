@@ -249,8 +249,8 @@ setMethod("variable.names",
 #stackConnectionType
 setClass("socioecoGeoData",
          # socioecoGeoData are raster layers containing information about environmental variables
-         # and or connectivity variables that will allow to buil niche models and friction models
-         # the layers that contain geographic information related to geographiccoordinates are called connectionType=geographic
+         # and or connectivity variables that will allow to build niche models and friction models
+         # the layers that contain geographic information related to geographic coordinates are called connectionType=geographic
          # the layers that contain other type of information characterizing ecological populations by groups (ethnic groups, market exchanges, plant varieties for pests and diseases) have a connectionType = grouping
          # connected class variables are coded as follows; when cell value is :
          # - 0 : the cell is not connected to any other cell 
@@ -286,7 +286,7 @@ socioecoGeoData<-function(x=NULL,socioecoList=NULL)
   if (is.null(x)) geo=new("geoEnvData") else {
       if (class(x)=="array") {
         if (is.null(stackConnectionType)) stackConnectionType=rep("geographic",dim(x)[3]) 
-      geo=new("geoEnvData",
+          geo=new("geoEnvData",
           {Stack=stack(sapply(1:dim(x)[3],function(i) raster(x[,,i])),layers=envLayerNames)
           names(Stack)=envLayerNames
           extent(Stack)=Extent
@@ -296,7 +296,7 @@ socioecoGeoData<-function(x=NULL,socioecoList=NULL)
     geo=new("geoEnvData",rasterstack)} else if (class(x)=="geoEnvData") {geo=x} else stop("x should be raster, RasterStack, array or empty")
   }
   if (is.null(socioecoList)) socioecoList=socioecoGroupDataList()
-  new("socioecoGeoData",geoEnvData=geo,socioecoData=socioecoList)
+  new("socioecoGeoData",geo,socioecoList)
 }
 
 socioecoGeoData(x = geoEnvData(),socioecoList=socioecoGroupDataList())
