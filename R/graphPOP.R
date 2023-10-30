@@ -90,38 +90,48 @@ setMethod(
   }
 )
 
+
 setClass("socioecoGroupData",
-         contains = "RasterStack",
-         representation(categories="character")
+         representation(groupValues = "RasterStack",groupNames="character",varNames="character")
          )
 
 validitysocioecoGroupData=function(object){
-  #if (ncell(object)!=dim(object)[2]) stop("the socioecoClass must be one dimentional rasterStack : ncategories cols and 1 row")
-  if (ncell(object)!=length(object@categories)) stop("the number of cells and the number of categories should not differ in socioecoGroupData")
+  #if (ncell(object)!=dim(object)[2]) stop("the socioecoClass must be one dimentional rasterStack : ngroups cols and 1 row")
+  if (ncell(object@groupValues)!=length(object@groupNames)) stop("the number of cells and the number of groups should not differ in socioecoGroupData")
   return(TRUE)
 }
-
-
 setValidity("socioecoGroupData",validitysocioecoGroupData)
 
-a=new("socioecoGroupData",stack(raster(matrix(1:4,nrow=1))),categories=c("susa","bogota","villapinzon","lacalera"))
+a=new("socioecoGroupData", 
+      groupValues = stack(raster(matrix(c(10000,8000000,500000,50000),nrow=1,dimnames = list("poblacion",c("susa","bogota","villapinzon","lacalera"))))),
+      groupNames=c("susa","bogota","villapinzon","lacalera"),
+      varNames="poblacion"
+)
 
-socioecoGroupData<-function(categories=c("group1","group2"),Values=c(1:4), Nlayers= 2, layerNames=c("cuidado","alimentación"),Array=NULL,rasterStack=NULL){
+socioecoGroupData<-function(groupNames=c("hispanico","afro"),groupValues=c(1:4), Nlayers= 2, varNames=c("cuidado","alimentación"),Array=NULL,rasterStack=NULL){
   if (is.null(rasterStack)) {
-    if (is.null(Array)) Array = array(Values,dim = c(1,length(categories),Nlayers),dimnames = list(1:1,categories,layerNames))
-    rasterStack = stack(apply(Array,3,function(x){raster(x)}))
+    if (is.null(Array)) Array = array(groupValues,dim = c(1,length(groupNames),Nlayers),dimnames = list(1:1,groupNames,varNames))
+    rasterStack = stack(apply(Array,3,function(x){raster(x)}),dimnames = list(1:1,groupNames,layerNames))
   }
-  new("socioecoGroupData",rasterStack,categories=categories)
+  new("socioecoGroupData",groupValues=rasterStack,groupNames=groupNames,varNames=varNames)
 }
+
+
+setMethod("nlayers",
+          signature="socioecoGroupData",
+          definition = function(x){
+            nlayers(x@groupValues)
+          }
+)
 
 setMethod("show",
           "socioecoGroupData",
           function(object) {
             cat("class\t\t: socioecoGroupData\n")
-            cat("# of categ.\t:",ncell(object), "\n")
+            cat("# of categ.\t:",ncell(object@groupValues), "\n")
             cat("# of layers\t:",nlayers(object),"\n")
-            cat("categories\t:",object@categories,"\n")
-            cat("var names\t:",names(object),"\n")}
+            cat("groupNames\t:",object@groupNames,"\n")
+            cat("var names\t:",names(object@varNames),"\n")}
           
 )
 
@@ -153,8 +163,8 @@ setMethod(
 
 setClass("socioecoGroupDataList",
          contains = "list",
-         prototype = prototype(list(mercado=new("socioecoGroupData",stack(list(probabilidadEnfermedad=raster(matrix(1:2,nrow=1)))),categories=c("Corrabastos","Semillas identidad")),
-           sistema=new("socioecoGroupData",stack(list(pesticidas=raster(matrix(c(0,2,0),nrow=1)),abono=raster(matrix(c(0,2,2),nrow=1)))),categories=c("ageoeco","convencional","pequeño"))
+         prototype = prototype(list(mercado=new("socioecoGroupData",stack(list(probabilidadEnfermedad=raster(matrix(1:2,nrow=1)))),groupNames=c("Corrabastos","Semillas identidad")),
+           sistema=new("socioecoGroupData",stack(list(pesticidas=raster(matrix(c(0,2,0),nrow=1)),abono=raster(matrix(c(0,2,2),nrow=1)))),groupNames=c("ageoeco","convencional","pequeño"))
               )
          )
         )
@@ -166,22 +176,22 @@ if (any(unlist(lapply(object,FUN = function(x) (class(x)!="socioecoGroupData")))
 
 
 setValidity("socioecoGroupDataList",validitysocioecoGroupDataList)
-#listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
+#listofsocioecoGroupData=NULL,listofgroupNames=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
 #Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad","pesticidas","abono"),listofArray=NULL,listofRasterStack=NULL)
 
 a=new("socioecoGroupDataList")
      
       
-socioecoGroupDataList<-function(listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
+socioecoGroupDataList<-function(listofsocioecoGroupData=NULL,listofgroupNames=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
                               Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad",c("pesticidas","abono")),listofArray=NULL,listofRasterStack=NULL)
   {
   if (is.null(listofsocioecoGroupData)) {
     if (is.null(listofRasterStack)) {
-      if (is.null(listofArray)) listofArray = lapply(1:length(Nlayers),function(i) array(data = listofValues[[i]],dim=c(1,length(listofCategories[[i]]),Nlayers[i]) , dimnames= list(1,listofCategories[[i]],listofLayerNames[[i]])))
+      if (is.null(listofArray)) listofArray = lapply(1:length(Nlayers),function(i) array(data = listofValues[[i]],dim=c(1,length(listofgroupNames[[i]]),Nlayers[i]) , dimnames= list(1,listofgroupNames[[i]],listofLayerNames[[i]])))
     }
     listofRasterStack = lapply(1:length(listofArray),function(i) {stack(apply(listofArray[[i]],3,function(x){raster(x)}))})
   }
-  listofsocioecoGroupData = lapply(1:length(listofRasterStack),function(i) socioecoGroupData(categories = listofCategories[[i]],rasterStack = listofRasterStack[[i]]))
+  listofsocioecoGroupData = lapply(1:length(listofRasterStack),function(i) socioecoGroupData(groupNames = listofgroupNames[[i]],rasterStack = listofRasterStack[[i]]))
   names(listofsocioecoGroupData)=Names
   new("socioecoGroupDataList",listofsocioecoGroupData)
 }
@@ -197,7 +207,7 @@ setMethod("show",
               cat("class\t\t:",class(object[[i]]),"\n")
               cat("# of categ.\t:",ncell(object[[i]]), "\n")
               cat("# of layers\t:",nlayers(object[[i]]),"\n")
-              cat("categories\t:",object[[i]]@categories,"\n")
+              cat("groupNames\t:",object[[i]]@groupNames,"\n")
               cat("var names\t:",names(object[[i]]),"\n\n")}
           }
 )
@@ -216,19 +226,19 @@ setMethod("nCellA",
           }
 )
 
-setGeneric("categories",
-           def=function(object){return(standardGeneric("categories"))})
+setGeneric("groupNames",
+           def=function(object){return(standardGeneric("groupNames"))})
 
-setMethod("categories",
+setMethod("groupNames",
           "socioecoGroupData",
-          function(object){list(socioeco=object@categories)}
+          function(object){list(socioeco=object@groupNames)}
 )
-setMethod("categories",
+setMethod("groupNames",
           "socioecoGroupDataList",
-          function(object) {lapply(object, function(x){categories(x)})}
+          function(object) {lapply(object, function(x){groupNames(x)})}
 )
 
-setMethod("categories",
+setMethod("groupNames",
           "geoEnvData",
           #function(object) {apply(xyFromCell(object,1:nCellA(object)),1,function(x) paste(x,collapse ="_"))}
           function(object) Acells(object)
@@ -258,7 +268,6 @@ setClass("socioecoGeoData",
          representation("geoEnvData","socioecoGroupDataList"),
          prototype = prototype(geoEnvData=geoEnvData(),socioecoData=socioecoGroupDataList())
 )
-
 
 
 connectionTypes=c("geographic","grouping","routes")
@@ -455,7 +464,7 @@ setClass("socioecoMigrationModel",
          representation(weight="numeric",varMig="character",shapeMig="character",pMig="list"),
          # describes migration model in multiple dimensions given by the variables of the socioecoGroupData
          # 
-         # these socioecoGroupData provide distance measure between socioecoCategories
+         # these socioecoGroupData provide distance measure between socioecogroups
          # for instance 
          # weigth represents the coefficient given to socioecoMigration Matrix relative to geoMigration matrix
          # varMig represents the names of the socioecoGroupDataList used to calculate migration rates
