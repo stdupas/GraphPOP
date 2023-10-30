@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-10-30T21:45:38.295Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0" etag="dc2CWbjsFje_sBRk2QLD" version="22.0.8" type="github">
+<mxfile host="app.diagrams.net" modified="2023-10-30T21:55:23.761Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0" etag="SVouWF853v2GJmRXVPrH" version="22.0.8" type="github">
   <diagram name="Page-1" id="Z6gb0_KSrEABv9Jm1-kw">
     <mxGraphModel dx="775" dy="526" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -31,17 +31,17 @@
             <mxPoint x="240" y="940" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="n09aio_ZxcxyVlvb_FAy-24" value="socioecoGroupDataList" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="n09aio_ZxcxyVlvb_FAy-24" value="socioecoGroupsData" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="390" y="670" width="170" height="150" as="geometry" />
         </mxCell>
         <mxCell id="n09aio_ZxcxyVlvb_FAy-25" value="+ .: list[[socioecoGroupData]]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="n09aio_ZxcxyVlvb_FAy-24" vertex="1">
           <mxGeometry y="26" width="170" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="n09aio_ZxcxyVlvb_FAy-27" value="&lt;div&gt;+ show&lt;/div&gt;&lt;div&gt;+ categories&lt;/div&gt;&lt;div&gt;+ variable.names&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ Acells: list[[int[]]]&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ nCellA:int&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="n09aio_ZxcxyVlvb_FAy-24" vertex="1">
-          <mxGeometry y="52" width="170" height="90" as="geometry" />
-        </mxCell>
         <mxCell id="n09aio_ZxcxyVlvb_FAy-26" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="n09aio_ZxcxyVlvb_FAy-24" vertex="1">
-          <mxGeometry y="142" width="170" height="8" as="geometry" />
+          <mxGeometry y="52" width="170" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="n09aio_ZxcxyVlvb_FAy-27" value="&lt;div&gt;+ show&lt;/div&gt;&lt;div&gt;+ categories&lt;/div&gt;&lt;div&gt;+ variable.names&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ Acells: list[[int[]]]&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ nCellA:int&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="n09aio_ZxcxyVlvb_FAy-24" vertex="1">
+          <mxGeometry y="60" width="170" height="90" as="geometry" />
         </mxCell>
         <mxCell id="n09aio_ZxcxyVlvb_FAy-28" value="list" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="480" y="1040" width="160" height="34" as="geometry" />
