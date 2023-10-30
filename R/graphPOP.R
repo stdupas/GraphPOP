@@ -313,7 +313,7 @@ setMethod("show",
             cat("- geoEnvData inherited class:\n")
             cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object),",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
             cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
-            cat("\nextent\t\t:",extent(object)[1],",",extent(object)[2],",",extent(object)[3],",",extent(object)[4],", (xmin, xmax, ymin, ymax)")
+            cat("\nextent\t\t:",extent(object@geoEnvData)[1],",", extent(object@geoEnvData)[2], "," , extent(object@geoEnvData)[3], ",", extent(object@geoEnvData)[4], " (xmin, xmax, ymin, ymax)")
             cat("\ncrs\t\t:",as.character(crs(object)))
             cat("\nnames\t\t: ")
             cat(names(object),sep = ", ")
