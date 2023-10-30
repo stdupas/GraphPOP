@@ -151,7 +151,7 @@ setMethod(
   }
 )
 
-setClass("socioecoGroupDataList",
+setClass("socioecoGroupsData",
          contains = "list",
          prototype = prototype(list(mercado=new("socioecoGroupData",stack(list(probabilidadEnfermedad=raster(matrix(1:2,nrow=1)))),categories=c("Corrabastos","Semillas identidad")),
            sistema=new("socioecoGroupData",stack(list(pesticidas=raster(matrix(c(0,2,0),nrow=1)),abono=raster(matrix(c(0,2,2),nrow=1)))),categories=c("ageoeco","convencional","pequeño"))
@@ -159,20 +159,20 @@ setClass("socioecoGroupDataList",
          )
         )
 
-validitysocioecoGroupDataList=function(object){
-if (any(unlist(lapply(object,FUN = function(x) (class(x)!="socioecoGroupData"))))) stop("socioecoGroupDataList is a list of object of class socioecoGroupData")
+validitysocioecoGroupsData=function(object){
+if (any(unlist(lapply(object,FUN = function(x) (class(x)!="socioecoGroupData"))))) stop("socioecoGroupsData is a list of object of class socioecoGroupData")
   return(TRUE)
 }
 
 
-setValidity("socioecoGroupDataList",validitysocioecoGroupDataList)
+setValidity("socioecoGroupsData",validitysocioecoGroupsData)
 #listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
 #Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad","pesticidas","abono"),listofArray=NULL,listofRasterStack=NULL)
 
-a=new("socioecoGroupDataList")
+a=new("socioecoGroupsData")
      
       
-socioecoGroupDataList<-function(listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
+socioecoGroupsData<-function(listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
                               Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad",c("pesticidas","abono")),listofArray=NULL,listofRasterStack=NULL)
   {
   if (is.null(listofsocioecoGroupData)) {
@@ -183,13 +183,13 @@ socioecoGroupDataList<-function(listofsocioecoGroupData=NULL,listofCategories=li
   }
   listofsocioecoGroupData = lapply(1:length(listofRasterStack),function(i) socioecoGroupData(categories = listofCategories[[i]],rasterStack = listofRasterStack[[i]]))
   names(listofsocioecoGroupData)=Names
-  new("socioecoGroupDataList",listofsocioecoGroupData)
+  new("socioecoGroupsData",listofsocioecoGroupData)
 }
 
 setMethod("show",
-          "socioecoGroupDataList",
+          "socioecoGroupsData",
           function(object) {
-            cat("class\t\t: socioecoGroupDataList\n")
+            cat("class\t\t: socioecoGroupsData\n")
             cat("# of elements\t:",length(object), "\n\n")
             for (i in 1:length(object))
               {
@@ -203,14 +203,14 @@ setMethod("show",
 )
 
 setMethod("Acells",
-          signature=c("socioecoGroupDataList"),
+          signature=c("socioecoGroupsData"),
           definition = function(object){
             lapply(object, function(x){Acells(x)})
           }
 )
 
 setMethod("nCellA",
-          signature=c("socioecoGroupDataList"),
+          signature=c("socioecoGroupsData"),
           definition = function(object){
             lapply(object, function(x){nCellA(x)})
           }
@@ -224,7 +224,7 @@ setMethod("categories",
           function(object){list(socioeco=object@categories)}
 )
 setMethod("categories",
-          "socioecoGroupDataList",
+          "socioecoGroupsData",
           function(object) {lapply(object, function(x){categories(x)})}
 )
 
@@ -241,7 +241,7 @@ setMethod("variable.names",
 
 
 setMethod("variable.names",
-          "socioecoGroupDataList",
+          "socioecoGroupsData",
           function(object) {lapply(object, function(x){names(x)})}
 )
 
@@ -255,8 +255,8 @@ setClass("socioecoGeoData",
          # connected class variables are coded as follows; when cell value is :
          # - 0 : the cell is not connected to any other cell 
          # - n!=0 : the cell is connected to the cells having the same value
-         representation("geoEnvData","socioecoGroupDataList"),
-         prototype = prototype(geoEnvData=geoEnvData(),socioecoData=socioecoGroupDataList())
+         representation("geoEnvData","socioecoGroupsData"),
+         prototype = prototype(geoEnvData=geoEnvData(),socioecoData=socioecoGroupsData())
 )
 
 
@@ -295,11 +295,10 @@ socioecoGeoData<-function(x=NULL,socioecoList=NULL)
    else if (class(x)=="RasterStack") {
     geo=new("geoEnvData",rasterstack)} else if (class(x)=="geoEnvData") {geo=x} else stop("x should be raster, RasterStack, array or empty")
   }
-  if (is.null(socioecoList)) socioecoList=socioecoGroupDataList()
+  if (is.null(socioecoList)) socioecoList=socioecoGroupsData()
   new("socioecoGeoData",geo,socioecoList)
 }
 
-socioecoGeoData(x = geoEnvData(),socioecoList=socioecoGroupDataList())
 
 setMethod("variable.names",
           "socioecoGeoData",
@@ -317,7 +316,7 @@ setMethod("show",
             cat("\ncrs\t\t:",as.character(crs(object)))
             cat("\nnames\t\t: ")
             cat(names(object),sep = ", ")
-            cat("\n\n- socioecoGroupDataList slot:\n")
+            cat("\n\n- socioecoGroupsData slot:\n")
             cat(show(object@socioecoData))
             }
           )
@@ -329,6 +328,7 @@ setMethod("nCellA",
             }
           )
 
+socioecoGeoData(x = geoEnvData(),socioecoList=socioecoGroupsData())
 
 reactionNorm = c("scaling","enveloppe","envelin","conQuadratic","conQuadraticSkw")
 
@@ -395,8 +395,6 @@ npMig <- function(x) {unlist(lapply(x,function(x) switch(x[],
 migrationShapes<-c("popSep","fat_tail1","gaussian","exponential","contiguous","contiguous8", "island","fat_tail2","contiguous_long_dist_mixt","gaussian_long_dist_mixt")
 # popSep : dispersion within groups is panmictic
 
-validitygeoMigrationModel=function(object){TRUE}
-
 validitygeoMigrationModel=function(object){
   #if(!is.character(object@shapeMig))stop("error in  migrationModel shapeMig : shapeMig just accept character!")
   whichSlotHasDifferentSize = sapply(c("varMig","shapeMig","pMig"),FUN = function(x) {length(slot(object,x))!=length(object@modelConnectionType)})
@@ -423,15 +421,19 @@ validitygeoMigrationModel=function(object){
 setClass("geoMigrationModel",
          representation(modelConnectionType="character",varMig="character",shapeMig="character",pMig="list",pMixt="numeric"),
          # describes migration model : depending on distance or grouping
-         # pMixt : a proportion of the individual migrates acording to each model
+         # pMixt : a proportion of the individual migrates according to each model
          # models are described in successive components of modelConnectionType, varMig, shapeMig, pMig and pMixt slots
-         # if modelConnectionType = dist and shapeMig=island the model is an island model in which each cell is an island and a proportion of propagules migrates to the pool with a proportion given by the parameter
-         # if modelConnectionType = group and shapeMig=island  the model is an island model in which each group is an island and a proportion of propagules migrates to the pool with a proportion given by the parameter there is a possiblity of dispersion models within groups according to the shapeDisp
+         # if modelConnectionType = dist and shapeMig=island the model is an island model in which each cell is an island and a proportion of 
+         #                          propagules migrates to the pool with a proportion given by the parameter
+         # if modelConnectionType = group and shapeMig=island the model is an island model in which each group is an island and a proportion of 
+         #                          propagules migrates to the pool with a proportion given by the parameter there is a possiblity of dispersion models within groups according to the shapeDisp
          prototype(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1/1.96,numeric(0)),pMixt=c(.5,.5)),
          # this prototype, migrationModel is a mixture of two components : migration related to distance in the first component and migration related to groups in the second component. Probability of migration between two points is a mixture of probablity given by the dist gaussian model and the group popSep model. 
          # the group popSep model means island model where cells of the raster belong to pops according to their group variable and mix panmictically within groups according to the popSep model
          # the dist gaussian model means dispersion between two points in the raster is given by gaussian distribution
 )
+# Para especies que tiene hierarchia en su estructura genetica puede tener interes considerar un island a nivel
+# de celda (modelConnectionType= dist, and shapeMig=island) y un island anivel de grupo geográfico (modelConnectionType= group, and shapeMig=island)
 
 setValidity("geoMigrationModel", validitygeoMigrationModel)
 
@@ -457,8 +459,8 @@ setClass("socioecoMigrationModel",
          # 
          # these socioecoGroupData provide distance measure between socioecoCategories
          # for instance 
-         # weigth represents the coefficient given to socioecoMigration Matrix relative to geoMigration matrix
-         # varMig represents the names of the socioecoGroupDataList used to calculate migration rates
+         # weigth represents the coefficient given to socioecoMigration Matrix relative to geoMigration matrix (has a fixed weight of 1)
+         # varMig represents the names of the socioecoGroupsData used to calculate migration rates
          # shapeMig represents the model used to transform varMig into migration rates
          # pMig represent the parameters to transform varMig into distance
          prototype(weight=1,varMig=c("Español","Chibcha","Corrabastos","Semillas_Comerciales","Guardianes_de_semilla"),shapeMig=c("euclideanInverse"),pMig=list(Español=1,Chibcha=1,Corrabastos=1,Semillas_Comerciales=1,Guardianes_de_semilla=1)),
@@ -502,6 +504,17 @@ setMethod("model.extract",
           }
 )
 
+setMethod("model.extract",
+          "socioecoMigrationModel",
+          function(frame,component="shapeMig"){
+            switch(component,
+                   shapeMig=frame@shapeMig,
+                   weight=frame@weight,
+                   varMig=frame@varMig,
+                   pMig=frame@pMig)
+          }
+)
+
 setGeneric("model",
   def=function(object){
     return(standardGeneric("model"))
@@ -514,7 +527,7 @@ setMethod("model",
              list(reactNorms=object@reactNorms,varNiche=object@varNiche)
            })
 
-a=socioecoGeoData(x = geoEnvData(),socioecoList=socioecoGroupDataList())
+a=socioecoGeoData(x = geoEnvData(),socioecoList=socioecoGroupsData())
 b=nicheModel(varNiche=c("temp","temp"),reactNorms=c(temp="envelin",temp="scaling"),pNiche=list(envelin=c(3,4),scaling=100))
 c=geoMigrationModel(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(gaussian=1/1.96,popSep=numeric(0)),pMixt=c(.5,.5))
 d=socioecoMigrationModel()
@@ -530,8 +543,16 @@ setClass("socioecoGeoDataHistory",
          # the last past socioecogeodata in the list goes from the last parsing time to minus infinite
          contains="socioecoGeoData",
          representation(pastsocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt"),
-         prototype(new("socioecoGeoData"),pastsocioecoGeoData=list(socioecoGeoData(),socioecoGeoData()),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
+         prototype(new("socioecoGeoData"),pastsocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
 )
+
+validitysocioecoGeoDataHistory = function(object){
+  if (any(object@parsingTimes>0)) stop("the pastStartingTimes should be negative")
+  if (length(object@parsingTimes)!=(length(object))) stop("slot pastStartingTimes should include all the starting dates between period, which is length(object)")
+  if (length(object@parsingTimes)>1) for (i in 2:length(object@pastStartingTimes)) {if (object@pastStartingTimes[i]>=object@pastStartingTimes[i-1]) stop("the socioecoGeoDataList should order from recent to past")}
+}
+
+setValidity("socioecoGeoDataHistory", validitysocioecoGeoDataHistory)
 
 a=new("socioecoGeoDataHistory")
 
@@ -566,7 +587,7 @@ setMethod("show",
             cat("\ncrs\t\t:",as.character(crs(object)))
             cat("\nnames\t\t: ")
             cat(names(object),sep = ", ")
-            cat("\n\n- socioecoGroupDataList slot:\n")
+            cat("\n\n- socioecoGroupsData slot:\n")
             cat(show(object@socioecoData)) 
             if (length(object@parsingTimes)>2) {for(i in 1:length(object@pastsocioecoGeoData)){
               cat("\n\nPast socioecoGeoData:\n")
@@ -576,14 +597,6 @@ setMethod("show",
             }}
           }
           )
-
-validitysocioecoGeoDataHistory = function(object){
-  if (any(object@parsingTimes>0)) stop("the pastStartingTimes should be negative")
-  if (length(object@parsingTimes)!=(length(object))) stop("slot pastStartingTimes should include all the starting dates between period, which is length(object)")
-  if (length(object@parsingTimes)>1) for (i in 2:length(object@pastStartingTimes)) {if (object@pastStartingTimes[i]>=object@pastStartingTimes[i-1]) stop("the socioecoGeoDataList should order from recent to past")}
-}
-
-setValidity("socioecoGeoDataHistory", validitysocioecoGeoDataHistory)
 
 
 validitysocioecoGeoDataModel=function(object){
