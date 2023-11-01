@@ -615,18 +615,23 @@ setClass("socioecoGeoDataModel",
          contains = "socioecoGeoDataHistory",
          representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
          validity=validitysocioecoGeoDataModel,
-         prototype(socioecoGeoData=new("socioecoGeoData"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
+         prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
       
 )
+a=new("socioecoGeoDataModel")
 
-socioecoGeoDataModel<-function(socioecoGeoDataList=NULL,nicheK=NULL,nicheR=NULL,migModel=NULL,
-                      EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
-                      stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
-                      varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
-                      varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
-                      modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
+socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
+                               SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecGeoData(),socioecGeoData(),socioecGeoData()),
+                               ParsingTimes=c(0,200,500,200),TimeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'),
+                               nicheK=NULL,nicheR=NULL,migModel=NULL,
+                               EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
+                               stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
+                               varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
+                               varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
+                               modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
+  
 {
-  if (is.null(socioecoGeoDataList)) socioecoGeoDataList=new(list("socioecoGeoData","socioecoGeoData"),EnvStack,stackConnectionType=stackConnectionType)
+  if (is.null(socioecoGeoDataHistory)) socioecoGeoDataHistory=socioecoGeoDataHistory( SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,zeroTime)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
