@@ -310,7 +310,7 @@ setMethod("show",
           function(object) {
             cat("An object of class 'socioecoGeoData'\n")
             cat("- geoEnvData inherited class:\n")
-            cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object),",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
+            cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object)[1],",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
             cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
             cat("\nextent\t\t:",extent(object@geoEnvData)[1],",", extent(object@geoEnvData)[2], "," , extent(object@geoEnvData)[3], ",", extent(object@geoEnvData)[4], " (xmin, xmax, ymin, ymax)")
             cat("\ncrs\t\t:",as.character(crs(object)))
@@ -543,7 +543,7 @@ setClass("socioecoGeoDataHistory",
          # the last past socioecogeodata in the list goes from the last parsing time to minus infinite
          contains="socioecoGeoData",
          representation(pastSocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt"),
-         prototype(new("socioecoGeoData"),pastSocioecoGeoData=list(new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData")),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
+         prototype(new("socioecoGeoData"),pastSocioecoGeoData=list(new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData")),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
 )
 
 validitysocioecoGeoDataHistory = function(object){
@@ -554,7 +554,7 @@ validitysocioecoGeoDataHistory = function(object){
 
 setValidity("socioecoGeoDataHistory", validitysocioecoGeoDataHistory)
 
-socioecoGeoDataHistory <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecGaoData(),socioecGaoData(),socioecGaoData(),socioecGaoData()),ParsingTimes=c(0,200,500,200),TimeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00')){
+socioecoGeoDataHistory <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecGaoData(),socioecGaoData(),socioecGaoData()),ParsingTimes=c(0,200,500,200),TimeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00')){
   new("socioecoGeoDataHistory",SocioecoGeoData,pastSocioecoGeodata=PastSocioecoGeodata,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
 }
 
@@ -585,9 +585,9 @@ setMethod("show",
             cat("(Inherited class):\n")
             cat("\nAn object of class 'socioecoGeoData'\n")
             cat("- geoEnvData inherited class:\n")
-            cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object),",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
+            cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object)[1],",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
             cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
-            #cat("\ngeographic extent\t\t:",extent(object)[1],",",extent(object)[2],",",extent(object)[3],",",extent(object)[4],", (xmin, xmax, ymin, ymax)")
+            cat("\ngeographic extent\t\t:",object@extent[1],",",object@extent[2],",",object@extent[3],",",object@extent[4],", (xmin, xmax, ymin, ymax)")
             cat("\ncrs\t\t:",as.character(crs(object)))
             cat("\nnames\t\t: ")
             cat(names(object),sep = ", ")
