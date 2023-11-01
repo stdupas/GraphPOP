@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-11-01T17:19:46.417Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0" etag="Iq92JxBpbryGmDvnQF3N" version="22.0.8" type="github">
+<mxfile host="app.diagrams.net" modified="2023-11-01T18:05:17.809Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0" etag="XvS7YqI6FUyHtbW_FL4-" version="22.0.8" type="github">
   <diagram name="Page-1" id="Z6gb0_KSrEABv9Jm1-kw">
     <mxGraphModel dx="810" dy="1574" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -197,7 +197,7 @@
           <mxGeometry x="820" y="730" width="140" height="40" as="geometry" />
         </mxCell>
         <mxCell id="mUlPBs0OehojVBWcTJut-1" value="envDynLandscape" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="440" y="-190" width="200" height="294" as="geometry" />
+          <mxGeometry x="445" y="-210" width="200" height="294" as="geometry" />
         </mxCell>
         <mxCell id="mUlPBs0OehojVBWcTJut-2" value="&lt;div&gt;+ .Data: socioecoGeoDataModel&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ RKLandscape: RasterStack&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ geoDist: float[,]&lt;/div&gt;+ mgrationMatrix: float[,]&lt;/div&gt;+ transitionForward: float[,]&lt;div&gt;+ transitionBackward: float[,]&lt;/div&gt;&lt;div&gt;+ [:&lt;/div&gt;&lt;div&gt;+ simulCoal&lt;/div&gt;+ hitting_time_digraph:&lt;div&gt;+ commute_time_digraph&lt;/div&gt;&lt;div&gt;+ linearizedFstDigraph&lt;br&gt;&lt;div&gt;+ Collisionijk&lt;/div&gt;+ linearizedFstUndigraph&lt;br&gt;+ simulCoal&lt;/div&gt;&lt;div&gt;+ compare&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="mUlPBs0OehojVBWcTJut-1">
           <mxGeometry y="26" width="200" height="234" as="geometry" />
@@ -208,7 +208,7 @@
         <mxCell id="mUlPBs0OehojVBWcTJut-4" value="+ method(type): type" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="mUlPBs0OehojVBWcTJut-1">
           <mxGeometry y="268" width="200" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="mUlPBs0OehojVBWcTJut-6" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;exitX=0.473;exitY=0.962;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="mUlPBs0OehojVBWcTJut-4" target="euh3f-BjxaFIM77-lD3N-35">
+        <mxCell id="mUlPBs0OehojVBWcTJut-6" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" edge="1" parent="1" source="mUlPBs0OehojVBWcTJut-1" target="euh3f-BjxaFIM77-lD3N-35">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="450" y="286" as="sourcePoint" />
             <mxPoint x="330" y="300" as="targetPoint" />
