@@ -614,7 +614,7 @@ validitysocioecoGeoDataModel=function(object){
 setClass("socioecoGeoDataModel",
          contains = "socioecoGeoDataHistory",
          representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
-         #validity=validitysocioecoGeoDataModel,
+         validity=validitysocioecoGeoDataModel,
          prototype(socioecoGeoData=new("socioecoGeoData"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
       
 )
@@ -640,7 +640,7 @@ setMethod("show",
           function(object) {
             cat("class\t\t: nicheModel\n")
             cat("varNiche\t: ")
-            cat(nicheModelobject@varNiche,sep = ", ")
+            cat(object@varNiche,sep = ", ")
             cat("\nreactNorms\t: ")
             cat(object@reactNorms,sep=", ")
             cat("\n")
@@ -683,22 +683,22 @@ setMethod("show",
             cat(ncell(object),nCellA(object),sep=", ")
             cat(" (total, attributed) \n")
             cat("resolution\t: ")
-            cat(c(extent(object)[2]-extent(object)[1],extent(object)[4]-extent(object)[3])/dim(object)[1:2],sep=", ")
+            #cat(c(extent(object)[2]-extent(object)[1],extent(object)[4]-extent(object)[3])/dim(object)[1:2],sep=", ")
             cat(" (x, y)\n")
             cat("extent\t\t: ")
-            cat(extent(object)[1:4],sep=", ")
+            #cat(extent(object)[1:4],sep=", ")
             cat("\ncrs\t\t:",as.character(crs(object)),"\n")
             cat("names\t\t:",names(object),"\n")
             cat("min values\t: ")
-            cat(min(object)[1:nlayers(object)],sep=", ")
-            cat("\nmax values\t: ")
-            cat(max(object)[1:nlayers(object)],sep=", ")
+            #cat(min(object)[1:nlayers(object)],sep=", ")
+            #cat("\nmax values\t: ")
+            #cat(max(object)[1:nlayers(object)],sep=", ")
             cat("\n\nKmodel\n")
             show(object@Kmodel)
             cat("\nRmodel\n")
             show(object@Rmodel)
             cat("\nmigModel\n")
-            show(object@migModel)
+            show(object@geoMigModel)
           }
 ) 
 
@@ -713,7 +713,9 @@ envelinear <- function(X, p) {
   else (X-p[1])/(p[2]-p[1])*enveloppe(X,p)
 }
 
-scaling <- function(X,p){X[]<-p}
+scaling <- function(X,p){X[]<-p
+X
+}
 
 conQuadratic <- function(X,p)
 {
