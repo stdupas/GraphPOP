@@ -542,8 +542,8 @@ setClass("socioecoGeoDataHistory",
          # includes a past socioecogeodata list with parsing times
          # the last past socioecogeodata in the list goes from the last parsing time to minus infinite
          contains="socioecoGeoData",
-         representation(pastsocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt"),
-         prototype(new("socioecoGeoData"),pastsocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
+         representation(pastSocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt"),
+         prototype(new("socioecoGeoData"),pastSocioecoGeoData=list(new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData")),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
 )
 
 validitysocioecoGeoDataHistory = function(object){
@@ -554,7 +554,11 @@ validitysocioecoGeoDataHistory = function(object){
 
 setValidity("socioecoGeoDataHistory", validitysocioecoGeoDataHistory)
 
-a=new("socioecoGeoDataHistory")
+socioecoGeoDataHistory <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecGaoData(),socioecGaoData(),socioecGaoData(),socioecGaoData()),ParsingTimes=c(0,200,500,200),TimeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00')){
+  new("socioecoGeoDataHistory",SocioecoGeoData,pastSocioecoGeodata=PastSocioecoGeodata,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
+}
+
+  a=new("socioecoGeoDataHistory")
 
 #socioecoGeoDataHistory <- function(socioecoGeoData)
 
@@ -583,17 +587,17 @@ setMethod("show",
             cat("- geoEnvData inherited class:\n")
             cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object),",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
             cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
-            cat("\nextent\t\t:",extent(object)[1],",",extent(object)[2],",",extent(object)[3],",",extent(object)[4],", (xmin, xmax, ymin, ymax)")
+            #cat("\ngeographic extent\t\t:",extent(object)[1],",",extent(object)[2],",",extent(object)[3],",",extent(object)[4],", (xmin, xmax, ymin, ymax)")
             cat("\ncrs\t\t:",as.character(crs(object)))
             cat("\nnames\t\t: ")
             cat(names(object),sep = ", ")
             cat("\n\n- socioecoGroupsData slot:\n")
             cat(show(object@socioecoData)) 
-            if (length(object@parsingTimes)>2) {for(i in 1:length(object@pastsocioecoGeoData)){
+            if (length(object@parsingTimes)>2) {for(i in 1:length(object@pastSocioecoGeoData)){
               cat("\n\nPast socioecoGeoData:\n")
               cat("Past period #:\t",i,"\nsocioecoGeoData From", object@parsingTimes[i+1],"to",object@parsingTimes[i+2],"time units)\n")
               cat("(Time units\t: ",object@timeUnit," )\n",sep="")
-              show(object@pastsocioecoGeoData[[i]])
+              show(object@pastSocioecoGeoData[[i]])
             }}
           }
           )
