@@ -1,25 +1,25 @@
-<mxfile host="app.diagrams.net" modified="2023-10-30T21:55:23.761Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0" etag="SVouWF853v2GJmRXVPrH" version="22.0.8" type="github">
+<mxfile host="app.diagrams.net" modified="2023-11-01T14:01:22.772Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0" etag="Hi02b6y9GZLOvTHew9V2" version="22.0.8" type="github">
   <diagram name="Page-1" id="Z6gb0_KSrEABv9Jm1-kw">
-    <mxGraphModel dx="775" dy="526" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="724" dy="609" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="n09aio_ZxcxyVlvb_FAy-2" value="&lt;div&gt;RasterStack&lt;/div&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="90" y="1040" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="Zex_I4kqIBt21-otJFnS-11" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="n09aio_ZxcxyVlvb_FAy-2">
+        <mxCell id="Zex_I4kqIBt21-otJFnS-11" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="n09aio_ZxcxyVlvb_FAy-2" vertex="1">
           <mxGeometry y="26" width="160" height="8" as="geometry" />
         </mxCell>
-        <mxCell id="Zex_I4kqIBt21-otJFnS-9" value="&lt;div&gt;+ nCell: int[]&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ xy: data.frame&lt;/div&gt;&lt;div&gt;+ values: data.frame&lt;/div&gt;&lt;div&gt;+ variable.names: char[]&lt;/div&gt;&lt;div&gt;+ extent&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="n09aio_ZxcxyVlvb_FAy-2">
+        <mxCell id="Zex_I4kqIBt21-otJFnS-9" value="&lt;div&gt;+ nCell: int[]&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ xy: data.frame&lt;/div&gt;&lt;div&gt;+ values: data.frame&lt;/div&gt;&lt;div&gt;+ variable.names: char[]&lt;/div&gt;&lt;div&gt;+ extent&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="n09aio_ZxcxyVlvb_FAy-2" vertex="1">
           <mxGeometry y="34" width="160" height="106" as="geometry" />
         </mxCell>
         <mxCell id="n09aio_ZxcxyVlvb_FAy-6" value="geoEnvData" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="90" y="670" width="160" height="174" as="geometry" />
         </mxCell>
-        <mxCell id="Zex_I4kqIBt21-otJFnS-4" value="&lt;div&gt;+ .:RasterStack&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="n09aio_ZxcxyVlvb_FAy-6">
+        <mxCell id="Zex_I4kqIBt21-otJFnS-4" value="&lt;div&gt;+ .:RasterStack&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="n09aio_ZxcxyVlvb_FAy-6" vertex="1">
           <mxGeometry y="26" width="160" height="34" as="geometry" />
         </mxCell>
-        <mxCell id="Zex_I4kqIBt21-otJFnS-7" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="n09aio_ZxcxyVlvb_FAy-6">
+        <mxCell id="Zex_I4kqIBt21-otJFnS-7" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="n09aio_ZxcxyVlvb_FAy-6" vertex="1">
           <mxGeometry y="60" width="160" height="8" as="geometry" />
         </mxCell>
         <mxCell id="n09aio_ZxcxyVlvb_FAy-9" value="&lt;div&gt;+ NAcells: int[]&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ Acells: int[]&lt;/div&gt;&lt;div&gt;+ xyA: data.frame&lt;/div&gt;&lt;div&gt;+ nCellA:int&lt;/div&gt;&lt;div&gt;+ valuesA: data.frame&lt;/div&gt;&lt;div&gt;+ variable.names: char[]&lt;/div&gt;&lt;div&gt;+ show&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="n09aio_ZxcxyVlvb_FAy-6" vertex="1">
@@ -62,7 +62,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="n09aio_ZxcxyVlvb_FAy-32" value="socioecoGeoData" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="240" y="516" width="160" height="104" as="geometry" />
+          <mxGeometry x="240" y="516" width="160" height="120" as="geometry" />
         </mxCell>
         <mxCell id="n09aio_ZxcxyVlvb_FAy-33" value="&lt;div&gt;+&amp;nbsp;socioecoGroupDataList&lt;/div&gt;&lt;div&gt;+ geoEnvData&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="n09aio_ZxcxyVlvb_FAy-32" vertex="1">
           <mxGeometry y="26" width="160" height="44" as="geometry" />
@@ -71,7 +71,7 @@
           <mxGeometry y="70" width="160" height="8" as="geometry" />
         </mxCell>
         <mxCell id="n09aio_ZxcxyVlvb_FAy-35" value="&lt;div&gt;+ extent(): int&lt;/div&gt;&lt;div&gt;+ dim&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="n09aio_ZxcxyVlvb_FAy-32" vertex="1">
-          <mxGeometry y="78" width="160" height="26" as="geometry" />
+          <mxGeometry y="78" width="160" height="42" as="geometry" />
         </mxCell>
         <mxCell id="euh3f-BjxaFIM77-lD3N-1" value="socioecoGroupData" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="300" y="910" width="180" height="128" as="geometry" />
@@ -181,13 +181,13 @@
             <mxPoint x="428" y="920" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Zex_I4kqIBt21-otJFnS-1" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="euh3f-BjxaFIM77-lD3N-28" target="n09aio_ZxcxyVlvb_FAy-32">
+        <mxCell id="Zex_I4kqIBt21-otJFnS-1" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" parent="1" source="euh3f-BjxaFIM77-lD3N-28" target="n09aio_ZxcxyVlvb_FAy-32" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="484" y="324" as="sourcePoint" />
             <mxPoint x="330" y="360" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Zex_I4kqIBt21-otJFnS-8" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" edge="1" parent="1" source="n09aio_ZxcxyVlvb_FAy-32" target="n09aio_ZxcxyVlvb_FAy-6">
+        <mxCell id="Zex_I4kqIBt21-otJFnS-8" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" parent="1" source="n09aio_ZxcxyVlvb_FAy-32" target="n09aio_ZxcxyVlvb_FAy-6" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="309" y="454" as="sourcePoint" />
             <mxPoint x="150" y="560" as="targetPoint" />
