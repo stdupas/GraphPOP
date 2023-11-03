@@ -785,7 +785,7 @@ setMethod(
     #if model["shapeMig"]=="contiguous" matrix()
     geoDist = unlist(apply(xyA(object),1,
                            function(x){
-                             values(distanceFromPoints(object,x))
+                             values(distanceFromPoints(object@geoEnvData,x))
                              }))[Acells(object),]
     geoDist[which(geoDist==0)]<-sqrt(2*min(geoDist[which(geoDist!=0)])^2)/3
     # The distance between points within the same cell is one third 
@@ -808,25 +808,25 @@ setMethod(
     Ndim = 1+all(ncell(object)!=dim(object)[1:2]) # if the landscape is a line one cell width Ndim=1, otherwise Ndim=2
     #if model["shapeMig"]=="contiguous" matrix()
     migration=list()
-    for (i in which(object@migModel@modelConnectionType=="geographic"))
+    for (i in which(object@geoMigModel@modelConnectionType=="geographic"))
     {
       migration[[i]] = apply(buildGeodist(object), c(1,2),
-                             function(x)(switch(object@migModel@shapeMig[i],
-                                                gaussian = dnorm(x, mean = 0, sd = object@migModel@pMig[[i]][1], log = FALSE),
-                                                exponential = (dexp(x, rate = 1/object@migModel@pMig[[i]][1], log = FALSE)),
-                                                contiguous = apply(xyA(object),1,function(x){((abs(xyA(object)[,"x"]-x["x"])==res(object)[1])&(xyA(object)[,"y"]==x["y"])|(abs(xyA(object)[,"y"]-x["y"])==res(object)[1])&(xyA(object)[,"x"]==x["x"]))*object@migModel@pMig[[1]][1]/4})+diag(nCellA(object))*(1-object@migModel@pMig[[1]][1]),
-                                                contiguous8 = apply(xyA(object),1,function(x){((abs(xyA(object)[,"x"]-x["x"])==res(object)[1])&(xyA(object)[,"y"]==x["y"])|(abs(xyA(object)[,"y"]-x["y"])==res(object)[1])&(xyA(object)[,"x"]==x["x"]|(abs(xyA(object)[,"x"]-x["x"])==res(object)[1])))*object@migModel@pMig[[1]][1]/8})+diag(nCellA(object))*(1-object@migModel@pMig[[1]][1]),
-                                                island = diag(nCellA(object))*(1-object@migModel@pMig[[i]][1])+(1-diag(nCellA(object)))*(object@migModel@pMig[[i]][1])/(nCellA(object)-1),
-                                                fat_tail2 = x^object@migModel@pMig[[i]][2]*exp(-2*x/(object@migModel@pMig[[i]][1]^0.5))
+                             function(x)(switch(object@geoMigModel@shapeMig[i],
+                                                gaussian = dnorm(x, mean = 0, sd = object@geoMigModel@pMig[[i]][1], log = FALSE),
+                                                exponential = (dexp(x, rate = 1/object@geoMigModel@pMig[[i]][1], log = FALSE)),
+                                                contiguous = apply(xyA(object),1,function(x){((abs(xyA(object)[,"x"]-x["x"])==res(object)[1])&(xyA(object)[,"y"]==x["y"])|(abs(xyA(object)[,"y"]-x["y"])==res(object)[1])&(xyA(object)[,"x"]==x["x"]))*object@geoMigModel@pMig[[1]][1]/4})+diag(nCellA(object))*(1-object@geoMigModel@pMig[[1]][1]),
+                                                contiguous8 = apply(xyA(object),1,function(x){((abs(xyA(object)[,"x"]-x["x"])==res(object)[1])&(xyA(object)[,"y"]==x["y"])|(abs(xyA(object)[,"y"]-x["y"])==res(object)[1])&(xyA(object)[,"x"]==x["x"]|(abs(xyA(object)[,"x"]-x["x"])==res(object)[1])))*object@geoMigModel@pMig[[1]][1]/8})+diag(nCellA(object))*(1-object@geoMigModel@pMig[[1]][1]),
+                                                island = diag(nCellA(object))*(1-object@geoMigModel@pMig[[i]][1])+(1-diag(nCellA(object)))*(object@geoMigModel@pMig[[i]][1])/(nCellA(object)-1),
+                                                fat_tail2 = x^object@geoMigModel@pMig[[i]][2]*exp(-2*x/(object@geoMigModel@pMig[[i]][1]^0.5))
                                                 #contiguous_long_dist_mixt = model["pMig"]["plongdist"]/nCellA(object)+(x==0)*(1-model["pMig"]["pcontiguous"]-model["pMig"]["plongdist"])+((x>0)-(x>1.4*res(object)[1]))*(model["pMig"]["pcontiguous"]/2),
-                                                #gaussian_long_dist_mixt = model["pMig"][2]/nCellA(object) + (dnorm(x, mean = 0, sd = object@migModel@pMig[[i]][1], log = FALSE))
+                                                #gaussian_long_dist_mixt = model["pMig"][2]/nCellA(object) + (dnorm(x, mean = 0, sd = object@geoMigModel@pMig[[i]][1], log = FALSE))
                              )))
       migration[[i]]<-migration[[i]]/sum(migration[[i]])
     }
-    for (i in which(object@migModel@modelConnectionType=="grouping"))
+    for (i in which(object@geoMigModel@modelConnectionType=="grouping"))
     {
-      migration[[i]] = switch(object@migModel@shapeMig[i],
-                                                popSep = sapply(valuesA(object)[,i],function(x) {x==valuesA(object)[,i]})
+      migration[[i]] = switch(object@geoMigModel@shapeMig[i],
+                                                popSep = sapply(valuesA(object)[i],function(x) {x==valuesA(object)[i]})
                              )
       migration[[i]]<-migration[[i]]/sum(migration[[i]])
     }
