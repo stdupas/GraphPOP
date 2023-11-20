@@ -830,7 +830,7 @@ setMethod(
                              )
       migration[[i]]<-migration[[i]]/sum(migration[[i]])
     }
-    return(apply(array(unlist(migration), dim = c(nCellA(object),nCellA(object), length(migration))),c(1,2),function(x){sum(x*object@migModel@pMixt)}))
+    return(apply(array(unlist(migration), dim = c(nCellA(object),nCellA(object), length(migration))),c(1,2),function(x){sum(x*object@geoMigModel@pMixt)}))
   }
 )
 
