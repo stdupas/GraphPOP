@@ -548,7 +548,7 @@ setClass("socioecoGeoDataHistory",
 
 validitysocioecoGeoDataHistory = function(object){
   if (any(object@parsingTimes>0)) stop("the pastStartingTimes should be negative")
-  if (length(object@parsingTimes)!=(length(object))) stop("slot pastStartingTimes should include all the starting dates between period, which is length(object)")
+  if (length(object@parsingTimes)!=(length(object)-1)) stop("slot pastStartingTimes should include all the starting dates between period, which is length(object)")
   if (length(object@parsingTimes)>1) for (i in 2:length(object@pastStartingTimes)) {if (object@pastStartingTimes[i]>=object@pastStartingTimes[i-1]) stop("the socioecoGeoDataList should order from recent to past")}
 }
 
