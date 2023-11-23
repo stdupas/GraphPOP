@@ -631,7 +631,7 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
                                modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
   
 {
-  if (is.null(socioecoGeoDataHistory)) socioecoGeoDataHistory=socioecoGeoDataHistory(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,zeroTime)
+  if (is.null(socioecoGeoDataHistory)) socioecoGeoDataHistory=socioecoGeoDataHistory(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
