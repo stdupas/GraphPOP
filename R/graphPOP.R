@@ -634,8 +634,8 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
   if (is.null(socioecoGeoDataHistory)) socioecoGeoDataHistory=socioecoGeoDataHistory(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
-  if (is.null(migModel)) migModel= migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
-  new("socioecoGeoDataModel",socioecoGeoDataList,Kmodel=nicheK,Rmodel=nicheR,migModel=migModel)
+  if (is.null(migModel)) migModel= geoMigrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
+  new("socioecoGeoDataModel",SocioecoGeoData,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel)
 }
 
 setValidity("socioecoGeoDataModel", validitysocioecoGeoDataModel)
