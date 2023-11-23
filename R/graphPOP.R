@@ -554,8 +554,8 @@ validitysocioecoGeoDataHistory = function(object){
 
 setValidity("socioecoGeoDataHistory", validitysocioecoGeoDataHistory)
 
-socioecoGeoDataHistory <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecGaoData(),socioecGaoData(),socioecGaoData()),ParsingTimes=c(0,200,500,200),TimeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00')){
-  new("socioecoGeoDataHistory",SocioecoGeoData,pastSocioecoGeodata=PastSocioecoGeodata,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
+socioecoGeoDataHistory <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecGaoData(),socioecGaoData(),socioecGaoData()),ParsingTimes=c(0,200,500,200),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00')){
+  new("socioecoGeoDataHistory",SocioecoGeoData,pastSocioecoGeoData=PastSocioecoGeoData,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
 }
 
   a=new("socioecoGeoDataHistory")
@@ -622,7 +622,7 @@ a=new("socioecoGeoDataModel")
 
 socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
                                SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),
-                               ParsingTimes=c(0,200,500,200),TimeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'),
+                               ParsingTimes=c(0,200,500,200),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'),
                                nicheK=NULL,nicheR=NULL,migModel=NULL,
                                EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
                                stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
