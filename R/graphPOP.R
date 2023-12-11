@@ -840,7 +840,17 @@ b=buildMigrationMatrix(a)
 setClass("envDynSet",
          contains=c(socioecoGeoDataModel="socioecoGeoDataModel"),
          slots = c(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
+         prototype(socioecoGeoDataModel(),RKlandscape=buildRKLandscape(socioecoGeoDataModel())
+                       geoDist=buildGeodist(socioecoGeoDataModel()),
+                       migrationMatrix=buildMigrationMatrix(socioecoGeoDataModel()),
+                       transitionForward=buildTransitionForward(socioecoGeoDataModel()),
+                       transitionBackward=buildTransitionBackward(socioecoGeoDataModel())))
 )
+
+         representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
+         validity=validitysocioecoGeoDataModel,
+         prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
+
 
 envDynLandscape<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migrationMatrix=NULL,transitionForward=NULL,transitionBackward=NULL,
                           envData=NULL,
@@ -879,6 +889,18 @@ setMethod(f="transitionBackward",
           }
 )
 
+setMethod(f="transitionBackward",
+          signature=c("socioecoGeoDataModel"),
+          definition=function(object){
+            if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
+            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * K * t(mig)}
+            if ((length(R)==1)&(length(K)>1)){transition = R * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
+            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * lpar$K * t(mig)}
+            if ((length(R)>1)&(length(K)>1)) {transition = t(matrix(R,nrow=length(R),ncol=length(R))) * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
+            t<-transition/t(sapply(rowSums(transition),function(x)rep(x,ncol(transition))))
+            TransitionBackward(t)
+          }
+)
 
 setMethod(
   f="transitionMatrixForward",
