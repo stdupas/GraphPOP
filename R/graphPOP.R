@@ -840,11 +840,12 @@ b=buildMigrationMatrix(a)
 setClass("envDynSet",
          contains=c(socioecoGeoDataModel="socioecoGeoDataModel"),
          slots = c(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
-         prototype(socioecoGeoDataModel(),RKlandscape=buildRKLandscape(socioecoGeoDataModel())
-                       geoDist=buildGeodist(socioecoGeoDataModel()),
-                       migrationMatrix=buildMigrationMatrix(socioecoGeoDataModel()),
-                       transitionForward=buildTransitionForward(socioecoGeoDataModel()),
-                       transitionBackward=buildTransitionBackward(socioecoGeoDataModel())))
+         prototype(socioecoGeoDataModel(),
+                      RKlandscape=buildRKLandscape(socioecoGeoDataModel()),
+                      geoDist=buildGeodist(socioecoGeoDataModel()),
+                      migrationMatrix=buildMigrationMatrix(socioecoGeoDataModel()),
+                      transitionForward=buildTransitionForward(socioecoGeoDataModel()),
+                      transitionBackward=buildTransitionBackward(socioecoGeoDataModel()))
 )
 
          representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
@@ -871,12 +872,12 @@ envDynLandscape<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NUL
 }
 
 setGeneric(
-  name = "transitionBackward",
-  def=function(K,R,mig){return(standardGeneric("getTransitionBackward"))}
+  name = "buildTransitionBackward",
+  def=function(R,K,mig){return(standardGeneric("buildTransitionBackward"))}
 )
 
 
-setMethod(f="transitionBackward",
+setMethod(f="buildTransitionBackward",
           signature=c("numeric","numeric","matrix"),
           definition=function(R,K,mig){
             if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
