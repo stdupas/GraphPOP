@@ -12,15 +12,14 @@ library(raster)
 
 setClass("geoEnvData",
          contains = "RasterStack",
-         slots = c(layerConnectionTypes="character"),
-         prototype=prototype(stack(stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),pops=raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat"))))),layerConnectionTypes=c("geographic","grouping"))
-)
-new("geoEnvData",stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),pops=raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))))
+         representation(layerConnectionTypes="character"),
+         prototype=prototype(
+           stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),
+                     pops=raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")))),
+           layerConnectionTypes=c("geographic","grouping")
+           )
+         )
 
-geoEnvData <- function(rasterStack=NULL,Array=array(c(c(5,3,2,3,2,3,2,3,5),rep(1:3,3)),dim=c(3,3,2),dimnames = list(1:3,1:3,c("temp","pops"))),CRS="+proj=longlat",xmn=0,xmx=3,ymn=0,ymx=3){
-  if (is.null(rasterStack)) rasterStack=stack(apply(Array,3,function(x) raster(matrix(x,nrow = dim(Array)[1]),xmn=xmn,xmx=xmx,ymn=ymn,ymx=ymx,crs=CRS)))
-  new("geoEnvData",rasterStack)
-}
 
 setGeneric(name="NAcells",
            def=function(object){
@@ -90,6 +89,25 @@ setMethod(
     x
   }
 )
+
+new("geoEnvData",stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),pops=raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),layerConnectionTypes=c("geographic","grouping"))
+
+geoEnvData <- function(rasterStack=NULL,Array=array(c(c(5,3,2,3,2,3,2,3,5),rep(1:3,3)),dim=c(3,3,2),dimnames = list(1:3,1:3,c("temp","pops"))),CRS="+proj=longlat",xmn=0,xmx=3,ymn=0,ymx=3,layerConnectionTypes=c("geographic","grouping")){
+  if (is.null(rasterStack)) rasterStack=stack(apply(Array,3,function(x) raster(matrix(x,nrow = dim(Array)[1]),xmn=xmn,xmx=xmx,ymn=ymn,ymx=ymx,crs=CRS)))
+  new("geoEnvData",rasterStack,layerConnectionTypes=layerConnectionTypes)
+}
+
+setMethod("show",
+          "geoEnvData",
+          function(object) {
+            cat("Class\t\t: geoEnvData\n")
+            cat("geo dimensions\t: ",nrow(object),", ",ncol(object),", ",nlayers(object),", ",ncell(object),", ",nCellA(object)," (nrow, ncol, nlayers, ncell, ncellA)\n",sep="")
+            cat("layerConnectionTypes\t:",paste(object@layerConnectionTypes,sep=", "),"\n")
+            cat("resolution\t: ",res(object)[1],", ",res(object)[2],"\n",sep="")
+            cat("extent\t\t: ",paste(extent(object),sep=", "),"(xmin, xmax, ymin, ymax)\n",sep="")
+            cat("crs\t\t: ",as.character(crs(object)))}
+)
+
 
 setClass("socioecoGroupData",
          contains = "RasterStack",
@@ -210,6 +228,7 @@ setMethod("Acells",
           }
 )
 
+
 setMethod("nCellA",
           signature=c("socioecoGroupsData"),
           definition = function(object){
@@ -277,7 +296,7 @@ connectionTypes=c("geographic","grouping","routes")
 # transition matrix individuals among demes defined 
 # by geographic and socioeconomic variables
 
-socioecoGeoData<-function(x=NULL,socioecoList=NULL)
+socioecoGeoData<-function(x=NULL,socioecoList=NULL,stackConnectionType=NULL,envLayerNames=NULL)
 {
   #
   # socioecoGeoData has 2 components
@@ -294,7 +313,8 @@ socioecoGeoData<-function(x=NULL,socioecoList=NULL)
           crs(Stack) <- Crs
           Stack})}
    else if (class(x)=="RasterStack") {
-    geo=new("geoEnvData",rasterstack)} else if (class(x)=="geoEnvData") {geo=x} else stop("x should be raster, RasterStack, array or empty")
+     if (is.null(stackConnectionType)) stackConnectionType=rep("geographic",dim(x)[3]) 
+     geo=new("geoEnvData",rasterstack,stackConnectionType)} else if (class(x)=="geoEnvData") {geo=x} else stop("x should be raster, RasterStack, array or empty")
   }
   if (is.null(socioecoList)) socioecoList=socioecoGroupsData()
   new("socioecoGeoData",geo,socioecoList)
@@ -306,6 +326,14 @@ setMethod("variable.names",
           function(object) {list(geo=names(object),socioeco=variable.names(object@socioecoData))  
           }
 )
+
+cat("geo dimensions\t: ",nrow(object),", ",ncol(object),", ",nlayers(object),", ",ncell(object),", ",nCellA(object)," (nrow, ncol, nlayers, ncell, ncellA)\n",sep="")
+cat("layerConnectionTypes\t:",paste(object@layerConnectionTypes,sep=", "),"\n")
+cat("resolution\t: ",res(object)[1],", ",res(object)[2],"\n",sep="")
+cat("extent\t\t: ",paste(extent(object),sep=", "),"(xmin, xmax, ymin, ymax)\n",sep="")
+cat("crs\t\t: ",as.character(crs(object)))}
+
+
 setMethod("show",
           "socioecoGeoData",
           function(object) {
@@ -313,6 +341,7 @@ setMethod("show",
             cat("- geoEnvData inherited class:\n")
             cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object)[1],",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
             cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
+            cat("\nlayerConnectionTypes\t:",paste(object@layerConnectionTypes,sep=", "))
             cat("\nextent\t\t:",extent(object@geoEnvData)[1],",", extent(object@geoEnvData)[2], "," , extent(object@geoEnvData)[3], ",", extent(object@geoEnvData)[4], " (xmin, xmax, ymin, ymax)")
             cat("\ncrs\t\t:",as.character(crs(object)))
             cat("\nnames\t\t: ")
@@ -563,46 +592,46 @@ socioecoGeoDataHistory <- function(SocioecoGeoData=socioecoGeoData(),PastSocioec
 
 #socioecoGeoDataHistory <- function(socioecoGeoData)
 
-setMethod("show",
-          "socioecoGeoDataHistory",
-          function(object){
-            cat("An object of class 'socioecoGeoDataHistory':\n\n")
-            if (length(object@parsingTimes)==2) {
-              cat("unique socioecoGeoData :")
-              cat("(Time frame from", as.character(object@zeroTime),"to",object@parsingTimes[2],object@timeUnit,")")
-              cat("\nTime units\t:",object@timeUnit)
+  setMethod("show",
+            "socioecoGeoDataHistory",
+            function(object){
+              cat("An object of class 'socioecoGeoDataHistory':\n\n")
+              if (length(object@parsingTimes)==2) {
+                cat("unique socioecoGeoData :")
+                cat("(Time frame from", as.character(object@zeroTime),"to",object@parsingTimes[2],object@timeUnit,")")
+                cat("\nTime units\t:",object@timeUnit)
+              }
+              
+              if (length(object@parsingTimes)==0) {
+                cat("unique socioecoGeoData (no time frame) :\n")
+              }
+              
+              if (length(object@parsingTimes)>2) {
+                cat("most recent socioecoGeoData  :\n")
+                cat("(Time frame from", as.character(object@zeroTime),"to",object@parsingTimes[2], object@timeUnit,")")
+                cat("\nTime units\t:",object@timeUnit,"\n")
+              }
+              
+              cat("(Inherited class):\n")
+              cat("\nAn object of class 'socioecoGeoData'\n")
+              cat("- geoEnvData inherited class:\n")
+              cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object)[1],",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
+              cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
+              cat("\nlayerConnectionTypes\t:",paste(object@layerConnectionTypes,sep=", "))
+              cat("\ngeographic extent\t\t:",object@extent[1],",",object@extent[2],",",object@extent[3],",",object@extent[4],", (xmin, xmax, ymin, ymax)")
+              cat("\ncrs\t\t:",as.character(crs(object)))
+              cat("\nnames\t\t: ")
+              cat(names(object),sep = ", ")
+              cat("\n\n- socioecoGroupsData slot:\n")
+              cat(show(object@socioecoData)) 
+              if (length(object@parsingTimes)>2) {for(i in 1:length(object@pastSocioecoGeoData)){
+                cat("\n\nPast socioecoGeoData:\n")
+                cat("Past period #:\t",i,"\nsocioecoGeoData From", object@parsingTimes[i+1],"to",object@parsingTimes[i+2],"time units)\n")
+                cat("(Time units\t: ",object@timeUnit," )\n",sep="")
+                show(object@pastSocioecoGeoData[[i]])
+              }}
             }
-            
-            if (length(object@parsingTimes)==0) {
-              cat("unique socioecoGeoData (no time frame) :\n")
-            }
-
-            if (length(object@parsingTimes)>2) {
-              cat("most recent socioecoGeoData  :\n")
-              cat("(Time frame from", as.character(object@zeroTime),"to",object@parsingTimes[2], object@timeUnit,")")
-              cat("\nTime units\t:",object@timeUnit,"\n")
-            }
-            
-            cat("(Inherited class):\n")
-            cat("\nAn object of class 'socioecoGeoData'\n")
-            cat("- geoEnvData inherited class:\n")
-            cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object)[1],",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
-            cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
-            cat("\ngeographic extent\t\t:",object@extent[1],",",object@extent[2],",",object@extent[3],",",object@extent[4],", (xmin, xmax, ymin, ymax)")
-            cat("\ncrs\t\t:",as.character(crs(object)))
-            cat("\nnames\t\t: ")
-            cat(names(object),sep = ", ")
-            cat("\n\n- socioecoGroupsData slot:\n")
-            cat(show(object@socioecoData)) 
-            if (length(object@parsingTimes)>2) {for(i in 1:length(object@pastSocioecoGeoData)){
-              cat("\n\nPast socioecoGeoData:\n")
-              cat("Past period #:\t",i,"\nsocioecoGeoData From", object@parsingTimes[i+1],"to",object@parsingTimes[i+2],"time units)\n")
-              cat("(Time units\t: ",object@timeUnit," )\n",sep="")
-              show(object@pastSocioecoGeoData[[i]])
-            }}
-          }
-          )
-
+  )
 
 validitysocioecoGeoDataModel=function(object){
   if(class(object@Kmodel)!="nicheModel")stop("Error in socioecoGeoDataModel Kmodel : Kmodel just accept NicheModel !")
@@ -636,11 +665,10 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= geoMigrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
-  new("socioecoGeoDataModel",SocioecoGeoData,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel)
+  new("socioecoGeoDataModel",socioecoGeoDataHistory,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel)
 }
 
 setValidity("socioecoGeoDataModel", validitysocioecoGeoDataModel)
-
 setMethod("show",
           "nicheModel",
           function(object) {
@@ -682,29 +710,18 @@ setMethod("show",
           "socioecoGeoDataModel",
           function(object) {
             cat("class\t\t: socioecoGeoDataModel\n\n")
-            cat("Data (Inherited)\n")
-            cat("class\t\t: envData\n")
-            cat("dimension\t:",dim(object), "(nrow, ncol, nlayers) \n")
-            cat("number of cells\t: ")
-            cat(ncell(object),nCellA(object),sep=", ")
-            cat(" (total, attributed) \n")
-            cat("resolution\t: ")
-            cat(c(object@extent[2]-object@extent[1],object@extent[4]-object@extent[3])/dim(object)[1:2],sep=", ")
-            cat(" (x, y)\n")
-            cat("extent\t\t: ")
-            cat(object@extent[1:4],sep=", ")
-            cat("\ncrs\t\t:",as.character(crs(object)),"\n")
-            cat("names\t\t:",names(object),"\n")
-            cat("min values\t: ")
-            cat(apply(values(object),MARGIN = 2, FUN = min),sep=", ")
-            cat("\nmax values\t: ")
-            cat(apply(values(object),MARGIN = 2, FUN = max),sep=", ")
-            cat("\n\nKmodel\n")
+            cat("Data (Inherited)\t\t: socioecoGeoDataHistory\n")
+            show(object@.Data)
+            cat("\nslot\t\t: pastsocioecoGeoData \n")
+            show(object@pastSocioecoGeoData)
+            cat("slot\t\t: Kmodel \n")
             show(object@Kmodel)
-            cat("\nRmodel\n")
+            cat("\nslot\t\t: Rmodel \n")
             show(object@Rmodel)
-            cat("\nmigModel\n")
+            cat("\nslot\t\t: geoMigModel \n")
             show(object@geoMigModel)
+            cat("\nslot\t\t: socioecoMigModel \n")
+            show(object@socioecoMigModel)
           }
 ) 
 
@@ -1563,18 +1580,18 @@ setMethod(
 ## removed > Trash
 setValidity("envDynHistory",validityEnvDynHistory)
 
-setMethod("show",
-          "envDynHistory",
-          function(object){
-            cat("An object of class \"envDynHistory\":\nenvData ordered from most recent to most remote in the past\n\n", sep="")
-            cat("ending date \t:", object@endingDate,"\n")
-            cat("time unit\t:",object@timeUnit,"\n")
-            for (i in 1:length(object)) {
-              cat("\n",i,") Period -",i,":\n\n",sep="")           
-              cat("starting in time units at\t: ",object@pastStartingTimes[i],"\n\n",sep="")
-              show(object[[i]])
-            }
-          }
-)
+#setMethod("show",
+#          "envDynHistory",
+#          function(object){
+#            cat("An object of class \"envDynHistory\":\nenvData ordered from most recent to most remote in the past\n\n", sep="")
+#            cat("ending date \t:", object@endingDate,"\n")
+#            cat("time unit\t:",object@timeUnit,"\n")
+#            for (i in 1:length(object)) {
+#              cat("\n",i,") Period -",i,":\n\n",sep="")           
+#              cat("starting in time units at\t: ",object@pastStartingTimes[i],"\n\n",sep="")
+#              show(object[[i]])
+#            }
+#          }
+#)
 
 new("envDynHistory")
