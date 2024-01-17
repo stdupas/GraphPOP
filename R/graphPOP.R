@@ -327,11 +327,11 @@ setMethod("variable.names",
           }
 )
 
-cat("geo dimensions\t: ",nrow(object),", ",ncol(object),", ",nlayers(object),", ",ncell(object),", ",nCellA(object)," (nrow, ncol, nlayers, ncell, ncellA)\n",sep="")
-cat("layerConnectionTypes\t:",paste(object@layerConnectionTypes,sep=", "),"\n")
-cat("resolution\t: ",res(object)[1],", ",res(object)[2],"\n",sep="")
-cat("extent\t\t: ",paste(extent(object),sep=", "),"(xmin, xmax, ymin, ymax)\n",sep="")
-cat("crs\t\t: ",as.character(crs(object)))}
+#cat("geo dimensions\t: ",nrow(object),", ",ncol(object),", ",nlayers(object),", ",ncell(object),", ",nCellA(object)," (nrow, ncol, nlayers, ncell, ncellA)\n",sep="")
+#cat("layerConnectionTypes\t:",paste(object@layerConnectionTypes,sep=", "),"\n")
+#cat("resolution\t: ",res(object)[1],", ",res(object)[2],"\n",sep="")
+#cat("extent\t\t: ",paste(extent(object),sep=", "),"(xmin, xmax, ymin, ymax)\n",sep="")
+#cat("crs\t\t: ",as.character(crs(object)))}
 
 
 setMethod("show",
@@ -643,7 +643,7 @@ validitysocioecoGeoDataModel=function(object){
 
 setClass("socioecoGeoDataModel",
          contains = "socioecoGeoDataHistory",
-         representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
+         representation(SocioecoGeoData = "socioecoGeoData",Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
          validity=validitysocioecoGeoDataModel,
          prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
       
