@@ -712,6 +712,8 @@ setMethod("show",
             cat("class\t\t: socioecoGeoDataModel\n\n")
             cat("Data (Inherited)\t\t: socioecoGeoDataHistory\n")
             show(object@.Data)
+            cat("\nslot\t\t: socioecoGeoData\n")
+            show(object@SocioecoGeoData)
             cat("\nslot\t\t: pastsocioecoGeoData \n")
             show(object@pastSocioecoGeoData)
             cat("slot\t\t: Kmodel \n")
