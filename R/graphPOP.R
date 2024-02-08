@@ -858,20 +858,19 @@ a=socioecoGeoDataModel(EnvStack = stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4
 b=buildMigrationMatrix(a)
 
 setClass("envDynSet",
-         contains=c(socioecoGeoDataModel="socioecoGeoDataModel"),
-         slots = c(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
+         contains = "socioecoGeoDataModel",
+         representation(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
          prototype(socioecoGeoDataModel(),
-                      RKlandscape=buildRKLandscape(socioecoGeoDataModel()),
+                      RKlandscape=buildRKlandscape(socioecoGeoDataModel()),
                       geoDist=buildGeodist(socioecoGeoDataModel()),
                       migrationMatrix=buildMigrationMatrix(socioecoGeoDataModel()),
                       transitionForward=buildTransitionForward(socioecoGeoDataModel()),
-                      transitionBackward=buildTransitionBackward(socioecoGeoDataModel()))
+                      transitionBackward=buildTransitionBackward(socioecoGeoDataModel())),
+         validity=validitysocioecoGeoDataModel
 )
 
-         representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
-         validity=validitysocioecoGeoDataModel,
-         prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
-
+#prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
+#representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel")
 
 envDynLandscape<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migrationMatrix=NULL,transitionForward=NULL,transitionBackward=NULL,
                           envData=NULL,
@@ -893,13 +892,13 @@ envDynLandscape<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NUL
 
 setGeneric(
   name = "buildTransitionBackward",
-  def=function(R,K,mig){return(standardGeneric("buildTransitionBackward"))}
+  def=function(object){return(standardGeneric("buildTransitionBackward"))}
 )
 
 
 setMethod(f="buildTransitionBackward",
-          signature=c("numeric","numeric","matrix"),
-          definition=function(R,K,mig){
+          signature=c("socioecoGeoDataModel"),
+          definition=function(object){
             if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
             if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * K * t(mig)}
             if ((length(R)==1)&(length(K)>1)){transition = R * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
@@ -923,8 +922,13 @@ setMethod(f="transitionBackward",
           }
 )
 
+setGeneric(
+  name = "buildTransitionForward", 
+  def = function(R,K,mig,meth){return(standardGeneric("buildTransitionForward"))}
+)
+
 setMethod(
-  f="transitionMatrixForward",
+  f="buildTransitionForward",
   signature=c("numeric","numeric","matrix","character"),
   definition=function(R,K,mig,meth)
   {
