@@ -899,6 +899,9 @@ setGeneric(
 setMethod(f="buildTransitionBackward",
           signature=c("socioecoGeoDataModel"),
           definition=function(object){
+            R <- object@Rmodel@pNiche[[1]]
+            K <- object@Kmodel@pNiche[[1]]
+            mig <- buildMigrationMatrix(object)
             if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
             if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * K * t(mig)}
             if ((length(R)==1)&(length(K)>1)){transition = R * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
