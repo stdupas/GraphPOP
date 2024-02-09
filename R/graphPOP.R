@@ -850,7 +850,7 @@ setMethod(
                              )
       migration[[i]]<-migration[[i]]/sum(migration[[i]])
     }
-    return(apply(array(unlist(migration), dim = c(nCellA(object),nCellA(object), length(migration))),c(1,2),function(x){sum(x*object@geoMigModel@pMixt)}))
+    return(apply(array(unlist(migration), dim = c(nCellA(object)[1],nCellA(object)[1], length(migration))),c(1,2),function(x){sum(x*object@geoMigModel@pMixt)}))
   }
 )
 
@@ -890,6 +890,34 @@ envDynLandscape<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NUL
   new("envDynLandscape",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
 }
 
+setClass("TransitionBackward",
+         contains = "matrix",
+         validity = function(object){
+           if (all(nrow(object)==0))stop("The matrix is empty.")
+           if (nrow(object)!=ncol(object))stop("The matrix is not square")
+           if (!all(rowSums(object)>0.999999999) && !all(rowSums(object)<1.000000001)) {stop("The sum of probabilities in each row is not 1")}
+         }
+)
+
+TransitionBackward<- function(matrix){
+  if (nrow(matrix)!=ncol(matrix))stop("The matrix is not square")
+  if(class(rownames(matrix)[1])!="character"){
+    lname <- c(1:nrow(matrix))
+    rownames(matrix) <- lname
+    colnames(matrix) <- lname
+  }
+  new(Class="TransitionBackward",matrix)
+}
+
+
+setClass("TransitionForward",
+         contains = "matrix",
+         validity = function(object){
+           if (all(nrow(object)==0))stop("The matrix is empty.")
+           if (nrow(object)!=ncol(object))stop("The matrix is not square")
+         }
+)
+
 setGeneric(
   name = "buildTransitionBackward",
   def=function(object){return(standardGeneric("buildTransitionBackward"))}
@@ -899,8 +927,11 @@ setGeneric(
 setMethod(f="buildTransitionBackward",
           signature=c("socioecoGeoDataModel"),
           definition=function(object){
-            R <- object@Rmodel@pNiche[[1]]
-            K <- object@Kmodel@pNiche[[1]]
+            RKland <- buildRKlandscape(object)
+            R <- values(RKland)[,1]
+            K <- values(RKland)[,2]
+            #R <- object@Rmodel@pNiche[[1]]
+            #K <- object@Kmodel@pNiche[[1]]
             mig <- buildMigrationMatrix(object)
             if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
             if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * K * t(mig)}
@@ -956,34 +987,7 @@ setMethod(
 ######################### | To TRASH | ############################### 
 ######################### V          V ############################### 
 
-setClass("TransitionBackward",
-         contains = "matrix",
-         validity = function(object){
-           if (all(nrow(object)==0))stop("The matrix is empty.")
-           if (nrow(object)!=ncol(object))stop("The matrix is not square")
-           if (!all(rowSums(object)>0.999999999 && rowSums(object)<1.000000001))stop("The sum of probabilities in each row is not 1")
-         }
-)
 
-
-TransitionBackward<- function(matrix){
-  if (nrow(matrix)!=ncol(matrix))stop("The matrix is not square")
-  if(class(rownames(matrix)[1])!="character"){
-    lname <- c(1:nrow(matrix))
-    rownames(matrix) <- lname
-    colnames(matrix) <- lname
-  }
-  new(Class="TransitionBackward",matrix)
-}
-
-
-setClass("TransitionForward",
-         contains = "matrix",
-         validity = function(object){
-                        if (all(nrow(object)==0))stop("The matrix is empty.")
-                        if (nrow(object)!=ncol(object))stop("The matrix is not square")
-                      }
-)
 
 Demographic<-setClass("Demographic",
                       contains = "envDynLandscape",
