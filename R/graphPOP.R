@@ -958,14 +958,18 @@ setMethod(f="transitionBackward",
 
 setGeneric(
   name = "buildTransitionForward", 
-  def = function(R,K,mig,meth){return(standardGeneric("buildTransitionForward"))}
+  def = function(object,meth){return(standardGeneric("buildTransitionForward"))}
 )
 
 setMethod(
   f="buildTransitionForward",
-  signature=c("numeric","numeric","matrix","character"),
-  definition=function(R,K,mig,meth)
+  signature=c("socioecoGeoDataModel","character"),
+  definition=function(object,meth)
   {
+    RKland <- buildRKlandscape(object)
+    R <- values(RKland)[,1]
+    K <- values(RKland)[,2]
+    mig <- buildMigrationMatrix(object)
     rs = matrix(R,nrow=length(R),ncol=length(R))
     Ku = t(matrix(K,nrow=length(K),ncol=length(K)))
     leave = mig*(1+rs)*t(Ku); leave = leave - diag(leave)
