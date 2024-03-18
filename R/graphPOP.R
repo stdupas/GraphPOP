@@ -857,39 +857,6 @@ setMethod(
 a=socioecoGeoDataModel(EnvStack = stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
 b=buildMigrationMatrix(a)
 
-setClass("envDynSet",
-         contains = "socioecoGeoDataModel",
-         representation(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
-         prototype(socioecoGeoDataModel(),
-                      RKlandscape=buildRKlandscape(socioecoGeoDataModel()),
-                      geoDist=buildGeodist(socioecoGeoDataModel()),
-                      migrationMatrix=buildMigrationMatrix(socioecoGeoDataModel()),
-                      transitionForward=buildTransitionForward(socioecoGeoDataModel()),
-                      transitionBackward=buildTransitionBackward(socioecoGeoDataModel())),
-         validity=validitysocioecoGeoDataModel
-)
-
-#prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
-#representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel")
-
-envDynLandscape<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migrationMatrix=NULL,transitionForward=NULL,transitionBackward=NULL,
-                          envData=NULL,
-                          EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
-                          stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
-                          varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
-                          varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
-                          modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5)){
-  if (is.null(socioecoGeoDataModel)) {
-    if (is.null(envData)) envData=new("envData",EnvStack,stackConnectionType=stackConnectionType)
-    socioecoGeoDataModel=socioecoGeoDataModel(envData = envData,nicheK = nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK),nicheR = nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR), migModel = migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt))}
-  if (is.null(RKlandscape)) RKlandscape=buildRKLandscape(socioecoGeoDataModel)
-  if (is.null(geoDist)) geoDist=buildGeodist(socioecoGeoDataModel)
-  if (is.null(migrationMatrix)) RKlandscape=buildMigrationMatrix(socioecoGeoDataModel)
-  if (is.null(transitionForward)) transitionForward=buildTransitionForward(socioecoGeoDataModel)
-  if (is.null(transitionBackward)) transitionBackward=buildTransitionBackward(socioecoGeoDataModel)
-  new("envDynLandscape",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
-}
-
 setClass("TransitionBackward",
          contains = "matrix",
          validity = function(object){
@@ -943,18 +910,18 @@ setMethod(f="buildTransitionBackward",
           }
 )
 
-setMethod(f="transitionBackward",
-          signature=c("socioecoGeoDataModel"),
-          definition=function(object){
-            if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
-            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * K * t(mig)}
-            if ((length(R)==1)&(length(K)>1)){transition = R * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
-            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * lpar$K * t(mig)}
-            if ((length(R)>1)&(length(K)>1)) {transition = t(matrix(R,nrow=length(R),ncol=length(R))) * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
-            t<-transition/t(sapply(rowSums(transition),function(x)rep(x,ncol(transition))))
-            TransitionBackward(t)
-          }
-)
+#setMethod(f="transitionBackward",
+#          signature=c("socioecoGeoDataModel"),
+#          definition=function(object){
+#            if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
+#            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * K * t(mig)}
+#            if ((length(R)==1)&(length(K)>1)){transition = R * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
+#            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * lpar$K * t(mig)}
+#            if ((length(R)>1)&(length(K)>1)) {transition = t(matrix(R,nrow=length(R),ncol=length(R))) * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
+#            t<-transition/t(sapply(rowSums(transition),function(x)rep(x,ncol(transition))))
+#            TransitionBackward(t)
+#          }
+#)
 
 setGeneric(
   name = "buildTransitionForward", 
@@ -982,6 +949,38 @@ setMethod(
   }
 )
 
+setClass("envDynSet",
+         contains = "socioecoGeoDataModel",
+         representation(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
+         prototype(socioecoGeoDataModel(),
+                   RKlandscape=buildRKlandscape(socioecoGeoDataModel()),
+                   geoDist=buildGeodist(socioecoGeoDataModel()),
+                   migrationMatrix=buildMigrationMatrix(socioecoGeoDataModel()),
+                   transitionForward=buildTransitionForward(socioecoGeoDataModel(), "non_overlap"),
+                   transitionBackward=buildTransitionBackward(socioecoGeoDataModel())),
+         validity=validitysocioecoGeoDataModel
+)
+
+#prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
+#representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel")
+
+envDynSet<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migrationMatrix=NULL,transitionForward=NULL,transitionBackward=NULL,
+                          envData=NULL,
+                          EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
+                          stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
+                          varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
+                          varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
+                          modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5)){
+  if (is.null(socioecoGeoDataModel)) {
+    if (is.null(envData)) envData=new("geoEnvData")
+    socioecoGeoDataModel=socioecoGeoDataModel(envData = envData,nicheK = nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK),nicheR = nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR), migModel = migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt))}
+  if (is.null(RKlandscape)) RKlandscape=buildRKLandscape(socioecoGeoDataModel)
+  if (is.null(geoDist)) geoDist=buildGeodist(socioecoGeoDataModel)
+  if (is.null(migrationMatrix)) RKlandscape=buildMigrationMatrix(socioecoGeoDataModel)
+  if (is.null(transitionForward)) transitionForward=buildTransitionForward(socioecoGeoDataModel)
+  if (is.null(transitionBackward)) transitionBackward=buildTransitionBackward(socioecoGeoDataModel)
+  new("envDynSet",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
+}
 
 
 ##,transFor="transitionMatrixForward",transBack="getTransitionBackward",environment="landscape"
