@@ -1405,7 +1405,7 @@ setMethod(
     time=0
     single_coalescence_events=0
     single_and_multiple_coalescence_events=0
-    for (cell in 1:nCellA(envDynSet[1]))
+    for (cell in 1:nCellA(envDynSet)[1])
     {
       nodes_remaining_by_cell[[cell]] <- which(cell_number_of_nodes==cell)
     }
