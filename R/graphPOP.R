@@ -982,6 +982,25 @@ envDynSet<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migr
   new("envDynSet",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
 }
 
+setMethod(
+  f ="[",
+  signature = c(x="envDynSet" ,i="character",j="missing"),
+  definition = function (x ,i ,j , drop ){
+    switch ( EXPR =i,
+             "K" ={return(values(x@RKlandscape$K))} ,
+             "R" ={return(values(x@RKlandscape$R))} ,
+             "TransiBackw" ={return(x@transitionBackward)} ,
+             "TransiForw" = {return(x@transitionForward)},
+             stop("This slot doesn't exist!")
+    )
+  }
+)
+
+setGeneric(
+  name = "simulCoal",
+  def=function(envDynSet,printCoal){return(standardGeneric("simulCoal"))}
+)
+
 
 ##,transFor="transitionMatrixForward",transBack="getTransitionBackward",environment="landscape"
 
@@ -992,15 +1011,15 @@ envDynSet<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migr
 
 
 
-Demographic<-setClass("Demographic",
-                      contains = "envDynLandscape",
-                      slots = c(sampleCells="integer"),
-                      validity = function(object){
-                        if(any(object@K<0))stop("K is negative")
-                        if(any(object@R<0))stop("R is negative")
-                        if(any(object@sampleCells>nCellA(object)))stop("Sample cell number outside the range")
-                      }
-)# Demographic contains all the informacion to run a coalescent and calculate probabilities and graph statistics
+#Demographic<-setClass("Demographic",
+#                      contains = "envDynLandscape",
+#                      slots = c(sampleCells="integer"),
+#                      validity = function(object){
+#                        if(any(object@K<0))stop("K is negative")
+#                        if(any(object@R<0))stop("R is negative")
+#                        if(any(object@sampleCells>nCellA(object)))stop("Sample cell number outside the range")
+#                      }
+#)# Demographic contains all the information to run a coalescent and calculate probabilities and graph statistics
 
 
 ############## METHODS #####
@@ -1041,10 +1060,6 @@ setGeneric(
   def=function(object){return(standardGeneric("commute_time_digraph"))}
 )
 
-setGeneric(
-  name = "simulCoal",
-  def=function(demographic,printCoal){return(standardGeneric("simulCoal"))}
-)
 
 setGeneric(
   name = "simulMultiCoal",
@@ -1149,26 +1164,26 @@ setMethod(
   }
 )
 
-setMethod("buildRKLandscape",
-          signature=c("landscape","NicheModel"),
-          definition = function(object,model){                  #X=object, p=,shape=
-            Y=lapply(model@variables,function(x){
-              switch(model@reactNorms[[x]],
-                     scaling={setValues(object[[x]],rep(model@pNiche[[x]],ncell(object[[x]])))},
+#setMethod("buildRKLandscape",
+#          signature=c("landscape","NicheModel"),
+#          definition = function(object,model){                  #X=object, p=,shape=
+#            Y=lapply(model@variables,function(x){
+#              switch(model@reactNorms[[x]],
+#                     scaling={setValues(object[[x]],rep(model@pNiche[[x]],ncell(object[[x]])))},
                      #proportional = {values(object[[x]])=object[[x]]*model@pNiche[[x]]},
-                     enveloppe = {object[[x]]=enveloppe(object[[x]],model@pNiche[[x]])},
-                     envelin={object[[x]]=envelinear(object[[x]],model@pNiche[[x]])},
-                     conQuadratic={object[[x]]=conQuadratic(object[[x]],model@pNiche[[x]])},
-                     conQuadraticSkw={object[[x]]=conQuadraticSkw(object[[x]],model@pNiche[[x]])},#conquadraticskewed=conquadraticskewed(object[,,(model@variables==x)],p),
-                     #conquadraticsq=conquadraticsq(object[,,(model@variables==x)],p),
+#                     enveloppe = {object[[x]]=enveloppe(object[[x]],model@pNiche[[x]])},
+#                     envelin={object[[x]]=envelinear(object[[x]],model@pNiche[[x]])},
+#                     conQuadratic={object[[x]]=conQuadratic(object[[x]],model@pNiche[[x]])},
+#                     conQuadraticSkw={object[[x]]=conQuadraticSkw(object[[x]],model@pNiche[[x]])},#conquadraticskewed=conquadraticskewed(object[,,(model@variables==x)],p),
+#                     #conquadraticsq=conquadraticsq(object[,,(model@variables==x)],p),
                      #conquadraticskewedsq=conquadraticskewedsq(object[,,(model@variables==x)],p)
-                     stop("This variable does not exist for NicheModel !")
-              )
-            }
-            )
-            Y=prod(stack(Y))
-          }
-)
+#                     stop("This variable does not exist for NicheModel !")
+#              )
+#            }
+#            )
+#            Y=prod(stack(Y))
+#          }
+#)
 
 
 
@@ -1208,71 +1223,71 @@ setMethod(f="runsocioecoGeoDataModel",
           }
 )
 
-setMethod(f="runsocioecoGeoDataModel",
-          signature=c("enDynLandscape"),
-          definition=function(object){
-            R<-buildRKLandscape(object["R"])
-            K<-runNich
-            m<-migrationMatrix(object,model["m"])
-            f <-getTransitionBackward(K=K,R=R,mig=m)      
-            b <-transitionMatrixForward(K=K,R=R,mig=m,meth = "non_overlap") # creates the forward transition matrix between cells
-            envDynLandscape(K=K,R=R,migration=m,transForMat = f,transBackMat = b)
-          }
-)
+#setMethod(f="runsocioecoGeoDataModel",
+#          signature=c("enDynLandscape"),
+#          definition=function(object){
+#            R<-buildRKLandscape(object["R"])
+#            K<-runNich
+#            m<-migrationMatrix(object,model["m"])
+#            f <-getTransitionBackward(K=K,R=R,mig=m)      
+#            b <-transitionMatrixForward(K=K,R=R,mig=m,meth = "non_overlap") # creates the forward transition matrix between cells
+#            envDynLandscape(K=K,R=R,migration=m,transForMat = f,transBackMat = b)
+#          }
+#)
 
 
-setMethod(
-  f="migrationMatrix",
-  signature=c("landscape","migrationModel"),
-  definition=function(object,model)
-  {
-    Ndim = 1+all(ncell(object)!=dim(object)[1:2])
-    #if model["shapeMig"]=="contiguous" matrix()
-    migration = apply(object["distanceMatrix"], c(1,2),
-                      function(x)(switch(model["shapeMig"],
-                                         fat_tail1 = 1/(1+x^model["pMig"][2]/model["pMig"][1]),
-                                         gaussian = (dnorm(x, mean = 0, sd = model["pMig"][1], log = FALSE)),
-                                         exponential = (dexp(x, rate = 1/model["pMig"][1], log = FALSE)),
-                                         contiguous = (x==0)*(1-model["pMig"][1])+((x>0)-(x>1.4*res(object)[1]))*(model["pMig"][1]/(2*Ndim)),
-                                         contiguous8 = (x==0)*(1-object@migModel@pMig[[i]][1])+((x>0)-(x>2*res(object)[1]))*(model["pMig"][1]/(4*Ndim)),
-                                         island = (x==0)*(1-model["pMig"][1])+(x>0)*(model["pMig"][1]),
-                                         fat_tail2 = x^object@migModel@pMig[[i]][2]*exp(-2*x/(model["pMig"][1]^0.5)),
-                                         contiguous_long_dist_mixt = model["pMig"]["plongdist"]/nCellA(object)+(x==0)*(1-model["pMig"]["pcontiguous"]-model["pMig"]["plongdist"])+((x>0)-(x>1.4*res(object)[1]))*(model["pMig"]["pcontiguous"]/2),
-                                         gaussian_long_dist_mixt = object@migModel@pMig[[i]][2]/nCellA(object) + (dnorm(x, mean = 0, sd = model["pMig"][1], log = FALSE))
-                      )))
-    return(migration)
-  }
-)
-setMethod(f="getTransitionBackward",
-          signature=c("numeric","numeric","matrix"),
-          definition=function(R,K,mig){
-            if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
-            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * K * t(mig)}
-            if ((length(R)==1)&(length(K)>1)){transition = R * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
-            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * lpar$K * t(mig)}
-            if ((length(R)>1)&(length(K)>1)) {transition = t(matrix(R,nrow=length(R),ncol=length(R))) * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
-            t<-transition/t(sapply(rowSums(transition),function(x)rep(x,ncol(transition))))
-            TransitionBackward(t)
-          }
-)
+#setMethod(
+#  f="migrationMatrix",
+#  signature=c("landscape","migrationModel"),
+#  definition=function(object,model)
+#  {
+#    Ndim = 1+all(ncell(object)!=dim(object)[1:2])
+#    #if model["shapeMig"]=="contiguous" matrix()
+#    migration = apply(object["distanceMatrix"], c(1,2),
+#                      function(x)(switch(model["shapeMig"],
+#                                         fat_tail1 = 1/(1+x^model["pMig"][2]/model["pMig"][1]),
+#                                         gaussian = (dnorm(x, mean = 0, sd = model["pMig"][1], log = FALSE)),
+#                                         exponential = (dexp(x, rate = 1/model["pMig"][1], log = FALSE)),
+#                                         contiguous = (x==0)*(1-model["pMig"][1])+((x>0)-(x>1.4*res(object)[1]))*(model["pMig"][1]/(2*Ndim)),
+#                                         contiguous8 = (x==0)*(1-object@migModel@pMig[[i]][1])+((x>0)-(x>2*res(object)[1]))*(model["pMig"][1]/(4*Ndim)),
+#                                         island = (x==0)*(1-model["pMig"][1])+(x>0)*(model["pMig"][1]),
+#                                         fat_tail2 = x^object@migModel@pMig[[i]][2]*exp(-2*x/(model["pMig"][1]^0.5)),
+#                                         contiguous_long_dist_mixt = model["pMig"]["plongdist"]/nCellA(object)+(x==0)*(1-model["pMig"]["pcontiguous"]-model["pMig"]["plongdist"])+((x>0)-(x>1.4*res(object)[1]))*(model["pMig"]["pcontiguous"]/2),
+#                                         gaussian_long_dist_mixt = object@migModel@pMig[[i]][2]/nCellA(object) + (dnorm(x, mean = 0, sd = model["pMig"][1], log = FALSE))
+#                      )))
+#    return(migration)
+#  }
+#)
+#setMethod(f="getTransitionBackward",
+#          signature=c("numeric","numeric","matrix"),
+#          definition=function(R,K,mig){
+#            if ((length(R)==1)&(length(K)==1)){transition = R * K * t(mig)}
+#            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * K * t(mig)}
+#            if ((length(R)==1)&(length(K)>1)){transition = R * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
+#            if ((length(R)>1)&(length(K)==1)){transition = t(matrix(R,nrow=length(R),ncol=length(R))) * lpar$K * t(mig)}
+#            if ((length(R)>1)&(length(K)>1)) {transition = t(matrix(R,nrow=length(R),ncol=length(R))) * t(matrix(K,nrow=length(K),ncol=length(K))) * t(mig)}
+#            t<-transition/t(sapply(rowSums(transition),function(x)rep(x,ncol(transition))))
+#            TransitionBackward(t)
+#          }
+#)
 
 
-setMethod(
-  f="transitionMatrixForward",
-  signature=c("numeric","numeric","matrix","character"),
-  definition=function(R,K,mig,meth)
-  {
-    rs = matrix(R,nrow=length(R),ncol=length(R))
-    Ku = t(matrix(K,nrow=length(K),ncol=length(K)))
-    leave = mig*(1+rs)*t(Ku); leave = leave - diag(leave)
-    tMF<-switch (meth,
-            non_overlap = mig * rs * Ku / colSums(rs * t(Ku) * mig),
-            overlap = mig * (1+rs) * Ku / (colSums((1+rs) * t(Ku) * mig - t(leave))),
-            stop("error in creation of transitionMatrixForward : the method does not exist !")
-    )
-    new(Class = "TransitionForward",tMF)
-  }
-)
+#setMethod(
+#  f="transitionMatrixForward",
+#  signature=c("numeric","numeric","matrix","character"),
+#  definition=function(R,K,mig,meth)
+#  {
+#    rs = matrix(R,nrow=length(R),ncol=length(R))
+#    Ku = t(matrix(K,nrow=length(K),ncol=length(K)))
+#    leave = mig*(1+rs)*t(Ku); leave = leave - diag(leave)
+#    tMF<-switch (meth,
+#            non_overlap = mig * rs * Ku / colSums(rs * t(Ku) * mig),
+#            overlap = mig * (1+rs) * Ku / (colSums((1+rs) * t(Ku) * mig - t(leave))),
+#            stop("error in creation of transitionMatrixForward : the method does not exist !")
+#    )
+#    new(Class = "TransitionForward",tMF)
+#  }
+#)
 
 
 setMethod(f="sampleLandscape",
@@ -1379,18 +1394,18 @@ setMethod(
 ############################################
 setMethod(
   f="simulCoal", ## simulates a coalescent 
-  signature=c("Demographic","logical"),
-  definition=function(demographic,printCoal)
+  signature=c("envDynSet","logical"),
+  definition=function(envDynSet,printCoal)
   {
     prob_forward=NA
-    N <- round(demographic["K"]);#N[N==0]<-1
+    N <- round(envDynSet["K"]);#N[N==0]<-1
     coalescent = list() #
-    cell_number_of_nodes <- parent_cell_number_of_nodes <- democraphic@sampleCells
+    cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet@sampleCells
     nodes_remaining_by_cell = list()
     time=0
     single_coalescence_events=0
     single_and_multiple_coalescence_events=0
-    for (cell in 1:nCellA(demographic))
+    for (cell in 1:nCellA(envDynSet[1]))
     {
       nodes_remaining_by_cell[[cell]] <- which(cell_number_of_nodes==cell)
     }
@@ -1398,17 +1413,17 @@ setMethod(
     {
       for (node in 1:length(parent_cell_number_of_nodes))
       {
-        parent_cell_number_of_nodes[node] = sample(nCellA(demographic),size=1,prob=c(demographic["TransiBackw"][cell_number_of_nodes[node],]))
+        parent_cell_number_of_nodes[node] = sample(nCellA(envDynSet),size=1,prob=c(envDynSet["TransiBackw"][cell_number_of_nodes[node],]))
       }
-      prob_forward[time] = sum(log(demographic["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
+      prob_forward[time] = sum(log(envDynSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1; if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
-      for (cell in 1:nCellA(demographic))
+      for (cell in 1:nCellA(envDynSet))
       {
         nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
       }
-      prob_forward[time] = sum(log(demographic["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
+      prob_forward[time] = sum(log(envDynSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1;  if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
-      for (cell in 1:nCellA(demographic))
+      for (cell in 1:nCellA(envDynSet))
       {
         nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
         if (length(nodes_remaining_in_the_cell)>1)
@@ -1463,8 +1478,8 @@ setMethod(
 
 setMethod(
   f="simulMultiCoal",
-  signature=c("Demographic","logical","numeric"),
-  definition=function(demographic,printCoal,iteration){
+  signature=c("envDynSet","logical","numeric"),
+  definition=function(envDynSet,printCoal,iteration){
     lapply(1:iteration,function(x)simulCoal(demographic,printCoal))
   }
 )
