@@ -1401,6 +1401,7 @@ setMethod(
     N <- round(envDynSet["K"]);#N[N==0]<-1
     coalescent = list() #
     cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet@sampleCells
+           parent_cell_number_of_nodes <- NA
     nodes_remaining_by_cell = list()
     time=0
     single_coalescence_events=0
@@ -1413,7 +1414,7 @@ setMethod(
     {
       for (node in 1:length(parent_cell_number_of_nodes))
       {
-        parent_cell_number_of_nodes[node] = sample(nCellA(envDynSet),size=1,prob=c(envDynSet["TransiBackw"][cell_number_of_nodes[node],]))
+        parent_cell_number_of_nodes[node] = sample(x=nCellA(envDynSet),size=1,prob=c(envDynSet["TransiBackw"][cell_number_of_nodes[node],]))
       }
       prob_forward[time] = sum(log(envDynSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1; if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
