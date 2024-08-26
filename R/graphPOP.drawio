@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:129.0) Gecko/20100101 Firefox/129.0" version="24.7.7">
   <diagram name="Page-1" id="Z6gb0_KSrEABv9Jm1-kw">
-    <mxGraphModel dx="941" dy="1780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1364" dy="2055" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -232,13 +232,13 @@
         <mxCell id="_K4OWj6VhO3JEERv6Nd--6" value="ecoCoalGraphs" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="89" y="-860" width="201" height="184" as="geometry" />
         </mxCell>
-        <mxCell id="_K4OWj6VhO3JEERv6Nd--7" value="&lt;div&gt;+ FstGenet&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ hitting_time_digraph:&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ commute_time_digraph&lt;/div&gt;&lt;div&gt;+ linearizedFstDigraph (Nombre OK?)&lt;br&gt;&lt;div&gt;+ Collisionijk&lt;/div&gt;+ linearizedFstUndigraph (Nombre OK?)&lt;br&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_K4OWj6VhO3JEERv6Nd--6" vertex="1">
+        <mxCell id="_K4OWj6VhO3JEERv6Nd--7" value="&lt;div&gt;+ linearizedFstGenet&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ hitting_time_digraph:&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ commute_time_digraph&lt;/div&gt;&lt;div&gt;+ linearizedFstDigraph (Nombre OK?)&lt;br&gt;&lt;div&gt;+ Collisionijk&lt;/div&gt;+ linearizedFstUndigraph (Nombre OK?)&lt;br&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_K4OWj6VhO3JEERv6Nd--6" vertex="1">
           <mxGeometry y="26" width="201" height="124" as="geometry" />
         </mxCell>
         <mxCell id="_K4OWj6VhO3JEERv6Nd--8" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="_K4OWj6VhO3JEERv6Nd--6" vertex="1">
           <mxGeometry y="150" width="201" height="8" as="geometry" />
         </mxCell>
-        <mxCell id="_K4OWj6VhO3JEERv6Nd--9" value="+ method(type): type" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_K4OWj6VhO3JEERv6Nd--6" vertex="1">
+        <mxCell id="_K4OWj6VhO3JEERv6Nd--9" value="+ FstGenet(genet): float" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_K4OWj6VhO3JEERv6Nd--6" vertex="1">
           <mxGeometry y="158" width="201" height="26" as="geometry" />
         </mxCell>
         <mxCell id="_K4OWj6VhO3JEERv6Nd--10" value="ecoCoalProb" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -636,7 +636,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="qsnxfp2OyxdYE0fEjemA-1" value="linearizedFstGenet" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="360" y="-1016" width="170" height="86" as="geometry" />
+          <mxGeometry x="370" y="-1016" width="170" height="86" as="geometry" />
         </mxCell>
         <mxCell id="qsnxfp2OyxdYE0fEjemA-2" value="+ linearizedFst: float[,]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="qsnxfp2OyxdYE0fEjemA-1" vertex="1">
           <mxGeometry y="26" width="170" height="26" as="geometry" />
@@ -667,7 +667,7 @@
             <mxPoint x="310" y="-800" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="49uFMA6zL0cVl0Q6PZ_X-6" value="ecoCoaltSim" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="49uFMA6zL0cVl0Q6PZ_X-6" value="ecoCoalSim" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="89" y="-402" width="200" height="80" as="geometry" />
         </mxCell>
         <mxCell id="49uFMA6zL0cVl0Q6PZ_X-7" value="&lt;div&gt;+ coalescent: genealogy&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="49uFMA6zL0cVl0Q6PZ_X-6">
