@@ -1393,67 +1393,88 @@ setMethod(
 
 ############################################
 setMethod(
-  f="simulCoal", ## simulates a coalescent 
+  f="simulCoal", ##Simulates a coalescent
   signature=c("envDynSet","logical"),
   definition=function(envDynSet,printCoal)
   {
+    #Initialization of the objects that will store the information about the coalescent
     prob_forward=NA
     N <- round(envDynSet["K"]);#N[N==0]<-1
     coalescent = list() #
     cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet@sampleCells
-           parent_cell_number_of_nodes <- NA
     nodes_remaining_by_cell = list()
     time=0
     single_coalescence_events=0
     single_and_multiple_coalescence_events=0
+    
+    #Adds the remaining nodes per cell to the nodes_remaining_by_cell list for the coalescent simulation
     for (cell in 1:nCellA(envDynSet)[1])
     {
       nodes_remaining_by_cell[[cell]] <- which(cell_number_of_nodes==cell)
     }
+    
+    #Main cycle for the coalescent simulation. It will run until there is only one remaining node
     while (length(unlist(nodes_remaining_by_cell))>1)
     {
+      #Spatial transition backwards of each node with a probability given by the Backwards Transition matrix of the envDynSet object
       for (node in 1:length(parent_cell_number_of_nodes))
       {
         parent_cell_number_of_nodes[node] = sample(x=nCellA(envDynSet),size=1,prob=c(envDynSet["TransiBackw"][cell_number_of_nodes[node],]))
       }
+      #Calculation of the Forward transition probability of each iteration
       prob_forward[time] = sum(log(envDynSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1; if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
+      #After the spatial transition backwards, the nodes newly positioned in the cells are accounted for in this cycle
       for (cell in 1:nCellA(envDynSet))
       {
         nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
       }
       prob_forward[time] = sum(log(envDynSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1;  if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
+      
+      #The coalescent events are calculated in this cycle accounting for the new cell position of each node
       for (cell in 1:nCellA(envDynSet))
       {
         nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
+        #The coalescence of the nodes in each cell is calculated if there is more than one node in the cell, otherwise all nodes in the cell have already coalesced
         if (length(nodes_remaining_in_the_cell)>1)
         {
+          #Amount of nodes remaining in the cell
           nbgenesremaining=length(nodes_remaining_in_the_cell)
           smp = sample(N[cell],length(nodes_remaining_in_the_cell),replace=TRUE)
+          #A matrix of the random coalescent events is generated. The row names of this matrix correspond to the nodes in the current cell
           parentoffspringmatrix <- matrix(smp,nrow=nbgenesremaining,ncol=N[cell])==matrix(1:N[cell],nrow=nbgenesremaining,ncol=N[cell],byrow=TRUE)
           rownames(parentoffspringmatrix) <- nodes_remaining_in_the_cell
+          #When the column sum of any of the columns of the parentoffspringmatrix object are more than 1, it means there is a coalescent event between the nodes indicated in the rownames
           if (any(colSums(parentoffspringmatrix)>1) )
           {
             for (multiple in which(colSums(parentoffspringmatrix)>1))
             {
+              #The counter for single coalescent events is increased by 1
               single_coalescence_events = single_coalescence_events +1
+              #The new nodes that formed by the coalescing of other nodes are given a name and added to the list of nodes in the current cell
               nodes_that_coalesce = names(which(parentoffspringmatrix[,multiple]))
               new_node <- max(nodes)+1;nodes=nodes[!(names(nodes)%in%nodes_that_coalesce)];nodes=append(nodes,new_node);names(nodes)[length(nodes)]=new_node
+              #The parent cell of the nodes that coalesced are removed from this list and the parent cell of the newly formed nodes are added
               parent_cell_number_of_nodes <- append(parent_cell_number_of_nodes[!(names(parent_cell_number_of_nodes)%in%nodes_that_coalesce)],cell);names(parent_cell_number_of_nodes)[length(parent_cell_number_of_nodes)]<-new_node
+              #The coalescent events are accounted for.
               coalescent[[single_coalescence_events]] <- list(time=time,coalescing=as.numeric(nodes_that_coalesce),new_node=new_node)
+              #The coalesced notes are removed from the nodes remaining and the newly formed nodes are added
               nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- append(nodes_remaining_in_the_cell[!nodes_remaining_in_the_cell %in% nodes_that_coalesce],new_node)
+              #The single and multiple coalescent events are counted by adding the number of nodes that coalesced minus 1
               single_and_multiple_coalescence_events = single_and_multiple_coalescence_events + length(nodes_that_coalesce) - 1
             }
           }
         }
       }
+      #Before the following iteration, the cell number of nodes is asigned the value of the parent cell number of nodes
       cell_number_of_nodes = parent_cell_number_of_nodes
     }
     tips = NULL
     internals = NULL
     nodes = NULL
     times = NULL
+    #Collect the data of nodes, internals and times in the corresponding lists
     for (i in 1:length(coalescent))#i=1;i=2
     {
       nodes = append(nodes,c(coalescent[[i]]$coalescing,coalescent[[i]]$new_node))
@@ -1462,7 +1483,7 @@ setMethod(
     }
     nodes = as.numeric(levels(as.factor(c(nodes,internals))));nodes = nodes[order(nodes)]
     tips = nodes[!((nodes)%in%(internals))]
-    # getting the branch length of each coalescing node
+    #Getting the branch length of each coalescing node
     for (i in 1:length(coalescent))#i=1
     {
       for (coalescing in coalescent[[i]]$coalescing)# coalescing = coalescent[[i]]$coalescing[1]
@@ -1473,6 +1494,7 @@ setMethod(
         }
       }
     }
+    #Return a list with the coalescent and the total probability forward
     list(coalescent=coalescent,prob_forward=sum(prob_forward))
   }
 )
