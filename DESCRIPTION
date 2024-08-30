@@ -1,0 +1,15 @@
+Package: GraphPOP
+Title: Genetic Parameter Estimation Through Graph Theory
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Stéphane", "Dupas", , "Stephane.Dupas@universite-paris-saclay.fr", role = c("aut", "cre"),
+           comment = c(ORCID = "https://orcid.org/0000-0001-8332-6679")),
+    person("Camilo", "Patarroyo", , "c.patarroyov@gmail.com", role = ("ctb"),
+           comment = c(ORCID = "https://orcid.org/0000-0002-3124-1910"))
+           )
+Description: Graph theory estimates of population genetics differentiation in heterogenous landscape.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
