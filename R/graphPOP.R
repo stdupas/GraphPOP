@@ -1503,7 +1503,7 @@ setMethod(
   f="simulMultiCoal",
   signature=c("envDynSet","logical","numeric"),
   definition=function(envDynSet,printCoal,iteration){
-    lapply(1:iteration,function(x)simulCoal(demographic,printCoal))
+    lapply(1:iteration,function(x)simulCoal(envDynSet,printCoal))
   }
 )
 
