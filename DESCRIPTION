@@ -1,6 +1,6 @@
 Package: GraphPOP
 Title: Genetic Parameter Estimation Through Graph Theory
-Version: 0.0.0.9000
+Version: 0.0.1.0000
 Authors@R: c(
     person("Stéphane", "Dupas", , "Stephane.Dupas@universite-paris-saclay.fr", role = c("aut", "cre"),
            comment = c(ORCID = "https://orcid.org/0000-0001-8332-6679")),
