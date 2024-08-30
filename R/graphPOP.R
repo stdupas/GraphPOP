@@ -20,7 +20,13 @@ setClass("geoEnvData",
            )
          )
 
-
+#' Identify NA values
+#' 
+#' @description
+#' `NAcells` returns the cells with NA values in a raster object.
+#' 
+#' @param x a raster object to evaluate the values.
+#' @return vector of cells which value is NA.
 setGeneric(name="NAcells",
            def=function(object){
              return(standardGeneric("NAcells"))
