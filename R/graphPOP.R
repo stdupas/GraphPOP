@@ -957,13 +957,15 @@ setMethod(
 
 setClass("envDynSet",
          contains = "socioecoGeoDataModel",
-         representation(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
+         representation(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"
+                        , sampleCells = "vector"), #Test for the sampleCells slot for the coalescence simulations
          prototype(socioecoGeoDataModel(),
                    RKlandscape=buildRKlandscape(socioecoGeoDataModel()),
                    geoDist=buildGeodist(socioecoGeoDataModel()),
                    migrationMatrix=buildMigrationMatrix(socioecoGeoDataModel()),
                    transitionForward=buildTransitionForward(socioecoGeoDataModel(), "non_overlap"),
-                   transitionBackward=buildTransitionBackward(socioecoGeoDataModel())),
+                   transitionBackward=buildTransitionBackward(socioecoGeoDataModel()),
+                   sampleCells = setNames(c(1,1,1,1,2,2,3,3,3,4,4,5,5,6,7,7,7,8,8,8,8,9,9,9,9),nm = 1:25)), #Test for the sampleCells slot
          validity=validitysocioecoGeoDataModel
 )
 
@@ -985,7 +987,8 @@ envDynSet<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migr
   if (is.null(migrationMatrix)) RKlandscape=buildMigrationMatrix(socioecoGeoDataModel)
   if (is.null(transitionForward)) transitionForward=buildTransitionForward(socioecoGeoDataModel)
   if (is.null(transitionBackward)) transitionBackward=buildTransitionBackward(socioecoGeoDataModel)
-  new("envDynSet",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
+  if (is.null(sampleCells)) samples = setNames(c(1,1,1,1,2,2,3,3,3,4,4,5,5,6,7,7,7,8,8,8,8,9,9,9,9),1:25)
+  new("envDynSet",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward, sampleCells = samples)
 }
 
 setMethod(
@@ -1069,7 +1072,7 @@ setGeneric(
 
 setGeneric(
   name = "simulMultiCoal",
-  def=function(demographic,printCoal,iteration){return(standardGeneric("simulMultiCoal"))}
+  def=function(envDynSet,printCoal,iteration){return(standardGeneric("simulMultiCoal"))}
 )
 
 setGeneric(
@@ -1103,19 +1106,19 @@ setGeneric(
 )
 
 
-setMethod(
-  f ="[",
-  signature = c(x="Demographic" ,i="character",j="missing"),
-  definition = function (x ,i ,j , drop ){
-    switch ( EXPR =i,
-             "K" ={return(x@K)} ,
-             "R" ={return(x@R)} ,
-             "TransiBackw" ={return(x@TransiBackw)} ,
-             "TransiForw" = {return(x@TransiForw)},
-             stop("This slots doesn't exist!")
-    )
-  }
-)
+#setMethod(
+#  f ="[",
+#  signature = c(x="Demographic" ,i="character",j="missing"),
+#  definition = function (x ,i ,j , drop ){
+#    switch ( EXPR =i,
+#             "K" ={return(x@K)} ,
+#             "R" ={return(x@R)} ,
+#             "TransiBackw" ={return(x@TransiBackw)} ,
+#             "TransiForw" = {return(x@TransiForw)},
+#             stop("This slots doesn't exist!")
+#    )
+#  }
+#)
 
 setMethod(
   f ="[",
@@ -1130,45 +1133,45 @@ setMethod(
   }
 )
 
-setMethod(
-  f ="[",
-  signature = c(x="migrationModel" ,i="character",j="missing"),
-  definition = function (x ,i ,j , drop ){
-    switch ( EXPR =i,
-             "pMig" ={return(x@pMig)} ,
-             "shapeMig" ={return(x@shapeMig)} ,
-             stop("This slots doesn't exist!")
-    )
-  }
-)
+#setMethod(
+#  f ="[",
+#  signature = c(x="migrationModel" ,i="character",j="missing"),
+#  definition = function (x ,i ,j , drop ){
+#    switch ( EXPR =i,
+#             "pMig" ={return(x@pMig)} ,
+#             "shapeMig" ={return(x@shapeMig)} ,
+#             stop("This slots doesn't exist!")
+#    )
+#  }
+#)
 
 
 
-setMethod(
-  f ="[",
-  signature = c(x="landscape" ,i="character",j="missing"),
-  definition = function (x ,i ,j , drop ){
-    switch ( EXPR =i,
-             "period" ={return(x@period)} ,
-             "distanceMatrix" ={return(x@distanceMatrix)} ,
-             "vars" ={return(x@vars)} ,
-             stop("This slots doesn't exist!")
-    )
-  }
-)
+#setMethod(
+#  f ="[",
+#  signature = c(x="landscape" ,i="character",j="missing"),
+#  definition = function (x ,i ,j , drop ){
+#    switch ( EXPR =i,
+#             "period" ={return(x@period)} ,
+#             "distanceMatrix" ={return(x@distanceMatrix)} ,
+#             "vars" ={return(x@vars)} ,
+#             stop("This slots doesn't exist!")
+#    )
+#  }
+#)
 
-setMethod(
-  f ="[",
-  signature = c(x="landscape" ,i="character",j="missing"),
-  definition = function (x ,i ,j , drop ){
-    switch ( EXPR =i,
-             "period" ={return(x@period)} ,
-             "distanceMatrix" ={return(x@distanceMatrix)} ,
-             "vars" ={return(x@vars)} ,
-             stop("This slots doesn't exist!")
-    )
-  }
-)
+#setMethod(
+#  f ="[",
+#  signature = c(x="landscape" ,i="character",j="missing"),
+#  definition = function (x ,i ,j , drop ){
+#    switch ( EXPR =i,
+#             "period" ={return(x@period)} ,
+#             "distanceMatrix" ={return(x@distanceMatrix)} ,
+#             "vars" ={return(x@vars)} ,
+#             stop("This slots doesn't exist!")
+#    )
+#  }
+#)
 
 #setMethod("buildRKLandscape",
 #          signature=c("landscape","NicheModel"),
@@ -1217,17 +1220,17 @@ conQuadraticSkw <- function(X,p){
 }
 
 ######### CREER TRANSITION MATRIX ###############################################################################
-setMethod(f="runsocioecoGeoDataModel",
-          signature=c("landscape","socioecoGeoDataModel"),
-          definition=function(object,model){
-            R<-buildRKLandscape(object,model["R"])
-            K<-buildRKLandscape(object,model["K"])
-            migrationMat<-migrationMatrix(object,model["migration"])
-            b<-getTransitionBackward(K=values(K),R=values(R),mig=migrationMat)      
-            f<-transitionMatrixForward(K=values(K),R=values(R),mig=migrationMat,meth = "non_overlap") # creates the forward transition matrix between cells
-            envDynLandscape(K=K,R=R,migration=migrationMat,transForMat = f,transBackMat = b)
-          }
-)
+#setMethod(f="runsocioecoGeoDataModel",
+#          signature=c("landscape","socioecoGeoDataModel"),
+#          definition=function(object,model){
+#            R<-buildRKLandscape(object,model["R"])
+#            K<-buildRKLandscape(object,model["K"])
+#            migrationMat<-migrationMatrix(object,model["migration"])
+#            b<-getTransitionBackward(K=values(K),R=values(R),mig=migrationMat)      
+#            f<-transitionMatrixForward(K=values(K),R=values(R),mig=migrationMat,meth = "non_overlap") # creates the forward transition matrix between cells
+#            envDynLandscape(K=K,R=R,migration=migrationMat,transForMat = f,transBackMat = b)
+#          }
+#)
 
 #setMethod(f="runsocioecoGeoDataModel",
 #          signature=c("enDynLandscape"),
@@ -1296,8 +1299,8 @@ setMethod(f="runsocioecoGeoDataModel",
 #)
 
 
-setMethod(f="sampleLandscape",
-          signature = c("Demographic","numeric","data.frame","character"),
+#setMethod(f="sampleLandscape",
+#          signature = c("Demographic","numeric","data.frame","character"),
           # if length(sampleCells)==1 a sample of length equals to sampleCells is taken at random 
           # from the landscape cells with probability proportional to the cells's K value
           # if length(sampleCells)>1, sampleCells contains the cell number of the sample to at to 
@@ -1305,49 +1308,49 @@ setMethod(f="sampleLandscape",
           # creates the environmental dynamic model with the landscape and parameters
           # creates the backward transition matrix between cells to run the coalescent
           # creates the environmental dynamic model with the landscape and parameters
-          definition = function(demographic, sampleSize,xy=NULL, option="randomfromK"){
-            if (!(option%in%c("randomefromK","fromCoords","K"))) stop("wrong option used in sampleLandscape funcion call")
-            if (option=="fromCoords") if (any(colnames(xy)!=c("x","y"))) stop("colnames of xy should include 'x' and 'y', for longitude and latitude)")
-            tmp <- switch (option,
-                           fromCoords = {
-                             sampleCells=as.vector(cellFromXY(landscape,yx[,c("x","y")]))
-                             names(sampleCells)=1:length(sampleCells)
-                             sampleCells
-                           },
-                           randomfromK = {
-                             sampleNo=as.vector(rmultinom(1,sampleSize,demographic$K/sum(landscapePopSize)))
-                             sampleCells=rep(1:length(sampleNo),sampleNo) # it creates a vector of the cells number where the sample occur
-                             names(sampleCells)=1:length(sampleCells)
-                             sampleCells
-                           },
-                           K ={
-                             sampleCells=rep(1:length(sampleNo),landscape$K) # it creates a vector of the cells number where the sample occur
-                             names(sampleCells)=1:length(sampleCells)
-                             sampleCells
-                           }
-            )
-          }
-)
+#          definition = function(demographic, sampleSize,xy=NULL, option="randomfromK"){
+#            if (!(option%in%c("randomefromK","fromCoords","K"))) stop("wrong option used in sampleLandscape funcion call")
+#            if (option=="fromCoords") if (any(colnames(xy)!=c("x","y"))) stop("colnames of xy should include 'x' and 'y', for longitude and latitude)")
+#            tmp <- switch (option,
+#                           fromCoords = {
+#                             sampleCells=as.vector(cellFromXY(landscape,yx[,c("x","y")]))
+#                             names(sampleCells)=1:length(sampleCells)
+#                             sampleCells
+#                           },
+#                           randomfromK = {
+#                             sampleNo=as.vector(rmultinom(1,sampleSize,demographic$K/sum(landscapePopSize)))
+#                             sampleCells=rep(1:length(sampleNo),sampleNo) # it creates a vector of the cells number where the sample occur
+#                             names(sampleCells)=1:length(sampleCells)
+#                             sampleCells
+#                           },
+#                           K ={
+#                             sampleCells=rep(1:length(sampleNo),landscape$K) # it creates a vector of the cells number where the sample occur
+#                             names(sampleCells)=1:length(sampleCells)
+#                             sampleCells
+#                           }
+#            )
+#          }
+#)
 
 
-setMethod(f="demographic",
-          signature=c("envDynLandscape","integer"),
-          definition=function(envDynLand,sampleCells){
+#setMethod(f="demographic",
+#          signature=c("envDynLandscape","integer"),
+#          definition=function(envDynLand,sampleCells){
             #lpar<-runsocioecoGeoDataModel(object,model)             # creates the environmental dynamic model with the landscape and parameters
             #b<-getTransitionBackward(object,lpar)      
             #f<-transitionMatrixForward(lpar,"non_overlap") # creates the forward transition matrix between cells
             #sample according to socioecoGeoDataModel@K 
-            new(Class = "Demographic",object=envDynLand,sampleCells=sampleCells)
-          }
-)
+#            new(Class = "Demographic",object=envDynLand,sampleCells=sampleCells)
+#          }
+#)
 
-setMethod(
-  f = "nCellA",
-  signature = "Demographic",
-  definition = function(object){
-    nCellA(object[[1]])
-  }
-)
+#setMethod(
+#  f = "nCellA",
+#  signature = "Demographic",
+#  definition = function(object){
+#    nCellA(object[[1]])
+#  }
+#)
 
 
 setMethod(
@@ -1407,7 +1410,7 @@ setMethod(
     prob_forward=NA
     N <- round(envDynSet["K"]);#N[N==0]<-1
     coalescent = list() #
-    cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet@sampleCells
+    cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet@sampleCells #a@sampleCells must be a named vector, where the value of the vector is the tile where the sample is and the name is a consecutive number
     nodes_remaining_by_cell = list()
     time=0
     single_coalescence_events=0
@@ -1425,23 +1428,25 @@ setMethod(
       #Spatial transition backwards of each node with a probability given by the Backwards Transition matrix of the envDynSet object
       for (node in 1:length(parent_cell_number_of_nodes))
       {
-        parent_cell_number_of_nodes[node] = sample(x=nCellA(envDynSet),size=1,prob=c(envDynSet["TransiBackw"][cell_number_of_nodes[node],]))
+        parent_cell_number_of_nodes[node] = sample(x=nCellA(envDynSet)[1],size=1,prob=c(envDynSet["TransiBackw"][cell_number_of_nodes[node],]))
       }
       #Calculation of the Forward transition probability of each iteration
       prob_forward[time] = sum(log(envDynSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1; if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
       #After the spatial transition backwards, the nodes newly positioned in the cells are accounted for in this cycle
-      for (cell in 1:nCellA(envDynSet))
+      for (cell in 1:nCellA(envDynSet)[1])
       {
-        nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
+        #nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
+        nodes_remaining_by_cell[[cell]] <- as.numeric(which(parent_cell_number_of_nodes==cell))
       }
       prob_forward[time] = sum(log(envDynSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1;  if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
       
       #The coalescent events are calculated in this cycle accounting for the new cell position of each node
-      for (cell in 1:nCellA(envDynSet))
+      for (cell in 1:nCellA(envDynSet)[1])
       {
         nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
+        #nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(which(parent_cell_number_of_nodes==cell))
         #The coalescence of the nodes in each cell is calculated if there is more than one node in the cell, otherwise all nodes in the cell have already coalesced
         if (length(nodes_remaining_in_the_cell)>1)
         {
@@ -1460,10 +1465,12 @@ setMethod(
               single_coalescence_events = single_coalescence_events +1
               #The new nodes that formed by the coalescing of other nodes are given a name and added to the list of nodes in the current cell
               nodes_that_coalesce = names(which(parentoffspringmatrix[,multiple]))
-              new_node <- max(nodes)+1;nodes=nodes[!(names(nodes)%in%nodes_that_coalesce)];nodes=append(nodes,new_node);names(nodes)[length(nodes)]=new_node
+              nodes <- unlist(nodes_remaining_by_cell)
+              new_node <- max(nodes)+1; nodes = nodes[!(nodes %in% nodes_that_coalesce)]; nodes=append(nodes,new_node)
+              #new_node <- max(nodes)+1;nodes=nodes[!(names(nodes)%in%nodes_that_coalesce)];nodes=append(nodes,new_node);names(nodes)[length(nodes)]=new_node ##Legacy code
               #The parent cell of the nodes that coalesced are removed from this list and the parent cell of the newly formed nodes are added
               parent_cell_number_of_nodes <- append(parent_cell_number_of_nodes[!(names(parent_cell_number_of_nodes)%in%nodes_that_coalesce)],cell);names(parent_cell_number_of_nodes)[length(parent_cell_number_of_nodes)]<-new_node
-              #The coalescent events are accounted for.
+              #The coalescent events are accounted for
               coalescent[[single_coalescence_events]] <- list(time=time,coalescing=as.numeric(nodes_that_coalesce),new_node=new_node)
               #The coalesced notes are removed from the nodes remaining and the newly formed nodes are added
               nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- append(nodes_remaining_in_the_cell[!nodes_remaining_in_the_cell %in% nodes_that_coalesce],new_node)
@@ -1473,7 +1480,7 @@ setMethod(
           }
         }
       }
-      #Before the following iteration, the cell number of nodes is asigned the value of the parent cell number of nodes
+      #Before the following iteration, the cell number of nodes is assigned the value of the parent cell number of nodes
       cell_number_of_nodes = parent_cell_number_of_nodes
     }
     tips = NULL
