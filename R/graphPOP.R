@@ -10,6 +10,11 @@ library(raster)
 
 ### Generics for handling landscapes removing NA cells
 
+#' Class representing geographic and environmental data
+#' 
+#' @slot layerConnectionTypes character vector establishing the types of connection types of each layer. The amount of connection types should be the same as the amount of layers.
+#' @inherit raster::RasterStack description
+
 setClass("geoEnvData",
          contains = "RasterStack",
          representation(layerConnectionTypes="character"),
@@ -26,26 +31,56 @@ setClass("geoEnvData",
 #' `NAcells` returns the cells with NA values in a raster object.
 #' 
 #' @param x a raster object to evaluate the values.
-#' @return vector of cells which value is NA.
+#' @returns vector of cells which value is NA.
+
 setGeneric(name="NAcells",
            def=function(object){
              return(standardGeneric("NAcells"))
            })
+
+#' Identify non-NA values in a raster
+#' 
+#' @description
+#' `Acells` returns the cells that don't have NA values in a raster object.
+#' @param x raster object.
+#' @returns vector of cells which values aren't NA.
 
 setGeneric(
   name = "Acells",
   def=function(object){return(standardGeneric("Acells"))}
 )
 
+#' Coordinate difference from each cell
+#' 
+#' @description
+#' Gets the coordinate distance from each non-NA cell to each other in the raster.
+#' @param x raster object.
+#' @importFrom raster xyFromCell
+#' @returns data.frame of the coordinate distance from each non-NA cell to every other. 
+
 setGeneric(
   name = "xyA",
   def=function(object){return(standardGeneric("xyA"))}
 )
 
+#' Counts the number of non-NA cells
+#' @description
+#' This function returns the number of cells in a raster containing non-NA values.
+#' 
+#' @param x raster object.
+#' @returns integer counting the amount of non-NA cells.
+
 setGeneric(
   name = "nCellA",
   def=function(object){return(standardGeneric("nCellA"))}
 )
+
+#' Values of the cells in a raster.
+#' @description
+#' This function returns the value of the cells in a raster layer.
+#' 
+#' @param x raster object.
+#' @returns vector containing the values of the cells in a raster layer.
 
 setGeneric(
   name = "valuesA",
