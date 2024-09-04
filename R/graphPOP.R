@@ -13,6 +13,7 @@ library(raster)
 #' Class representing geographic and environmental data
 #' 
 #' @slot layerConnectionTypes character vector establishing the types of connection types of each layer. The amount of connection types should be the same as the amount of layers.
+#' @importClassesFrom raster RasterStack
 #' @inherit raster::RasterStack description
 
 setClass("geoEnvData",
@@ -132,6 +133,14 @@ setMethod(
 )
 
 new("geoEnvData",stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),pops=raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),layerConnectionTypes=c("geographic","grouping"))
+
+#' Builder function for geoEnvData objects
+#' 
+#' @description
+#' This is the builder function to create geoEnvData objects. 
+#' 
+#' @param rasterStack a RasterStack object.
+#' @param Array An array containing the values for the RasterStack layers.
 
 geoEnvData <- function(rasterStack=NULL,Array=array(c(c(5,3,2,3,2,3,2,3,5),rep(1:3,3)),dim=c(3,3,2),dimnames = list(1:3,1:3,c("temp","pops"))),CRS="+proj=longlat",xmn=0,xmx=3,ymn=0,ymx=3,layerConnectionTypes=c("geographic","grouping")){
   if (is.null(rasterStack)) rasterStack=stack(apply(Array,3,function(x) raster(matrix(x,nrow = dim(Array)[1]),xmn=xmn,xmx=xmx,ymn=ymn,ymx=ymx,crs=CRS)))
@@ -1465,15 +1474,15 @@ setMethod(
       {
         parent_cell_number_of_nodes[node] = sample(x=nCellA(envDynSet)[1],size=1,prob=c(envDynSet["TransiBackw"][cell_number_of_nodes[node],]))
       }
-      #Calculation of the Forward transition probability of each iteration
-      prob_forward[time] = sum(log(envDynSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
-      time=time+1; if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
+      
       #After the spatial transition backwards, the nodes newly positioned in the cells are accounted for in this cycle
       for (cell in 1:nCellA(envDynSet)[1])
       {
         #nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
         nodes_remaining_by_cell[[cell]] <- as.numeric(which(parent_cell_number_of_nodes==cell))
       }
+      
+      #Calculation of the Forward transition probability of each iteration
       prob_forward[time] = sum(log(envDynSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1;  if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
       
