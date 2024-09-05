@@ -1478,8 +1478,7 @@ setMethod(
       #After the spatial transition backwards, the nodes newly positioned in the cells are accounted for in this cycle
       for (cell in 1:nCellA(envDynSet)[1])
       {
-        #nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
-        nodes_remaining_by_cell[[cell]] <- as.numeric(which(parent_cell_number_of_nodes==cell))
+        nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
       }
       
       #Calculation of the Forward transition probability of each iteration
