@@ -615,6 +615,13 @@ d=socioecoMigrationModel()
 
 #connectionType=c("geographic","grouping") # two types of connection geo is related to geographic distance, grouping
 
+setClass("sampledCells",
+         representation(sampleCell = "numeric", sampleTime ="numeric"),
+         prototype(sampleCell = c(1,4,5,2,3,2,5,6,7,7,3,2,1,9,8,7), sampleTime = c(0,0,0,0,0,1,3,5,5,6,6,6,7,7,9,10)))
+
+validitysampledCells <- function(object) {
+  if(length(object@sampleCell) != length(object@sampleTime)) stop("There should be the same number of sampled cells and sample times")
+}
 
 setClass("socioecoGeoDataHistory",
          # to represent environmental dynamic data history
@@ -622,7 +629,7 @@ setClass("socioecoGeoDataHistory",
          # includes a past socioecogeodata list with parsing times
          # the last past socioecogeodata in the list goes from the last parsing time to minus infinite
          contains="socioecoGeoData",
-         representation(pastSocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt"),
+         representation(pastSocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt", sampledCells = "list"),
          prototype(new("socioecoGeoData"),pastSocioecoGeoData=list(new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData")),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
 )
 
