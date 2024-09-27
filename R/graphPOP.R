@@ -617,11 +617,25 @@ d=socioecoMigrationModel()
 
 setClass("sampledCells",
          representation(sampleCell = "numeric", sampleTime ="numeric"),
-         prototype(sampleCell = c(1,4,5,2,3,2,5,6,7,7,3,2,1,9,8,7), sampleTime = c(0,0,0,0,0,1,3,5,5,6,6,6,7,7,9,10)))
+         prototype(sampleCell = c(1,4,5,2,3,2,5,6,7,7,3,2,1,9,8,7), sampleTime = c(0,0,0,0,0,-1,-3,-5,-5,-6,-6,-6,-7,-7,-9,-10)))
 
 validitysampledCells <- function(object) {
   if(length(object@sampleCell) != length(object@sampleTime)) stop("There should be the same number of sampled cells and sample times")
+  if(class(object@sampleCell) != "numeric") stop("The sampleCell slot must be numeric")
+  if(class(object@sampleTime) != "numeric") stop("The sampling times must be numeric")
 }
+
+setValidity("sampledCells", validitysampledCells)
+
+setMethod("show", "sampledCells", function(object) {
+  cat("An object of class 'sampledCells':\n\n")
+  cat("Sample number:\n")
+  cat(1:length(object@sampleCell),"\n")
+  cat("Sampled cells:\n")
+  cat(object@sampleCell, "\n")
+  cat("Sampling times:\n")
+  cat(object@sampleTime, "\n")
+})
 
 setClass("socioecoGeoDataHistoryAndSample",
          # to represent environmental dynamic data history
