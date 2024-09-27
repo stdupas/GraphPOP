@@ -617,7 +617,7 @@ d=socioecoMigrationModel()
 
 setClass("sampledCells",
          representation(sampleCell = "numeric", sampleTime ="numeric"),
-         prototype(sampleCell = c(1,4,5,2,3,2,5,6,7,7,3,2,1,9,8,7), sampleTime = c(0,0,0,0,0,-1,-3,-5,-5,-6,-6,-6,-7,-7,-9,-10)))
+         prototype(sampleCell = c(1,4,5,2,3,2,5,6,7,7,3,2,1,9,8,7), sampleTime = c(0,0,0,0,0,-1,-3,-5,-15,-35,-50,-50,-72,-90,-90,-110)))
 
 validitysampledCells <- function(object) {
   if(length(object@sampleCell) != length(object@sampleTime)) stop("There should be the same number of sampled cells and sample times")
@@ -643,8 +643,8 @@ setClass("socioecoGeoDataHistoryAndSample",
          # includes a past socioecogeodata list with parsing times
          # the last past socioecogeodata in the list goes from the last parsing time to minus infinite
          contains="socioecoGeoData",
-         representation(pastSocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt", sampledCells = "list"),
-         prototype(new("socioecoGeoData"),pastSocioecoGeoData=list(new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData")),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
+         representation(pastSocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt", sampledCells = "sampledCells"),
+         prototype(new("socioecoGeoData"),pastSocioecoGeoData=list(new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData")),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'), sampledCells = new("sampledCells"))
 )
 
 validitysocioecoGeoDataHistory = function(object){
@@ -655,7 +655,7 @@ validitysocioecoGeoDataHistory = function(object){
 
 setValidity("socioecoGeoDataHistoryAndSample", validitysocioecoGeoDataHistory)
 
-socioecoGeoDataHistoryAndSample <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00')){
+socioecoGeoDataHistoryAndSample <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'), sampledCells = new("sampledCells")){
   new("socioecoGeoDataHistoryAndSample",SocioecoGeoData,pastSocioecoGeoData=PastSocioecoGeoData,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
 }
 
@@ -701,6 +701,7 @@ socioecoGeoDataHistoryAndSample <- function(SocioecoGeoData=socioecoGeoData(),Pa
                 cat("(Time units\t: ",object@timeUnit," )\n",sep="")
                 show(object@pastSocioecoGeoData[[i]])
               }}
+              cat(show(object@sampledCells))
             }
   )
 
@@ -723,7 +724,7 @@ a=new("socioecoGeoDataModel")
 
 socioecoGeoDataModel<-function(socioecoGeoDataHistoryAndSample=NULL,
                                SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),
-                               ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'),
+                               ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'),sampledCells = new("sampledCells"),
                                nicheK=NULL,nicheR=NULL,migModel=NULL,
                                EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
                                stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
@@ -732,11 +733,11 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistoryAndSample=NULL,
                                modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
   
 {
-  if (is.null(socioecoGeoDataHistoryAndSample)) socioecoGeoDataHistoryAndSample=socioecoGeoDataHistoryAndSample(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime)
+  if (is.null(socioecoGeoDataHistoryAndSample)) socioecoGeoDataHistoryAndSample=socioecoGeoDataHistoryAndSample(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime,sampledCells)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= geoMigrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
-  new("socioecoGeoDataModel",socioecoGeoDataHistory,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel)
+  new("socioecoGeoDataModel",socioecoGeoDataHistoryAndSample,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel)
 }
 
 setValidity("socioecoGeoDataModel", validitysocioecoGeoDataModel)
@@ -781,13 +782,15 @@ setMethod("show",
           "socioecoGeoDataModel",
           function(object) {
             cat("class\t\t: socioecoGeoDataModel\n\n")
-            cat("Data (Inherited)\t\t: socioecoGeoDataHistory\n")
+            cat("Data (Inherited)\t\t: socioecoGeoDataHistoryAndSample\n")
             show(object@.Data)
             cat("\nslot\t\t: socioecoGeoData\n")
             show(object@SocioecoGeoData)
             cat("\nslot\t\t: pastsocioecoGeoData \n")
             show(object@pastSocioecoGeoData)
-            cat("slot\t\t: Kmodel \n")
+            cat("\nslot\t\t: sampledCells\n")
+            show(object@sampledCells)
+            cat("\nslot\t\t: Kmodel \n")
             show(object@Kmodel)
             cat("\nslot\t\t: Rmodel \n")
             show(object@Rmodel)
@@ -1022,15 +1025,13 @@ setMethod(
 
 setClass("envDynSet",
          contains = "socioecoGeoDataModel",
-         representation(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"
-                        , sampleCells = "vector"), #Test for the sampleCells slot for the coalescence simulations
+         representation(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
          prototype(socioecoGeoDataModel(),
                    RKlandscape=buildRKlandscape(socioecoGeoDataModel()),
                    geoDist=buildGeodist(socioecoGeoDataModel()),
                    migrationMatrix=buildMigrationMatrix(socioecoGeoDataModel()),
                    transitionForward=buildTransitionForward(socioecoGeoDataModel(), "non_overlap"),
-                   transitionBackward=buildTransitionBackward(socioecoGeoDataModel()),
-                   sampleCells = setNames(c(1,1,1,1,2,2,3,3,3,4,4,5,5,6,7,7,7,8,8,8,8,9,9,9,9),nm = 1:25)), #Test for the sampleCells slot
+                   transitionBackward=buildTransitionBackward(socioecoGeoDataModel())),
          validity=validitysocioecoGeoDataModel
 )
 
@@ -1052,8 +1053,7 @@ envDynSet<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migr
   if (is.null(migrationMatrix)) RKlandscape=buildMigrationMatrix(socioecoGeoDataModel)
   if (is.null(transitionForward)) transitionForward=buildTransitionForward(socioecoGeoDataModel)
   if (is.null(transitionBackward)) transitionBackward=buildTransitionBackward(socioecoGeoDataModel)
-  if (is.null(sampleCells)) samples = setNames(c(1,1,1,1,2,2,3,3,3,4,4,5,5,6,7,7,7,8,8,8,8,9,9,9,9),1:25)
-  new("envDynSet",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward, sampleCells = samples)
+  new("envDynSet",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
 }
 
 setMethod(
