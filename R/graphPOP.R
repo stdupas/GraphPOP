@@ -623,7 +623,7 @@ validitysampledCells <- function(object) {
   if(length(object@sampleCell) != length(object@sampleTime)) stop("There should be the same number of sampled cells and sample times")
 }
 
-setClass("socioecoGeoDataHistory",
+setClass("socioecoGeoDataHistoryAndSample",
          # to represent environmental dynamic data history
          # inherits from socioecoData as the present socioecogeodata
          # includes a past socioecogeodata list with parsing times
@@ -639,20 +639,20 @@ validitysocioecoGeoDataHistory = function(object){
   if (length(object@parsingTimes)>1) for (i in 2:length(object@parsingTimes)) {if (object@parsingTimes[i]>=object@parsingTimes[i-1]) stop("the socioecoGeoDataList should order from recent to past")}
 }
 
-setValidity("socioecoGeoDataHistory", validitysocioecoGeoDataHistory)
+setValidity("socioecoGeoDataHistoryAndSample", validitysocioecoGeoDataHistory)
 
-socioecoGeoDataHistory <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00')){
-  new("socioecoGeoDataHistory",SocioecoGeoData,pastSocioecoGeoData=PastSocioecoGeoData,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
+socioecoGeoDataHistoryAndSample <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00')){
+  new("socioecoGeoDataHistoryAndSample",SocioecoGeoData,pastSocioecoGeoData=PastSocioecoGeoData,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
 }
 
-  a=new("socioecoGeoDataHistory")
+  a=new("socioecoGeoDataHistoryAndSample")
 
 #socioecoGeoDataHistory <- function(socioecoGeoData)
 
   setMethod("show",
-            "socioecoGeoDataHistory",
+            "socioecoGeoDataHistoryAndSample",
             function(object){
-              cat("An object of class 'socioecoGeoDataHistory':\n\n")
+              cat("An object of class 'socioecoGeoDataHistoryAndSample':\n\n")
               if (length(object@parsingTimes)==2) {
                 cat("unique socioecoGeoData :")
                 cat("(Time frame from", as.character(object@zeroTime),"to",object@parsingTimes[2],object@timeUnit,")")
@@ -699,15 +699,15 @@ validitysocioecoGeoDataModel=function(object){
 
 
 setClass("socioecoGeoDataModel",
-         contains = "socioecoGeoDataHistory",
+         contains = "socioecoGeoDataHistoryAndSample",
          representation(SocioecoGeoData = "socioecoGeoData",Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
          validity=validitysocioecoGeoDataModel,
-         prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
+         prototype(new("socioecoGeoDataHistoryAndSample"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
       
 )
 a=new("socioecoGeoDataModel")
 
-socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
+socioecoGeoDataModel<-function(socioecoGeoDataHistoryAndSample=NULL,
                                SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),
                                ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'),
                                nicheK=NULL,nicheR=NULL,migModel=NULL,
@@ -718,7 +718,7 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
                                modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
   
 {
-  if (is.null(socioecoGeoDataHistory)) socioecoGeoDataHistory=socioecoGeoDataHistory(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime)
+  if (is.null(socioecoGeoDataHistoryAndSample)) socioecoGeoDataHistoryAndSample=socioecoGeoDataHistoryAndSample(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= geoMigrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
