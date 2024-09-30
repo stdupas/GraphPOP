@@ -617,7 +617,7 @@ d=socioecoMigrationModel()
 
 setClass("sampledCells",
          representation(sampleCell = "numeric", sampleTime ="numeric"),
-         prototype(sampleCell = c(1,4,5,2,3,2,5,6,7,7,3,2,1,9,8,7), sampleTime = c(0,0,0,0,0,-1,-3,-5,-15,-35,-50,-50,-72,-90,-90,-110)))
+         prototype(sampleCell = setNames(c(1,4,5,2,3,2,5,6,7,7,3,2,1,9,8,7),1:16), sampleTime = c(0,0,0,0,0,-1,-3,-5,-15,-35,-50,-50,-72,-90,-90,-110)))
 
 validitysampledCells <- function(object) {
   if(length(object@sampleCell) != length(object@sampleTime)) stop("There should be the same number of sampled cells and sample times")
@@ -630,12 +630,16 @@ setValidity("sampledCells", validitysampledCells)
 setMethod("show", "sampledCells", function(object) {
   cat("An object of class 'sampledCells':\n\n")
   cat("Sample number:\n")
-  cat(1:length(object@sampleCell),"\n")
+  cat(names(object@sampleCell),"\n")
   cat("Sampled cells:\n")
   cat(object@sampleCell, "\n")
   cat("Sampling times:\n")
   cat(object@sampleTime, "\n")
 })
+
+sampledCells <- function(sampleCells, sampleTimes) {
+  new("sampledCells", sampleCells = setNames(sampleCells, 1:length(sampleCells)), sampleTimes = sampleTimes)
+}
 
 setClass("socioecoGeoDataHistoryAndSample",
          # to represent environmental dynamic data history
@@ -1086,7 +1090,7 @@ setMethod(
     prob_forward=NA
     N <- round(envDynSet["K"]);#N[N==0]<-1
     coalescent = list() #
-    cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet@sampleCells #a@sampleCells must be a named vector, where the value of the vector is the tile where the sample is and the name is a consecutive number
+    cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet@sampleCells #Here take only the samples with time = 0
     nodes_remaining_by_cell = list()
     time=0
     single_coalescence_events=0
@@ -1099,8 +1103,10 @@ setMethod(
     }
     
     #Main cycle for the coalescent simulation. It will run until there is only one remaining node
-    while (length(unlist(nodes_remaining_by_cell))>1)
+    while (length(unlist(nodes_remaining_by_cell))>1) #replace by a vector holding all remaining nodes 
     {
+      #add the nodes in which sampleTime = t
+      
       #Spatial transition backwards of each node with a probability given by the Backwards Transition matrix of the envDynSet object
       for (node in 1:length(parent_cell_number_of_nodes))
       {
