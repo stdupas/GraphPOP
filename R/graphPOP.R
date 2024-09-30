@@ -1069,6 +1069,8 @@ setMethod(
              "R" ={return(values(x@RKlandscape$R))} ,
              "TransiBackw" ={return(x@transitionBackward)} ,
              "TransiForw" = {return(x@transitionForward)},
+             "Present" = {return(x@sampledCells@sampleCell[which(x@sampledCells@sampleTime == 0)])},
+             "Past" = {return(x@sampledCells@sampleCell[which(x@sampledCells@sampleTime != 0)])},
              stop("This slot doesn't exist!")
     )
   }
