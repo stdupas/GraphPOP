@@ -1067,14 +1067,17 @@ setMethod(
     switch ( EXPR =i,
              "K" ={return(values(x@RKlandscape$K))} ,
              "R" ={return(values(x@RKlandscape$R))} ,
-             "TransiBackw" ={return(x@transitionBackward)} ,
+             "TransiBackw" ={return(x@transitionBackward)},
              "TransiForw" = {return(x@transitionForward)},
              "Present" = {return(x@sampledCells@sampleCell[which(x@sampledCells@sampleTime == 0)])},
              "Past" = {return(x@sampledCells@sampleCell[which(x@sampledCells@sampleTime != 0)])},
+             "Times" = return(x@sampledCells@sampleTime),
              stop("This slot doesn't exist!")
     )
   }
 )
+
+a<-new("envDynSet")
 
 ###################Coalescence simulation methods#########################
 
@@ -1092,8 +1095,9 @@ setMethod(
     prob_forward=NA
     N <- round(envDynSet["K"]);#N[N==0]<-1
     coalescent = list() #
-    cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet@sampleCells #Here take only the samples with time = 0
+    cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet["Present"]
     nodes_remaining_by_cell = list()
+    nodes_remaining <- as.numeric(names(envDynSet@sampledCells@sampleCell))
     time=0
     single_coalescence_events=0
     single_and_multiple_coalescence_events=0
@@ -1104,10 +1108,25 @@ setMethod(
       nodes_remaining_by_cell[[cell]] <- which(cell_number_of_nodes==cell)
     }
     
-    #Main cycle for the coalescent simulation. It will run until there is only one remaining node
-    while (length(unlist(nodes_remaining_by_cell))>1) #replace by a vector holding all remaining nodes 
+    #Main cycle for the coalescent simulation. It will run until there is only one remaining node, including the nodes samples in the past
+    while (length(nodes_remaining)>1) 
     {
-      #add the nodes in which sampleTime = t
+      #Adding the nodes sampled in the past if there is any
+      if(time > 0 && any(abs(envDynSet["Times"]) == time)) 
+      {
+        past_nodes_remaining <- envDynSet@sampledCells@sampleCell[which(abs(envDynSet["Times"]) == time)]
+        
+        #This cycle adds the past nodes present in each of the cells. It cycles only through the cells where the past nodes are
+        for(cell in unique(past_nodes_remaining)) 
+        {
+          nodes_remaining_by_cell[[cell]] <- append(nodes_remaining_by_cell[[cell]], as.numeric(names(which(past_nodes_remaining == cell))))
+          num_nodes_to_add <- length(which(past_nodes_remaining == cell))
+          final_pos_parent_cell <- length(parent_cell_number_of_nodes)
+          parent_cell_number_of_nodes <- append(parent_cell_number_of_nodes,rep(cell, num_nodes_to_add))
+          names(parent_cell_number_of_nodes)[(final_pos_parent_cell+1):(final_pos_parent_cell+num_nodes_to_add)] <- as.numeric(names(which(past_nodes_remaining == cell)))
+          cell_number_of_nodes <- parent_cell_number_of_nodes
+        }
+      }
       
       #Spatial transition backwards of each node with a probability given by the Backwards Transition matrix of the envDynSet object
       for (node in 1:length(parent_cell_number_of_nodes))
@@ -1148,15 +1167,17 @@ setMethod(
               single_coalescence_events = single_coalescence_events +1
               #The new nodes that formed by the coalescing of other nodes are given a name and added to the list of nodes in the current cell
               nodes_that_coalesce = names(which(parentoffspringmatrix[,multiple]))
-              nodes <- unlist(nodes_remaining_by_cell)
-              new_node <- max(nodes)+1; nodes = nodes[!(nodes %in% nodes_that_coalesce)]; nodes=append(nodes,new_node)
+              nodes <- unlist(nodes_remaining_by_cell) 
+              new_node <- max(unique(c(nodes,nodes_remaining)))+1; nodes = nodes[!(nodes %in% nodes_that_coalesce)]; nodes=append(nodes,new_node) 
               #new_node <- max(nodes)+1;nodes=nodes[!(names(nodes)%in%nodes_that_coalesce)];nodes=append(nodes,new_node);names(nodes)[length(nodes)]=new_node ##Legacy code
               #The parent cell of the nodes that coalesced are removed from this list and the parent cell of the newly formed nodes are added
               parent_cell_number_of_nodes <- append(parent_cell_number_of_nodes[!(names(parent_cell_number_of_nodes)%in%nodes_that_coalesce)],cell);names(parent_cell_number_of_nodes)[length(parent_cell_number_of_nodes)]<-new_node
               #The coalescent events are accounted for
               coalescent[[single_coalescence_events]] <- list(time=time,coalescing=as.numeric(nodes_that_coalesce),new_node=new_node)
-              #The coalesced notes are removed from the nodes remaining and the newly formed nodes are added
+              #The coalesced nodes are removed from the nodes remaining and the newly formed nodes are added
               nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- append(nodes_remaining_in_the_cell[!nodes_remaining_in_the_cell %in% nodes_that_coalesce],new_node)
+              #The coalesced nodes are removed from the list containing all nodes (present and past) to avoid overwriting node names
+              nodes_remaining <- append(nodes_remaining[!(nodes_remaining %in% nodes_that_coalesce)], new_node)
               #The single and multiple coalescent events are counted by adding the number of nodes that coalesced minus 1
               single_and_multiple_coalescence_events = single_and_multiple_coalescence_events + length(nodes_that_coalesce) - 1
             }
@@ -1184,7 +1205,8 @@ setMethod(
     {
       for (coalescing in coalescent[[i]]$coalescing)# coalescing = coalescent[[i]]$coalescing[1]
       {
-        if (coalescing %in% tips) {coalescent[[i]]$br_length <- append(coalescent[[i]]$br_length,coalescent[[i]]$time)
+        #The branch length of the nodes is calculated. The sampling time is subtracted from the tips
+        if (coalescing %in% tips) {coalescent[[i]]$br_length <- append(coalescent[[i]]$br_length,(coalescent[[i]]$time - abs(envDynSet@sampledCells@sampleTime[coalescing])))
         } else {
           coalescent[[i]]$br_length <- append(coalescent[[i]]$br_length,coalescent[[i]]$time-times[which(internals==coalescing)])
         }
@@ -1719,7 +1741,7 @@ setMethod(
 
  
 ## removed > Trash
-setValidity("envDynHistory",validityEnvDynHistory)
+#setValidity("envDynHistory",validityEnvDynHistory)
 
 #setMethod("show",
 #          "envDynHistory",
@@ -1735,4 +1757,4 @@ setValidity("envDynHistory",validityEnvDynHistory)
 #          }
 #)
 
-new("envDynHistory")
+#new("envDynHistory")
