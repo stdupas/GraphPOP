@@ -1,6 +1,6 @@
 Package: GraphPOP
 Title: Genetic Parameter Estimation Through Graph Theory
-Version: 0.0.1.0000
+Version: 0.1.1.0000
 Authors@R: c(
     person("Stéphane", "Dupas", , "Stephane.Dupas@universite-paris-saclay.fr", role = c("aut", "cre"),
            comment = c(ORCID = "https://orcid.org/0000-0001-8332-6679")),
@@ -8,9 +8,12 @@ Authors@R: c(
            comment = c(ORCID = "https://orcid.org/0000-0002-3124-1910"))
            )
 Description: Graph theory estimates of population genetics differentiation in heterogenous landscape.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: `use_mit_license()`
 Depends: R (>= 3.1.0), ape, stringr, MASS, raster, markovchain, matrixcalc
 Encoding: UTF-8
+Lazydata: TRUE
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
