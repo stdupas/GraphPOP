@@ -31,7 +31,7 @@ setClass("geoEnvData",
 #' @description
 #' `NAcells` returns the cells with NA values in a raster object.
 #' 
-#' @param x a raster object to evaluate the values.
+#' @param object a raster object to evaluate the values.
 #' @returns vector of cells which value is NA.
 
 setGeneric(name="NAcells",
@@ -43,7 +43,7 @@ setGeneric(name="NAcells",
 #' 
 #' @description
 #' `Acells` returns the cells that don't have NA values in a raster object.
-#' @param x raster object.
+#' @param object raster object.
 #' @returns vector of cells which values aren't NA.
 
 setGeneric(
@@ -55,7 +55,7 @@ setGeneric(
 #' 
 #' @description
 #' Gets the coordinate distance from each non-NA cell to each other in the raster.
-#' @param x raster object.
+#' @param object raster object.
 #' @importFrom raster xyFromCell
 #' @returns data.frame of the coordinate distance from each non-NA cell to every other. 
 
@@ -68,7 +68,7 @@ setGeneric(
 #' @description
 #' This function returns the number of cells in a raster containing non-NA values.
 #' 
-#' @param x raster object.
+#' @param object raster object.
 #' @returns integer counting the amount of non-NA cells.
 
 setGeneric(
@@ -80,15 +80,13 @@ setGeneric(
 #' @description
 #' This function returns the value of the cells in a raster layer.
 #' 
-#' @param x raster object.
+#' @param object raster object.
 #' @returns vector containing the values of the cells in a raster layer.
 
 setGeneric(
   name = "valuesA",
   def=function(object){return(standardGeneric("valuesA"))}
 )
-
-#### Methods
 
 setMethod("NAcells",
           signature=c("geoEnvData"),
@@ -137,7 +135,7 @@ new("geoEnvData",stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0
 #' Builder function for geoEnvData objects
 #' 
 #' @description
-#' This is the builder function to create geoEnvData objects. 
+#' Builder function to create geoEnvData objects. 
 #' 
 #' @param rasterStack a RasterStack object.
 #' @param Array An array containing the values for the RasterStack layers.
@@ -158,11 +156,18 @@ setMethod("show",
             cat("crs\t\t: ",as.character(crs(object)))}
 )
 
+#' Class representing the socio-economic grouping data
+#' 
+#' @slot layerConnectionTypes 
+#' @importClassesFrom raster RasterStack
+#' @inherit raster::RasterStack description
+#' @slot categories character. Vector establishing the types of connection types of each layer. The amount of connection types should be the same as the amount of layers.
 
 setClass("socioecoGroupData",
          contains = "RasterStack",
          representation(categories="character")
          )
+
 
 validitysocioecoGroupData=function(object){
   #if (ncell(object)!=dim(object)[2]) stop("the socioecoClass must be one dimentional rasterStack : ncategories cols and 1 row")
@@ -286,6 +291,13 @@ setMethod("nCellA",
           }
 )
 
+#' Method to obtain the category names of the connection types.
+#' 
+#' @description
+#' Method to obtain the category names of the non-geographic connection types.
+#' @param object Any object with a `categories` slot.
+#' @returns names of the values of the `categories` slot.
+
 setGeneric("categories",
            def=function(object){return(standardGeneric("categories"))})
 
@@ -315,21 +327,22 @@ setMethod("variable.names",
           function(object) {lapply(object, function(x){names(x)})}
 )
 
+#' Class to contain the socio-ecological and the geographical data.
+#' 
+#' @description
+#' socioecoGeoData are raster layers containing information about environmental variables and or connectivity variables that will allow to build niche models and friction models
+#' the layers that contain geographic information related to geographic coordinates are called connectionType = geographic
+#' the layers that contain other type of information characterizing ecological populations by groups (ethnic groups, market exchanges, plant varieties for pests and diseases) have a connectionType = grouping
+#' connected class variables are coded as follows; when cell value is:
+#' - 0 : the cell is not connected to any other cell 
+#' - n!=0 : the cell is connected to the cells having the same value
+#' @slot geoEnvData geoEnvData object. This object contains the geographical data.
+#' @slot socioecoData socioecoGroupsData object. This object contains the data for the socio-ecological grouping data.
 
-#stackConnectionType
 setClass("socioecoGeoData",
-         # socioecoGeoData are raster layers containing information about environmental variables
-         # and or connectivity variables that will allow to build niche models and friction models
-         # the layers that contain geographic information related to geographic coordinates are called connectionType=geographic
-         # the layers that contain other type of information characterizing ecological populations by groups (ethnic groups, market exchanges, plant varieties for pests and diseases) have a connectionType = grouping
-         # connected class variables are coded as follows; when cell value is :
-         # - 0 : the cell is not connected to any other cell 
-         # - n!=0 : the cell is connected to the cells having the same value
          representation("geoEnvData","socioecoGroupsData"),
          prototype = prototype(geoEnvData=geoEnvData(),socioecoData=socioecoGroupsData())
 )
-
-
 
 connectionTypes=c("geographic","grouping","routes")
 
@@ -345,6 +358,17 @@ connectionTypes=c("geographic","grouping","routes")
 # a geographic and/or a socioeconomic that permits to generate 
 # transition matrix individuals among demes defined 
 # by geographic and socioeconomic variables
+
+#' socioecoGeoData builder function
+#' 
+#' @description
+#' Function to construct a socioecoGeoData object.
+#' 
+#' @param x Either a geoEnvData or a rasterStack object containing the geographical information.
+#' @param socioecoList socioecoGroupsData object containing the groups and connection types.
+#' @param stackConnectionType character. The name of the stack connection type. Default value `geographic`.
+#' @returns socioecoGeoData object.
+#' @export
 
 socioecoGeoData<-function(x=NULL,socioecoList=NULL,stackConnectionType=NULL,envLayerNames=NULL)
 {
@@ -426,7 +450,7 @@ validityNicheModel=function(object){
   if(!is.list(object@pNiche))stop("error in NicheModel pNiche : pNiche just accept list!")
   if (!all(object@reactNorms%in%reactionNorm))stop(paste("reaction norm should be one of the following :",paste(reactionNorm,collapse = ", ")))
   if(FALSE%in%lapply(object@pNiche,is.numeric))stop("error in NicheModel parameter list : Parameter list just accept numeric!")
-#  if(!all(names(object@reactNorms)%in%object@varNiche))stop("error in NicheModel : names of reactionNorm slot are not all included in var slot")
+# if(!all(names(object@reactNorms)%in%object@varNiche))stop("error in NicheModel : names of reactionNorm slot are not all included in var slot")
   notMatching <- (unlist(lapply(1:length(object@pNiche),function(x) npNiche(object@reactNorms[x]) != length(object@pNiche[[x]]))))
   if (any(notMatching)) stop(paste("
                                             error in number of parameter given in nicheModel pNiche 
@@ -1217,6 +1241,11 @@ setMethod(
   }
 )
 
+setGeneric(
+  name = "simulMultiCoal",
+  def=function(envDynSet,printCoal,iteration){return(standardGeneric("simulMultiCoal"))}
+)
+
 setMethod(
   f="simulMultiCoal",
   signature=c("envDynSet","logical","numeric"),
@@ -1247,20 +1276,20 @@ setMethod(
 
 ############## METHODS #####
 
-setGeneric(
-  name = "getTransitionBackward",
-  def=function(K,R,mig){return(standardGeneric("getTransitionBackward"))}
-)
+#setGeneric(
+#  name = "getTransitionBackward",
+#  def=function(K,R,mig){return(standardGeneric("getTransitionBackward"))}
+#)
 
-setGeneric(
-  name = "sampleLandscape",
-  def=function(demographic, sampleSize,xy, option){return(standardGeneric("sampleLandscape"))}
-)
+#setGeneric(
+#  name = "sampleLandscape",
+#  def=function(demographic, sampleSize,xy, option){return(standardGeneric("sampleLandscape"))}
+#)
 
-setGeneric(
-  name = "transitionMatrixForward",
-  def=function(K,R,mig,meth){return(standardGeneric("transitionMatrixForward"))}
-)
+#setGeneric(
+#  name = "transitionMatrixForward",
+#  def=function(K,R,mig,meth){return(standardGeneric("transitionMatrixForward"))}
+#)
 
 setGeneric(
   name = "getLaplacian",
@@ -1272,7 +1301,6 @@ setGeneric(
   def=function(object){return(standardGeneric("getOrdinaryLaplacian"))}
 )
 
-
 setGeneric(
   name = "hitting_time_digraph",
   def=function(object){return(standardGeneric("hitting_time_digraph"))}
@@ -1281,12 +1309,6 @@ setGeneric(
 setGeneric(
   name = "commute_time_digraph",
   def=function(object){return(standardGeneric("commute_time_digraph"))}
-)
-
-
-setGeneric(
-  name = "simulMultiCoal",
-  def=function(envDynSet,printCoal,iteration){return(standardGeneric("simulMultiCoal"))}
 )
 
 setGeneric(
@@ -1320,73 +1342,6 @@ setGeneric(
 )
 
 
-#setMethod(
-#  f ="[",
-#  signature = c(x="Demographic" ,i="character",j="missing"),
-#  definition = function (x ,i ,j , drop ){
-#    switch ( EXPR =i,
-#             "K" ={return(x@K)} ,
-#             "R" ={return(x@R)} ,
-#             "TransiBackw" ={return(x@TransiBackw)} ,
-#             "TransiForw" = {return(x@TransiForw)},
-#             stop("This slots doesn't exist!")
-#    )
-#  }
-#)
-
-#setMethod(
-#  f ="[",
-#  signature = c(x="socioecoGeoDataModel" ,i="character",j="missing"),
-#  definition = function (x ,i ,j , drop ){
-#    switch ( EXPR =i,
-#             "K" ={return(x@K)} ,
-#             "R" ={return(x@R)} ,
-#             "migration" ={return(x@migration)} ,
-#             stop("This slots doesn't exist!")
-#    )
-#  }
-#)
-
-#setMethod(
-#  f ="[",
-#  signature = c(x="migrationModel" ,i="character",j="missing"),
-#  definition = function (x ,i ,j , drop ){
-#    switch ( EXPR =i,
-#             "pMig" ={return(x@pMig)} ,
-#             "shapeMig" ={return(x@shapeMig)} ,
-#             stop("This slots doesn't exist!")
-#    )
-#  }
-#)
-
-
-
-#setMethod(
-#  f ="[",
-#  signature = c(x="landscape" ,i="character",j="missing"),
-#  definition = function (x ,i ,j , drop ){
-#    switch ( EXPR =i,
-#             "period" ={return(x@period)} ,
-#             "distanceMatrix" ={return(x@distanceMatrix)} ,
-#             "vars" ={return(x@vars)} ,
-#             stop("This slots doesn't exist!")
-#    )
-#  }
-#)
-
-#setMethod(
-#  f ="[",
-#  signature = c(x="landscape" ,i="character",j="missing"),
-#  definition = function (x ,i ,j , drop ){
-#    switch ( EXPR =i,
-#             "period" ={return(x@period)} ,
-#             "distanceMatrix" ={return(x@distanceMatrix)} ,
-#             "vars" ={return(x@vars)} ,
-#             stop("This slots doesn't exist!")
-#    )
-#  }
-#)
-
 #setMethod("buildRKLandscape",
 #          signature=c("landscape","NicheModel"),
 #          definition = function(object,model){                  #X=object, p=,shape=
@@ -1407,8 +1362,6 @@ setGeneric(
 #            Y=prod(stack(Y))
 #          }
 #)
-
-
 
 enveloppe <- function(X,p){
   if(length(p)!=2)stop("The parameter of envelope must have two dimensions")
