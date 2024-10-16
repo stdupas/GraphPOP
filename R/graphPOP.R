@@ -15,6 +15,7 @@ library(raster)
 #' @slot layerConnectionTypes character vector establishing the types of connection types of each layer. The amount of connection types should be the same as the amount of layers.
 #' @importClassesFrom raster RasterStack
 #' @inherit raster::RasterStack description
+#' @export
 
 setClass("geoEnvData",
          contains = "RasterStack",
@@ -139,6 +140,7 @@ new("geoEnvData",stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0
 #' 
 #' @param rasterStack a RasterStack object.
 #' @param Array An array containing the values for the RasterStack layers.
+#' @export
 
 geoEnvData <- function(rasterStack=NULL,Array=array(c(c(5,3,2,3,2,3,2,3,5),rep(1:3,3)),dim=c(3,3,2),dimnames = list(1:3,1:3,c("temp","pops"))),CRS="+proj=longlat",xmn=0,xmx=3,ymn=0,ymx=3,layerConnectionTypes=c("geographic","grouping")){
   if (is.null(rasterStack)) rasterStack=stack(apply(Array,3,function(x) raster(matrix(x,nrow = dim(Array)[1]),xmn=xmn,xmx=xmx,ymn=ymn,ymx=ymx,crs=CRS)))
@@ -162,6 +164,7 @@ setMethod("show",
 #' @importClassesFrom raster RasterStack
 #' @inherit raster::RasterStack description
 #' @slot categories character. Vector establishing the types of connection types of each layer. The amount of connection types should be the same as the amount of layers.
+#' @export
 
 setClass("socioecoGroupData",
          contains = "RasterStack",
@@ -297,6 +300,7 @@ setMethod("nCellA",
 #' Method to obtain the category names of the non-geographic connection types.
 #' @param object Any object with a `categories` slot.
 #' @returns names of the values of the `categories` slot.
+#' @export
 
 setGeneric("categories",
            def=function(object){return(standardGeneric("categories"))})
@@ -338,6 +342,7 @@ setMethod("variable.names",
 #' - n!=0 : the cell is connected to the cells having the same value
 #' @slot geoEnvData geoEnvData object. This object contains the geographical data.
 #' @slot socioecoData socioecoGroupsData object. This object contains the data for the socio-ecological grouping data.
+#' @export
 
 setClass("socioecoGeoData",
          representation("geoEnvData","socioecoGroupsData"),
@@ -436,6 +441,14 @@ socioecoGeoData(x = geoEnvData(),socioecoList=socioecoGroupsData())
 
 reactionNorm = c("scaling","enveloppe","envelin","conQuadratic","conQuadraticSkw")
 
+#' Function for the amount of parameters of a niche model.
+#' 
+#' @description
+#' Returns the amount of parameters required for determined niche model.
+#' 
+#' @param x Character. The type of the niche model.
+#' @returns Int. Number of parameters for the niche model.
+
 npNiche <- function(x) {unlist(lapply(x,function(x) switch(x[],
                                                            scaling=1,
                                                            enveloppe=2,
@@ -444,6 +457,12 @@ npNiche <- function(x) {unlist(lapply(x,function(x) switch(x[],
                                                            conQuadraticSkw=2)
 ))
 }
+
+#' Validity function for nicheModel object
+#' 
+#' @description
+#' Validity control for the nicheModel objects.
+#' @param object nicheModel object.
 
 validityNicheModel=function(object){
   if(class(object@varNiche)!="character")stop("error in NicheModel variables : variables just accept character!")
@@ -467,21 +486,46 @@ validityNicheModel=function(object){
       TRUE
 }
 
+#' nicheModel class
+#' 
+#' @description
+#' Defines the reaction norm for each variable, without interaction in this version.
+#' 
+#' @slot varNiche Character. The variable names to which the niche model applies.
+#' @slot reactNorms Character. The reaction norms for the variables as a vector. The names of the entries correspond to the variables the reaction norm uses, and the value corresponds to the type of reaction norm.
+#' @slot pNiche List. The list of numerical parameters vectors for each reaction norm, there should be a parameter vector for each reaction norm. The names of the vector components correspond to the values of the reaction norm slot.
+#' @export
+
 setClass("nicheModel",
          representation(varNiche="character",reactNorms="character",pNiche="list"),
-         # defines the reaction norm for each variable, without interaction in this version
-         # var : the variable names to which the niche model applies
-         # reactNorms : the reaction norms for the variables as a vector. The names of the entries correspond to the variables the reaction norm uses, and the value corresponds to the type of reaction norm
-         # pNiche: the list of numerical parameters vectors for each reaction norm, there should be a parameter vector for each reaction norm. The names of the vector components correspond to the values of the reaction norm slot
          prototype(varNiche=c("temp","temp"),reactNorms=c("envelin","scaling"),pNiche=list(envelin=c(2,4),scaling=100))
 )
 
 setValidity("nicheModel", validityNicheModel)
 
+#' nicheModel builder function
+#' 
+#' @description
+#' Builder function for nicheModel objects.
+#' 
+#' @param varNiche Character. The variable names to which the niche model applies.
+#' @param reactNorms Character. The reaction norms for the variables as a vector. The names of the entries correspond to the variables the reaction norm uses, and the value corresponds to the type of reaction norm.
+#' @param pNiche List. The list of numerical parameters vectors for each reaction norm, there should be a parameter vector for each reaction norm. The names of the vector components correspond to the values of the reaction norm slot.
+#' @returns an object of nicheModel class.
+#' @export
+
 nicheModel<-function(varNiche=c("temp","temp"),reactNorms=c("envelin","scaling"),pNiche=list(c(3,4),100)){#,form=formul){
   names(pNiche)=reactNorms
   new("nicheModel",varNiche=varNiche,reactNorms=reactNorms,pNiche=pNiche)#,form=form)
 }
+
+#' Function to return the amount of parameters for a migration kernel.
+#' 
+#' @description
+#' Function used to return the amount of parameters of a migration probability distribution. 
+#' 
+#' @param x Character. The name of the migration probability distribution.
+#' @returns Int. Returns the amount of parameters for the input probability distribution.
 
 npMig <- function(x) {unlist(lapply(x,function(x) switch(x[],
                                                          popSep=0,
@@ -521,12 +565,24 @@ validitygeoMigrationModel=function(object){
   }
   TRUE
 }
-#proportion of individual produced in each attibuted cell that migrates to each attributed cell of the raster
+
+#' Migration model based on the geographical distance or grouping variables.
+#' @description
+#' Proportion of individual produced in each attributed cell that migrates to each attributed cell of the raster.
+#' models are described in successive components of modelConnectionType, varMig, shapeMig, pMig and pMixt slots
+#' if modelConnectionType = dist and shapeMig=island the model is an island model in which each cell is an island and a proportion of propagules migrates to the pool with a proportion given by the parameter.
+#' if modelConnectionType = group and shapeMig=island the model is an island model in which each group is an island and a proportion of propagules migrates to the pool with a proportion given by the parameter there is a possibility of dispersion models within groups according to the shapeDisp.
+#' Models are described in successive components of modelConnectionType, varMig, shapeMig, pMig and pMixt slots.
+#' 
+#' @slot modelConnectionType Character. describes migration model: depending on distance or grouping.
+#' @slot varMig Variable according to which the individual migrates.
+#' @slot shapeMig Character. Type of probability distribution for the dispersal. The popSep model means island model where cells of the raster belong to pops according to their group variable and mix panmictically within groups according to the popSep model.
+#' @slot pMixt Numeric. A proportion of the individual migrates according to each model.
+#' @slot pMig List. Parameters of the corresponding probability distribution.
+#' @export 
+ 
 setClass("geoMigrationModel",
-         representation(modelConnectionType="character",varMig="character",shapeMig="character",pMig="list",pMixt="numeric"),
-         # describes migration model : depending on distance or grouping
-         # pMixt : a proportion of the individual migrates according to each model
-         # models are described in successive components of modelConnectionType, varMig, shapeMig, pMig and pMixt slots
+         representation(modelConnectionType="character",varMig="character",shapeMig="character",pMig="list",pMixt="numeric"),         #
          # if modelConnectionType = dist and shapeMig=island the model is an island model in which each cell is an island and a proportion of 
          #                          propagules migrates to the pool with a proportion given by the parameter
          # if modelConnectionType = group and shapeMig=island the model is an island model in which each group is an island and a proportion of 
@@ -541,6 +597,18 @@ setClass("geoMigrationModel",
 
 setValidity("geoMigrationModel", validitygeoMigrationModel)
 
+#' Builder function for geoMigrationModel objects.
+#' 
+#' @description
+#' Builder function for objects of the geoMigrationModel class.
+#' 
+#' @param modelConnectionType Character. describes migration model: depending on distance or grouping.
+#' @param varMig Variable according to which the individual migrates.
+#' @param shapeMig Character. Type of probability distribution for the dispersal. The popSep model means island model where cells of the raster belong to pops according to their group variable and mix panmictically within groups according to the popSep model.
+#' @param pMixt Numeric. A proportion of the individual migrates according to each model.
+#' @param pMig List. Parameters of the corresponding probability distribution.
+#' @returns Object of the class geoMigrationModel.
+#' @export 
 
 geoMigrationModel<-function(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","island"),pMig=list(gaussian=1/1.96,island=.2),pMixt=c(0.5,0.5)){
   #if(length(pMixt)==length(shapeMig)) pMixt=(pMixt/sum(pMixt))[1:(length(pMixt)-1)] # pMixt requires length(shapeMig)-1 parameters only, since the sum of mixture parameters =1
@@ -556,7 +624,16 @@ validitysocioecoMigrationModel=function(object){
   if (any(names(object@pMig)!=object@varMig)) stop("names of pMig list should equal varMig")
 }
 
-#proportion of individual produced in each attibuted cell that migrates to each attributed cell of the raster
+#' Class to describe a migration model given by the socioecological variables.
+#' @description
+#' Proportion of individual produced in each attributed cell that migrates to each attributed cell of the raster.
+#' 
+#' @slot weight Numeric. represents the coefficient given to socioecoMigration Matrix relative to geoMigration matrix (has a fixed weight of 1).
+#' @slot varMig Character. represents the names of the socioecoGroupsData used to calculate migration rates.
+#' @slot shapeMig represents the model used to transform varMig into migration rates.
+#' @slot pMig represent the parameters to transform varMig into distance.
+#' @export
+
 setClass("socioecoMigrationModel",
          representation(weight="numeric",varMig="character",shapeMig="character",pMig="list"),
          # describes migration model in multiple dimensions given by the variables of the socioecoGroupData
@@ -573,6 +650,17 @@ setClass("socioecoMigrationModel",
 
 setValidity("socioecoMigrationModel", validitysocioecoMigrationModel)
 
+#' Builder function for a socioecoMigrationModel object.
+#' 
+#' @description
+#' Proportion of individual produced in each attributed cell that migrates to each attributed cell of the raster.
+#' 
+#' @param weight Numeric. represents the coefficient given to socioecoMigration Matrix relative to geoMigration matrix (has a fixed weight of 1).
+#' @param varMig Character. represents the names of the socioecoGroupsData used to calculate migration rates.
+#' @param shapeMig represents the model used to transform varMig into migration rates.
+#' @param pMig represent the parameters to transform varMig into distance.
+#' @returns An object of the socioecoMigrationModel class.
+#' @export
 
 socioecoMigrationModel<-function(weight=1,varMig=c("Español","Chibcha","Corrabastos","Semillas_Comerciales","Guardianes_de_semilla"),shapeMig=c("euclideanInverse"),pMig=list(Español=1,Chibcha=1,Corrabastos=1,Semillas_Comerciales=1,Guardianes_de_semilla=1)){
   new("socioecoMigrationModel",weight=weight,varMig=varMig,shapeMig=shapeMig,pMig=pMig)
@@ -618,6 +706,13 @@ setMethod("model.extract",
                    pMig=frame@pMig)
           }
 )
+
+#' Obtain the niche model of an object.
+#' @description
+#' This function obtains the niche model of an object.
+#' 
+#' @param object Object to extract the model.
+#' @returns nicheModel object.
 
 setGeneric("model",
   def=function(object){
@@ -665,11 +760,20 @@ sampledCells <- function(sampleCells, sampleTimes) {
   new("sampledCells", sampleCells = setNames(sampleCells, 1:length(sampleCells)), sampleTimes = sampleTimes)
 }
 
+#' Class that reunites the present and past socioecoData.
+#' 
+#' @description
+#' Class to represent environmental dynamic data history. It inherits from socioecoData as the present socioecogeodata. Includes a past socioecogeodata list with parsing times.
+#' The last past socioecogeodata in the list goes from the last parsing time to minus infinite.
+#' @slot .Data socioecoGeoData object that contains the present data.
+#' @slot pastSocioecoGeoData List of socioecoGeoData representing the past socio-ecological and geographical data.
+#' @slot parsingTimes Numeric. List of the parsing times.
+#' @slot timeUnit Character. Specifies the time unit.
+#' @slot zeroTime POSIXlt. The present time.
+#' @slot sampledCells Numeric. The cells where the sampled organisms are located.
+#' @export
+
 setClass("socioecoGeoDataHistoryAndSample",
-         # to represent environmental dynamic data history
-         # inherits from socioecoData as the present socioecogeodata
-         # includes a past socioecogeodata list with parsing times
-         # the last past socioecogeodata in the list goes from the last parsing time to minus infinite
          contains="socioecoGeoData",
          representation(pastSocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt", sampledCells = "sampledCells"),
          prototype(new("socioecoGeoData"),pastSocioecoGeoData=list(new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData")),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'), sampledCells = new("sampledCells"))
@@ -682,6 +786,20 @@ validitysocioecoGeoDataHistory = function(object){
 }
 
 setValidity("socioecoGeoDataHistoryAndSample", validitysocioecoGeoDataHistory)
+
+#' Builder function for objects of the class socioecoGeoDataHistoryAndSample.
+#' 
+#' @description
+#' Class to represent environmental dynamic data history. It inherits from socioecoData as the present socioecogeodata. Includes a past socioecogeodata list with parsing times.
+#' The last past socioecogeodata in the list goes from the last parsing time to minus infinite.
+#' @param socioecoGeoData socioecoGeoData object that contains the present data.
+#' @param PastSocioecoGeoData List of socioecoGeoData representing the past socio-ecological and geographical data.
+#' @param ParsingTimes Numeric. List of the parsing times.
+#' @param TimeUnit Character. Specifies the time unit. Defaults to "days".
+#' @param ZeroTime POSIXlt. The present time.
+#' @param sampledCells Numeric. The cells where the sampled organisms are located.
+#' @returns An object of the socioecoGeoDataHistoryAndSample class.
+#' @export
 
 socioecoGeoDataHistoryAndSample <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'), sampledCells = new("sampledCells")){
   new("socioecoGeoDataHistoryAndSample",SocioecoGeoData,pastSocioecoGeoData=PastSocioecoGeoData,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
@@ -740,6 +858,18 @@ validitysocioecoGeoDataModel=function(object){
   TRUE
 }
 
+#' Class to contain the socioecoGeoDataModel built on the historical information
+#' 
+#' @description
+#' This class builds the migration models using the historical and present socioecological and geographical information. 
+#' 
+#' @slot .Data socioecoGeoDataHistoryAndSample object containing all the historical and present socioecological and geographical information.
+#' @slot SocioecoGeoData socioecoGeoData object.
+#' @slot Kmodel nicheModel object. Carrying capacity niche model.
+#' @slot Rmodel nicheModel object. Reproductive potential niche model.
+#' @slot geoMigModel geoMigrationModel object. Contains the geographic migration model information.
+#' @slot socioecoMigModel socioecoMigrationModel object. Contains the socioecological migration model information.
+#' @export
 
 setClass("socioecoGeoDataModel",
          contains = "socioecoGeoDataHistoryAndSample",
