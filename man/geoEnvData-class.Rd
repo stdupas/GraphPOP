@@ -5,7 +5,11 @@
 \alias{geoEnvData-class}
 \title{Class representing geographic and environmental data}
 \description{
-Class representing geographic and environmental data
+Methods to create a RasterLayer object. RasterLayer objects can be created from scratch, a file, an Extent object, a matrix, an 'image' object, or from a Raster*, Spatial*, im (spatstat) asc, kasc (adehabitat*), grf (geoR) or kde object.
+
+In many cases, e.g. when a RasterLayer is created from a file, it does (initially) not contain any cell (pixel) values in (RAM) memory, it only has the parameters that describe the RasterLayer. You can access cell-values with \code{\link[raster]{getValues}, \link[raster]{extract}} and related functions. You can assign new values with  \code{\link[raster]{setValues}} and with \code{\link[raster]{replacement}}.
+
+For an overview of the functions in the raster package have a look here: \code{\link[raster]{raster-package}}.
 }
 \section{Slots}{
 

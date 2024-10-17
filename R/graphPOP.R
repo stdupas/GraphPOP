@@ -1,9 +1,9 @@
-library(ape)
-library(stringr)
-library(markovchain)
-library(matrixcalc)
-library(MASS)
-library(raster)
+#library(ape)
+#library(stringr)
+#library(markovchain)
+#library(matrixcalc)
+#library(MASS)
+#library(raster)
 
 
 ############## CLASS AND VALIDITY ####
@@ -14,15 +14,15 @@ library(raster)
 #' 
 #' @slot layerConnectionTypes character vector establishing the types of connection types of each layer. The amount of connection types should be the same as the amount of layers.
 #' @importClassesFrom raster RasterStack
-#' @inherit raster::RasterStack description
+#' @inherit raster::raster description
 #' @export
 
 setClass("geoEnvData",
          contains = "RasterStack",
          representation(layerConnectionTypes="character"),
          prototype=prototype(
-           stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),
-                     pops=raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")))),
+           raster::stack(x=c(temp= raster::raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),
+                     pops= raster::raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")))),
            layerConnectionTypes=c("geographic","grouping")
            )
          )
@@ -89,12 +89,27 @@ setGeneric(
   def=function(object){return(standardGeneric("valuesA"))}
 )
 
+#' NA cells.
+#' 
+#' @name NAcells
+#' @docType methods
+#' @rdname NAcells-methods
+#' @aliases NAcells,geoEnvData
+
 setMethod("NAcells",
           signature=c("geoEnvData"),
           definition = function(object){
             which(is.na(values(object[[1]])))
           }
 )
+
+#' A cells.
+#' 
+#' @name Acells
+#' @docType methods
+#' @rdname NAcells-methods
+#' @aliases Acells,geoEnvData
+
 setMethod("Acells",
           signature=c("geoEnvData"),
           definition = function(object){
@@ -102,15 +117,29 @@ setMethod("Acells",
           }
 )
 
+#' xyA.
+#' 
+#' @name xyA
+#' @docType methods
+#' @rdname xyA-methods
+#' @aliases xyA,geoEnvData
+#' @importFrom raster xyFromCell
 
 setMethod("xyA",
           signature = "geoEnvData",
           definition = function(object){
-            df=xyFromCell(object,Acells(object))
+            df= raster::xyFromCell(object,Acells(object))
             rownames(df) <- Acells(object)
             df
           }
 )
+
+#' n Cells A.
+#' 
+#' @name nCellsA
+#' @docType methods
+#' @rdname nCellsA-methods
+#' @aliases nCellsA,geoEnvData
 
 setMethod(
   f = "nCellA",
@@ -120,12 +149,20 @@ setMethod(
   }
 )
 
+#' values A.
+#' 
+#' @name valuesA
+#' @docType methods
+#' @rdname valuesA-methods
+#' @aliases valuesA,geoEnvData
+#' @importFrom raster values
+
 setMethod(
   f = "valuesA",
   signature = "geoEnvData",
   definition = function(object){
     select <- Acells(object)
-    x=values(object)[select]
+    x=raster::values(object)[select]
     names(x) <- select
     x
   }
@@ -140,21 +177,33 @@ new("geoEnvData",stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0
 #' 
 #' @param rasterStack a RasterStack object.
 #' @param Array An array containing the values for the RasterStack layers.
+#' @importFrom raster stack
+#' @importFrom raster raster
 #' @export
 
 geoEnvData <- function(rasterStack=NULL,Array=array(c(c(5,3,2,3,2,3,2,3,5),rep(1:3,3)),dim=c(3,3,2),dimnames = list(1:3,1:3,c("temp","pops"))),CRS="+proj=longlat",xmn=0,xmx=3,ymn=0,ymx=3,layerConnectionTypes=c("geographic","grouping")){
-  if (is.null(rasterStack)) rasterStack=stack(apply(Array,3,function(x) raster(matrix(x,nrow = dim(Array)[1]),xmn=xmn,xmx=xmx,ymn=ymn,ymx=ymx,crs=CRS)))
+  if (is.null(rasterStack)) rasterStack= raster::stack(apply(Array,3,function(x) raster::raster(matrix(x,nrow = dim(Array)[1]),xmn=xmn,xmx=xmx,ymn=ymn,ymx=ymx,crs=CRS)))
   new("geoEnvData",rasterStack,layerConnectionTypes=layerConnectionTypes)
 }
+
+
+#' Show method for geoEnvData.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,geoEnvData
+#' @importFrom raster res
+#' @importFrom raster extent
 
 setMethod("show",
           "geoEnvData",
           function(object) {
             cat("Class\t\t: geoEnvData\n")
-            cat("geo dimensions\t: ",nrow(object),", ",ncol(object),", ",nlayers(object),", ",ncell(object),", ",nCellA(object)," (nrow, ncol, nlayers, ncell, ncellA)\n",sep="")
+            cat("geo dimensions\t: ",nrow(object),", ",ncol(object),", ",raster::nlayers(object),", ",raster::ncell(object),", ",nCellA(object)," (nrow, ncol, nlayers, ncell, ncellA)\n",sep="")
             cat("layerConnectionTypes\t:",paste(object@layerConnectionTypes,sep=", "),"\n")
-            cat("resolution\t: ",res(object)[1],", ",res(object)[2],"\n",sep="")
-            cat("extent\t\t: ",paste(extent(object),sep=", "),"(xmin, xmax, ymin, ymax)\n",sep="")
+            cat("resolution\t: ",raster::res(object)[1],", ",raster::res(object)[2],"\n",sep="")
+            cat("extent\t\t: ",paste(raster::extent(object),sep=", "),"(xmin, xmax, ymin, ymax)\n",sep="")
             cat("crs\t\t: ",as.character(crs(object)))}
 )
 
