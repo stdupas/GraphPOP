@@ -7,7 +7,11 @@
 \title{values A.}
 \usage{
 \S4method{valuesA}{geoEnvData}(object)
+
+\S4method{valuesA}{socioecoGroupData}(object)
 }
 \description{
 values A.
+
+valuesA method for socioecoGroupData.
 }

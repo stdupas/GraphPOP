@@ -3,7 +3,7 @@
 \docType{class}
 \name{nicheModel-class}
 \alias{nicheModel-class}
-\title{nicheModel class}
+\title{nicheModel class.}
 \description{
 Defines the reaction norm for each variable, without interaction in this version.
 }

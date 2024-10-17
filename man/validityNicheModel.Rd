@@ -9,6 +9,9 @@ validityNicheModel(object)
 \arguments{
 \item{object}{nicheModel object.}
 }
+\value{
+boolean.
+}
 \description{
 Validity control for the nicheModel objects.
 }
