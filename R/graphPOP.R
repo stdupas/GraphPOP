@@ -220,13 +220,17 @@ setClass("socioecoGroupData",
          representation(categories="character")
          )
 
+#' Validity function for socioecoGroupData
+#' @description
+#' Validates that the number of cells and the number of categories are equal in socioecoGroupData object.
+#' @param object socioecoGroupData object.
+#' @importFrom raster ncell
 
 validitysocioecoGroupData=function(object){
   #if (ncell(object)!=dim(object)[2]) stop("the socioecoClass must be one dimentional rasterStack : ncategories cols and 1 row")
-  if (ncell(object)!=length(object@categories)) stop("the number of cells and the number of categories should not differ in socioecoGroupData")
+  if (raster::ncell(object)!=length(object@categories)) stop("the number of cells and the number of categories should not differ in socioecoGroupData")
   return(TRUE)
 }
-
 
 setValidity("socioecoGroupData",validitysocioecoGroupData)
 
@@ -240,16 +244,32 @@ socioecoGroupData<-function(categories=c("group1","group2"),Values=c(1:4), Nlaye
   new("socioecoGroupData",rasterStack,categories=categories)
 }
 
+#' Show method for socioecoGroupData.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,socioecoGroupData
+#' @importFrom raster ncell
+#' @importFrom raster nlayers
+#' @importFrom raster names
+
 setMethod("show",
           "socioecoGroupData",
           function(object) {
             cat("class\t\t: socioecoGroupData\n")
-            cat("# of categ.\t:",ncell(object), "\n")
-            cat("# of layers\t:",nlayers(object),"\n")
+            cat("# of categ.\t:",raster::ncell(object), "\n")
+            cat("# of layers\t:",raster::nlayers(object),"\n")
             cat("categories\t:",object@categories,"\n")
-            cat("var names\t:",names(object),"\n")}
-          
+            cat("var names\t:",raster::names(object),"\n")}
 )
+
+#' Acells method for socioecoGroupData.
+#' 
+#' @name Acells
+#' @docType methods
+#' @rdname Acells-methods
+#' @aliases Acells,socioecoGroupData
 
 setMethod("Acells",
           signature=c("socioecoGroupData"),
@@ -258,16 +278,32 @@ setMethod("Acells",
           }
 )
 
+#' valuesA method for socioecoGroupData.
+#' 
+#' @name valuesA
+#' @docType methods
+#' @rdname valuesA-methods
+#' @aliases valuesA,geoEnvData
+#' @importFrom raster values
+#' @importFrom raster names
+
 setMethod(
   f = "valuesA",
   signature = "socioecoGroupData",
   definition = function(object){
     select <- Acells(object)
-    x=values(object)[select]
-    names(x) <- select
+    x=raster::values(object)[select]
+    raster::names(x) <- select
     x
   }
 )
+
+#' nCellA method for socioecoGroupData.
+#' 
+#' @name nCellA
+#' @docType methods
+#' @rdname nCellA-methods
+#' @aliases nCellA,socioecoGroupData
 
 setMethod(
   f = "nCellA",
@@ -276,6 +312,7 @@ setMethod(
     length(Acells(object))
   }
 )
+
 
 setClass("socioecoGroupsData",
          contains = "list",
@@ -354,14 +391,36 @@ setMethod("nCellA",
 setGeneric("categories",
            def=function(object){return(standardGeneric("categories"))})
 
+#' Categories method for socioecoGroupData.
+#' 
+#' @name categories
+#' @docType methods
+#' @rdname categories-methods
+#' @aliases categories,socioecoGroupData
+
 setMethod("categories",
           "socioecoGroupData",
           function(object){list(socioeco=object@categories)}
 )
+
+#' Categories method for socioecoGroupsData.
+#' 
+#' @name categories
+#' @docType methods
+#' @rdname categories-methods
+#' @aliases categories,socioecoGroupsData
+
 setMethod("categories",
           "socioecoGroupsData",
           function(object) {lapply(object, function(x){categories(x)})}
 )
+
+#' Categories method for geoEnvData objects.
+#' 
+#' @name categories
+#' @docType methods
+#' @rdname categories-methods
+#' @aliases categories,geoEnvData
 
 setMethod("categories",
           "geoEnvData",
@@ -369,11 +428,23 @@ setMethod("categories",
           function(object) Acells(object)
 )
 
+#' Variable.names method for socioecoGroupData.
+#' 
+#' @name variable.names
+#' @docType methods
+#' @rdname variable.names-methods
+#' @aliases variable.names,socioecoGroupData
 
 setMethod("variable.names",
           "socioecoGroupData",
           function(object) {names(object)})
 
+#' Variable.names method for socioecoGroupsData.
+#' 
+#' @name variable.names
+#' @docType methods
+#' @rdname variable.names-methods
+#' @aliases variable.names,socioecoGroupData
 
 setMethod("variable.names",
           "socioecoGroupsData",
@@ -448,10 +519,17 @@ socioecoGeoData<-function(x=NULL,socioecoList=NULL,stackConnectionType=NULL,envL
   new("socioecoGeoData",geo,socioecoList)
 }
 
+#' Variable.names method for socioecoGeoData.
+#' 
+#' @name variable.names
+#' @docType methods
+#' @rdname variable.names-methods
+#' @aliases variable.names,socioecoGeoData
+#' @importFrom stats variable.names
 
 setMethod("variable.names",
           "socioecoGeoData",
-          function(object) {list(geo=names(object),socioeco=variable.names(object@socioecoData))  
+          function(object) {list(geo=names(object),socioeco=stats::variable.names(object@socioecoData))  
           }
 )
 
@@ -461,6 +539,16 @@ setMethod("variable.names",
 #cat("extent\t\t: ",paste(extent(object),sep=", "),"(xmin, xmax, ymin, ymax)\n",sep="")
 #cat("crs\t\t: ",as.character(crs(object)))}
 
+#' Show method for socioecoGeoData.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,socioecoGeoData
+#' @importFrom raster res
+#' @importFrom raster extent
+#' @importFrom raster crs
+#' @export
 
 setMethod("show",
           "socioecoGeoData",
@@ -468,16 +556,22 @@ setMethod("show",
             cat("An object of class 'socioecoGeoData'\n")
             cat("- geoEnvData inherited class:\n")
             cat("dimensions\t:",object@nrows,",",object@ncols,",",nCellA(object)[1],",",dim(object)[3],"(nrow, ncol, ncell, layers)"," \n")
-            cat("resolution\t:",res(object)[1],",",res(object)[2]," (x, y)")
+            cat("resolution\t:",raster::res(object)[1],",",raster::res(object)[2]," (x, y)")
             cat("\nlayerConnectionTypes\t:",paste(object@layerConnectionTypes,sep=", "))
-            cat("\nextent\t\t:",extent(object@geoEnvData)[1],",", extent(object@geoEnvData)[2], "," , extent(object@geoEnvData)[3], ",", extent(object@geoEnvData)[4], " (xmin, xmax, ymin, ymax)")
-            cat("\ncrs\t\t:",as.character(crs(object)))
+            cat("\nextent\t\t:",raster::extent(object@geoEnvData)[1],",", raster::extent(object@geoEnvData)[2], "," , raster::extent(object@geoEnvData)[3], ",", raster::extent(object@geoEnvData)[4], " (xmin, xmax, ymin, ymax)")
+            cat("\ncrs\t\t:",as.character(raster::crs(object)))
             cat("\nnames\t\t: ")
             cat(names(object),sep = ", ")
             cat("\n\n- socioecoGroupsData slot:\n")
             cat(show(object@socioecoData))
             }
           )
+#' nCellA method for socioecoGeoData.
+#' 
+#' @name nCellA
+#' @docType methods
+#' @rdname nCellA-methods
+#' @aliases nCellA,socioecoGroupData
 
 setMethod("nCellA",
           signature = "socioecoGeoData",
@@ -512,9 +606,10 @@ npNiche <- function(x) {unlist(lapply(x,function(x) switch(x[],
 #' @description
 #' Validity control for the nicheModel objects.
 #' @param object nicheModel object.
+#' @returns boolean.
 
 validityNicheModel=function(object){
-  if(class(object@varNiche)!="character")stop("error in NicheModel variables : variables just accept character!")
+  if(!is(object@varNiche,"character"))stop("error in NicheModel variables : variables just accept character!")
   if(!is.list(object@pNiche))stop("error in NicheModel pNiche : pNiche just accept list!")
   if (!all(object@reactNorms%in%reactionNorm))stop(paste("reaction norm should be one of the following :",paste(reactionNorm,collapse = ", ")))
   if(FALSE%in%lapply(object@pNiche,is.numeric))stop("error in NicheModel parameter list : Parameter list just accept numeric!")
@@ -535,7 +630,7 @@ validityNicheModel=function(object){
       TRUE
 }
 
-#' nicheModel class
+#' nicheModel class.
 #' 
 #' @description
 #' Defines the reaction norm for each variable, without interaction in this version.
@@ -591,6 +686,14 @@ npMig <- function(x) {unlist(lapply(x,function(x) switch(x[],
 
 migrationShapes<-c("popSep","fat_tail1","gaussian","exponential","contiguous","contiguous8", "island","fat_tail2","contiguous_long_dist_mixt","gaussian_long_dist_mixt")
 # popSep : dispersion within groups is panmictic
+
+#' Validity function for geoMigrationModel objects.
+#' 
+#' @description
+#' Validity function for geoMigrationModel objects. 
+#' 
+#' @param object geoMigrationModel object.
+#' @returns boolean.
 
 validitygeoMigrationModel=function(object){
   #if(!is.character(object@shapeMig))stop("error in  migrationModel shapeMig : shapeMig just accept character!")
@@ -666,6 +769,13 @@ geoMigrationModel<-function(modelConnectionType=c("geographic","grouping"),varMi
 
 socioecoMigrationShapes=c("euclideanInverse") # Invers
 
+#' Validity for socioecoMigrationModel objects.
+#' @description
+#' Validates socioecoMigrationModel objects. 
+#' Checks if the length of pMig is different from length of varMig, if the migrationShape is one of the socioecoMigrationShapes elements, and if the names of pMig list are equal to the names of varMig.
+#' @param object socioecoMigrationModel object.
+#' @returns boolean.
+
 validitysocioecoMigrationModel=function(object){
   #if(!is.character(object@shapeMig))stop("error in  migrationModel shapeMig : shapeMig just accept character!")
   if (length(object@varMig)!=length(object@pMig)) stop("length of pMig list is different from length of varMig list")
@@ -715,12 +825,26 @@ socioecoMigrationModel<-function(weight=1,varMig=c("Español","Chibcha","Corraba
   new("socioecoMigrationModel",weight=weight,varMig=varMig,shapeMig=shapeMig,pMig=pMig)
 }
 
+#' variable.names method for socioecoMigrationModel.
+#' 
+#' @name variable.names
+#' @docType methods
+#' @rdname variable.names-methods
+#' @aliases variable.names,socioecoMigrationModel
+
 setMethod("variable.names",
           "socioecoMigrationModel",
           function(object){
             object@varMig
           }
           )
+
+#' variable.names method for geoMigrationModel.
+#' 
+#' @name variable.names
+#' @docType methods
+#' @rdname variable.names-methods
+#' @aliases variable.names,socioecoMigrationModel
 
 setMethod("variable.names",
           "geoMigrationModel",
@@ -729,12 +853,26 @@ setMethod("variable.names",
           }
 )
 
+#' variable.names method for nicheModel.
+#' 
+#' @name variable.names
+#' @docType methods
+#' @rdname variable.names-methods
+#' @aliases variable.names,nicheModel
+
 setMethod("variable.names",
           "nicheModel",
           function(object){
             object@varNiche
           }
 )
+
+#' model.extract method for nicheModel objects.
+#' 
+#' @name model.extract
+#' @docType methods
+#' @rdname model.extract-methods
+#' @aliases model.extract,nicheModel
 
 setMethod("model.extract",
           "nicheModel",
@@ -744,6 +882,13 @@ setMethod("model.extract",
                    reactNorms=frame@reactNorms)
           }
 )
+
+#' model.extract method for socioecoMigrationModel objects.
+#' 
+#' @name model.extract
+#' @docType methods
+#' @rdname model.extract-methods
+#' @aliases model.extract,socioecoMigrationModel
 
 setMethod("model.extract",
           "socioecoMigrationModel",
@@ -768,6 +913,12 @@ setGeneric("model",
     return(standardGeneric("model"))
   })
 
+#' model method for nicheModel objects.
+#' 
+#' @name model
+#' @docType methods
+#' @rdname model-methods
+#' @aliases model,nicheModel
 
 setMethod("model",
            "nicheModel",
