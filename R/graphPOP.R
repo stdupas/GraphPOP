@@ -957,22 +957,52 @@ d=socioecoMigrationModel()
 
 #connectionType=c("geographic","grouping") # two types of connection geo is related to geographic distance, grouping
 
+#' Class that contains the information of the sampled cells.
+#' 
+#' @description
+#' This class holds the geographical (coordinates), temporal (times of collection), and socioecological characteristics of the samples taken.
+#' @importClassesFrom sp SpatialPoints
+#' @slot geoCoordinates SpatialPoints object. Coordinates for the samples.
+#' @slot sampleCell Int. Cells where the samples are located
+#' @slot sampleTime Int. Times when the samples where collected. These times are used to integrate the past samples into the coalescence simulations.
+#' @slot socioecoCoordinates Character list. Socioecological coordinates for the samples.
+#' @export
+
 setClass("sampledCells",
-         representation(sampleCell = "numeric", sampleTime ="numeric"),
+         representation(geoCoordinates = "SpatialPoints",sampleCell = "numeric", sampleTime ="numeric", socioecoCoordinates="list"),
          prototype(sampleCell = setNames(c(1,4,5,2,3,2,5,6,7,7,3,2,1,9,8,7),1:16), sampleTime = c(0,0,0,0,0,-1,-3,-5,-15,-35,-50,-50,-72,-90,-90,-110)))
+
+#' Validity function for sampledCells objects.
+#' 
+#' @description
+#' Validity verification for sampledCells objects. It checks that the samples, the sample times and the coordinates are the same length.
+#' 
+#' @param object The sampledCells object.
+#' @returns Boolean. 
 
 validitysampledCells <- function(object) {
   if(length(object@sampleCell) != length(object@sampleTime)) stop("There should be the same number of sampled cells and sample times")
-  if(class(object@sampleCell) != "numeric") stop("The sampleCell slot must be numeric")
-  if(class(object@sampleTime) != "numeric") stop("The sampling times must be numeric")
+  if(length(object@sampleCell) != length(object@geoCoordinates)) stop("There should be the same number of sampled cells and coordinates")
+  if(!is(object@geoCoordinates,"SpatialPoints")) stop("The geoCoordinates slot must be an object of the SpatialPoints class")
+  if(!is(object@sampleCell,"numeric")) stop("The sampleCell slot must be numeric")
+  if(!is(object@sampleTime,"numeric")) stop("The sampling times must be numeric")
 }
 
 setValidity("sampledCells", validitysampledCells)
+
+#' show method for sampledCells objects.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,sampledCells
 
 setMethod("show", "sampledCells", function(object) {
   cat("An object of class 'sampledCells':\n\n")
   cat("Sample number:\n")
   cat(names(object@sampleCell),"\n")
+  cat("Sample coordinates:\n")
+  cat(object@geoCoordinates)
   cat("Sampled cells:\n")
   cat(object@sampleCell, "\n")
   cat("Sampling times:\n")
