@@ -5,6 +5,7 @@
 \alias{show}
 \alias{show,geoEnvData}
 \alias{show,socioecoGroupData}
+\alias{show,socioecoGroupsData}
 \alias{show,socioecoGeoData}
 \title{Show method for geoEnvData.}
 \usage{
@@ -12,12 +13,16 @@
 
 \S4method{show}{socioecoGroupData}(object)
 
+\S4method{show}{socioecoGroupsData}(object)
+
 \S4method{show}{socioecoGeoData}(object)
 }
 \description{
 Show method for geoEnvData.
 
 Show method for socioecoGroupData.
+
+show method for socioecoGroupsData.
 
 Show method for socioecoGeoData.
 }

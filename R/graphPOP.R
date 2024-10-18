@@ -252,7 +252,6 @@ socioecoGroupData<-function(categories=c("group1","group2"),Values=c(1:4), Nlaye
 #' @aliases show,socioecoGroupData
 #' @importFrom raster ncell
 #' @importFrom raster nlayers
-#' @importFrom raster names
 
 setMethod("show",
           "socioecoGroupData",
@@ -261,7 +260,7 @@ setMethod("show",
             cat("# of categ.\t:",raster::ncell(object), "\n")
             cat("# of layers\t:",raster::nlayers(object),"\n")
             cat("categories\t:",object@categories,"\n")
-            cat("var names\t:",raster::names(object),"\n")}
+            cat("var names\t:",names(object),"\n")}
 )
 
 #' Acells method for socioecoGroupData.
@@ -285,7 +284,6 @@ setMethod("Acells",
 #' @rdname valuesA-methods
 #' @aliases valuesA,geoEnvData
 #' @importFrom raster values
-#' @importFrom raster names
 
 setMethod(
   f = "valuesA",
@@ -293,7 +291,7 @@ setMethod(
   definition = function(object){
     select <- Acells(object)
     x=raster::values(object)[select]
-    raster::names(x) <- select
+    names(x) <- select
     x
   }
 )
@@ -333,7 +331,8 @@ setValidity("socioecoGroupsData",validitysocioecoGroupsData)
 #Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad","pesticidas","abono"),listofArray=NULL,listofRasterStack=NULL)
 
 a=new("socioecoGroupsData")
-     
+
+
       
 socioecoGroupsData<-function(listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
                               Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad",c("pesticidas","abono")),listofArray=NULL,listofRasterStack=NULL)
@@ -349,6 +348,16 @@ socioecoGroupsData<-function(listofsocioecoGroupData=NULL,listofCategories=list(
   new("socioecoGroupsData",listofsocioecoGroupData)
 }
 
+#' show method for socioecoGroupsData.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,socioecoGroupsData
+#' @importFrom raster ncell
+#' @importFrom raster nlayers
+#' @export
+
 setMethod("show",
           "socioecoGroupsData",
           function(object) {
@@ -358,12 +367,19 @@ setMethod("show",
               {
               cat("element",i,"\t:",names(object)[i],"\n")
               cat("class\t\t:",class(object[[i]]),"\n")
-              cat("# of categ.\t:",ncell(object[[i]]), "\n")
-              cat("# of layers\t:",nlayers(object[[i]]),"\n")
+              cat("# of categ.\t:",raster::ncell(object[[i]]), "\n")
+              cat("# of layers\t:",raster::nlayers(object[[i]]),"\n")
               cat("categories\t:",object[[i]]@categories,"\n")
               cat("var names\t:",names(object[[i]]),"\n\n")}
           }
 )
+
+#' Acells method for socioecoGroupsData.
+#' 
+#' @name Acells
+#' @docType methods
+#' @rdname Acells-methods
+#' @aliases Acells,socioecoGroupsData
 
 setMethod("Acells",
           signature=c("socioecoGroupsData"),
@@ -372,6 +388,12 @@ setMethod("Acells",
           }
 )
 
+#' nCellA method for socioecoGroupsData.
+#' 
+#' @name nCellA
+#' @docType methods
+#' @rdname nCellA-methods
+#' @aliases nCellA,socioecoGroupsData
 
 setMethod("nCellA",
           signature=c("socioecoGroupsData"),
@@ -566,6 +588,7 @@ setMethod("show",
             cat(show(object@socioecoData))
             }
           )
+
 #' nCellA method for socioecoGeoData.
 #' 
 #' @name nCellA

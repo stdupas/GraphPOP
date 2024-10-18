@@ -4,14 +4,19 @@
 \name{nCellA}
 \alias{nCellA}
 \alias{nCellA,socioecoGroupData}
+\alias{nCellA,socioecoGroupsData}
 \title{nCellA method for socioecoGroupData.}
 \usage{
 \S4method{nCellA}{socioecoGroupData}(object)
+
+\S4method{nCellA}{socioecoGroupsData}(object)
 
 \S4method{nCellA}{socioecoGeoData}(object)
 }
 \description{
 nCellA method for socioecoGroupData.
+
+nCellA method for socioecoGroupsData.
 
 nCellA method for socioecoGeoData.
 }

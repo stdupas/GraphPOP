@@ -4,10 +4,15 @@
 \name{Acells}
 \alias{Acells}
 \alias{Acells,socioecoGroupData}
+\alias{Acells,socioecoGroupsData}
 \title{Acells method for socioecoGroupData.}
 \usage{
 \S4method{Acells}{socioecoGroupData}(object)
+
+\S4method{Acells}{socioecoGroupsData}(object)
 }
 \description{
 Acells method for socioecoGroupData.
+
+Acells method for socioecoGroupsData.
 }
