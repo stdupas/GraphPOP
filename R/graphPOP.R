@@ -969,7 +969,7 @@ d=socioecoMigrationModel()
 #' @importFrom sp SpatialPoints
 #' @export
 
-setClass("sampledCells",
+setClass("samplePoints",
          representation(geoCoordinates = "SpatialPoints",sampleCell = "numeric", sampleTime ="numeric", socioecoCoordinates="list"),
          prototype(geoCoordinates = sp::SpatialPoints(data.frame(Lat = c(0 ,0 ,1 ,1 ,1 ,3 ,3 ,0, 1, 0, 2, 0, 2, 0, 1, 0), Long = c(2, 3, 2, 1, 0, 2, 2, 0, 3, 3, 1, 0, 3, 0, 2, 1)), proj4string = CRS(as.character("+proj=longlat +datum=WGS84 +no_defs"))), 
                    sampleCell = setNames(c(4, 1, 5, 8, 8, 6, 6, 7, 2, 1, 9, 7, 3, 7, 5, 7),1:16), 
@@ -977,15 +977,15 @@ setClass("sampledCells",
                    )
          )
 
-#' Validity function for sampledCells objects.
+#' Validity function for samplePoints objects.
 #' 
 #' @description
-#' Validity verification for sampledCells objects. It checks that the samples, the sample times and the coordinates are the same length.
+#' Validity verification for samplePoints objects. It checks that the samples, the sample times and the coordinates are the same length.
 #' 
-#' @param object The sampledCells object.
+#' @param object The samplePoints object.
 #' @returns Boolean. 
 
-validitysampledCells <- function(object) {
+validitysamplePoints <- function(object) {
   if(length(object@sampleCell) != length(object@sampleTime)) stop("There should be the same number of sampled cells and sample times")
   if(length(object@sampleCell) != length(object@geoCoordinates)) stop("There should be the same number of sampled cells and coordinates")
   if(!is(object@geoCoordinates,"SpatialPoints")) stop("The geoCoordinates slot must be an object of the SpatialPoints class")
@@ -993,17 +993,17 @@ validitysampledCells <- function(object) {
   if(!is(object@sampleTime,"numeric")) stop("The sampling times must be numeric")
 }
 
-setValidity("sampledCells", validitysampledCells)
+setValidity("samplePoints", validitysamplePoints)
 
-#' show method for sampledCells objects.
+#' show method for samplePoints objects.
 #' 
 #' @name show
 #' @docType methods
 #' @rdname show-methods
-#' @aliases show,sampledCells
+#' @aliases show,samplePoints
 
-setMethod("show", "sampledCells", function(object) {
-  cat("An object of class 'sampledCells':\n\n")
+setMethod("show", "samplePoints", function(object) {
+  cat("An object of class 'samplePoints':\n\n")
   cat("Sample number:\n")
   cat(names(object@sampleCell),"\n")
   cat("Sample coordinates:\n")
@@ -1014,8 +1014,32 @@ setMethod("show", "sampledCells", function(object) {
   cat(object@sampleTime, "\n")
 })
 
-sampledCells <- function(sampleCells, sampleTimes) {
-  new("sampledCells", sampleCells = setNames(sampleCells, 1:length(sampleCells)), sampleTimes = sampleTimes)
+#' Create objects of class samplePoints
+#' 
+#' @description
+#' Creates an object of the class samplePoints
+#' @param sCoordinates SpatialPoints, matrix or data.frame object. Coordinates where the samples were collected. In case of not being a `SpatialPoints` object, the data.frame or matrix should have only two columns, for Latitude and Longitude respectively.
+#' @param sTimes Sampling times. 
+#' @param proj4 Projection string of class \link[sp]{CRS}. Default value `NULL`. If NULL, `+proj=longlat +datum=WGS84 +no_defs` is used.
+#' @returns samplePoints object.
+#' @export
+
+samplePoints <- function(sCoordinates, sTimes, proj4 = NULL) {
+  
+  if(is.null(proj4)) { proj4 <- sp::CRS(as.character("+proj=longlat +datum=WGS84 +no_defs")) }
+  
+  if(is(sCoordinates, "SpatialPoints")) { sampleCoords = sCoordinates }
+  else { tryCatch(
+                  {sampleCoords = sp::SpatialPoints(sCoordinates, proj4string = proj4)},
+                  error = function(cond) {
+                      message("There is a problem with the format of your coordinates")
+                      message("Here is the original error message:")
+                      message(conditionMessage(cond))
+                  }
+                )
+        }
+  
+  new("samplePoints", geoCoordinates = sampleCoords,sampleCells = setNames(cellFromXY(sampleCoords), 1:length(sampleCells)), sampleTimes = sTimes)
 }
 
 #' Class that reunites the present and past socioecoData.
@@ -1028,13 +1052,13 @@ sampledCells <- function(sampleCells, sampleTimes) {
 #' @slot parsingTimes Numeric. List of the parsing times.
 #' @slot timeUnit Character. Specifies the time unit.
 #' @slot zeroTime POSIXlt. The present time.
-#' @slot sampledCells Numeric. The cells where the sampled organisms are located.
+#' @slot samplePoints Numeric. The cells where the sampled organisms are located.
 #' @export
 
 setClass("socioecoGeoDataHistoryAndSample",
          contains="socioecoGeoData",
-         representation(pastSocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt", sampledCells = "sampledCells"),
-         prototype(new("socioecoGeoData"),pastSocioecoGeoData=list(new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData")),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'), sampledCells = new("sampledCells"))
+         representation(pastSocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt", samplePoints = "samplePoints"),
+         prototype(new("socioecoGeoData"),pastSocioecoGeoData=list(new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData")),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'), samplePoints = new("samplePoints"))
 )
 
 validitysocioecoGeoDataHistory = function(object){
@@ -1055,11 +1079,11 @@ setValidity("socioecoGeoDataHistoryAndSample", validitysocioecoGeoDataHistory)
 #' @param ParsingTimes Numeric. List of the parsing times.
 #' @param TimeUnit Character. Specifies the time unit. Defaults to "days".
 #' @param ZeroTime POSIXlt. The present time.
-#' @param sampledCells Numeric. The cells where the sampled organisms are located.
+#' @param samplePoints Numeric. The cells where the sampled organisms are located.
 #' @returns An object of the socioecoGeoDataHistoryAndSample class.
 #' @export
 
-socioecoGeoDataHistoryAndSample <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'), sampledCells = new("sampledCells")){
+socioecoGeoDataHistoryAndSample <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'), samplePoints = new("samplePoints")){
   new("socioecoGeoDataHistoryAndSample",SocioecoGeoData,pastSocioecoGeoData=PastSocioecoGeoData,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
 }
 
@@ -1105,7 +1129,7 @@ socioecoGeoDataHistoryAndSample <- function(SocioecoGeoData=socioecoGeoData(),Pa
                 cat("(Time units\t: ",object@timeUnit," )\n",sep="")
                 show(object@pastSocioecoGeoData[[i]])
               }}
-              cat(show(object@sampledCells))
+              cat(show(object@samplePoints))
             }
   )
 
@@ -1140,7 +1164,7 @@ a=new("socioecoGeoDataModel")
 
 socioecoGeoDataModel<-function(socioecoGeoDataHistoryAndSample=NULL,
                                SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),
-                               ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'),sampledCells = new("sampledCells"),
+                               ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'),samplePoints = new("samplePoints"),
                                nicheK=NULL,nicheR=NULL,migModel=NULL,
                                EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
                                stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
@@ -1149,7 +1173,7 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistoryAndSample=NULL,
                                modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
   
 {
-  if (is.null(socioecoGeoDataHistoryAndSample)) socioecoGeoDataHistoryAndSample=socioecoGeoDataHistoryAndSample(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime,sampledCells)
+  if (is.null(socioecoGeoDataHistoryAndSample)) socioecoGeoDataHistoryAndSample=socioecoGeoDataHistoryAndSample(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime,samplePoints)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= geoMigrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
@@ -1204,8 +1228,8 @@ setMethod("show",
             show(object@SocioecoGeoData)
             cat("\nslot\t\t: pastsocioecoGeoData \n")
             show(object@pastSocioecoGeoData)
-            cat("\nslot\t\t: sampledCells\n")
-            show(object@sampledCells)
+            cat("\nslot\t\t: samplePoints\n")
+            show(object@samplePoints)
             cat("\nslot\t\t: Kmodel \n")
             show(object@Kmodel)
             cat("\nslot\t\t: Rmodel \n")
@@ -1481,9 +1505,9 @@ setMethod(
              "R" ={return(values(x@RKlandscape$R))} ,
              "TransiBackw" ={return(x@transitionBackward)},
              "TransiForw" = {return(x@transitionForward)},
-             "Present" = {return(x@sampledCells@sampleCell[which(x@sampledCells@sampleTime == 0)])},
-             "Past" = {return(x@sampledCells@sampleCell[which(x@sampledCells@sampleTime != 0)])},
-             "Times" = return(x@sampledCells@sampleTime),
+             "Present" = {return(x@samplePoints@sampleCell[which(x@samplePoints@sampleTime == 0)])},
+             "Past" = {return(x@samplePoints@sampleCell[which(x@samplePoints@sampleTime != 0)])},
+             "Times" = return(x@samplePoints@sampleTime),
              stop("This slot doesn't exist!")
     )
   }
@@ -1509,7 +1533,7 @@ setMethod(
     coalescent = list() #
     cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet["Present"]
     nodes_remaining_by_cell = list()
-    nodes_remaining <- as.numeric(names(envDynSet@sampledCells@sampleCell))
+    nodes_remaining <- as.numeric(names(envDynSet@samplePoints@sampleCell))
     time=0
     single_coalescence_events=0
     single_and_multiple_coalescence_events=0
@@ -1526,7 +1550,7 @@ setMethod(
       #Adding the nodes sampled in the past if there is any
       if(time > 0 && any(abs(envDynSet["Times"]) == time)) 
       {
-        past_nodes_remaining <- envDynSet@sampledCells@sampleCell[which(abs(envDynSet["Times"]) == time)]
+        past_nodes_remaining <- envDynSet@samplePoints@sampleCell[which(abs(envDynSet["Times"]) == time)]
         
         #This cycle adds the past nodes present in each of the cells. It cycles only through the cells where the past nodes are
         for(cell in unique(past_nodes_remaining)) 
@@ -1618,7 +1642,7 @@ setMethod(
       for (coalescing in coalescent[[i]]$coalescing)# coalescing = coalescent[[i]]$coalescing[1]
       {
         #The branch length of the nodes is calculated. The sampling time is subtracted from the tips
-        if (coalescing %in% tips) {coalescent[[i]]$br_length <- append(coalescent[[i]]$br_length,(coalescent[[i]]$time - abs(envDynSet@sampledCells@sampleTime[coalescing])))
+        if (coalescing %in% tips) {coalescent[[i]]$br_length <- append(coalescent[[i]]$br_length,(coalescent[[i]]$time - abs(envDynSet@samplePoints@sampleTime[coalescing])))
         } else {
           coalescent[[i]]$br_length <- append(coalescent[[i]]$br_length,coalescent[[i]]$time-times[which(internals==coalescing)])
         }

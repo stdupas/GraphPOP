@@ -7,7 +7,7 @@
 \alias{show,socioecoGroupData}
 \alias{show,socioecoGroupsData}
 \alias{show,socioecoGeoData}
-\alias{show,sampledCells}
+\alias{show,samplePoints}
 \title{Show method for geoEnvData.}
 \usage{
 \S4method{show}{geoEnvData}(object)
@@ -18,7 +18,7 @@
 
 \S4method{show}{socioecoGeoData}(object)
 
-\S4method{show}{sampledCells}(object)
+\S4method{show}{samplePoints}(object)
 }
 \description{
 Show method for geoEnvData.
@@ -29,5 +29,5 @@ show method for socioecoGroupsData.
 
 Show method for socioecoGeoData.
 
-show method for sampledCells objects.
+show method for samplePoints objects.
 }

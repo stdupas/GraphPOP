@@ -10,7 +10,7 @@ socioecoGeoDataHistoryAndSample(
   ParsingTimes = c(0, -200, -500, -2000),
   TimeUnit = "days",
   ZeroTime = as.POSIXlt("2005-4-19 7:01:00"),
-  sampledCells = new("sampledCells")
+  samplePoints = new("samplePoints")
 )
 }
 \arguments{
@@ -22,7 +22,7 @@ socioecoGeoDataHistoryAndSample(
 
 \item{ZeroTime}{POSIXlt. The present time.}
 
-\item{sampledCells}{Numeric. The cells where the sampled organisms are located.}
+\item{samplePoints}{Numeric. The cells where the sampled organisms are located.}
 
 \item{socioecoGeoData}{socioecoGeoData object that contains the present data.}
 }
