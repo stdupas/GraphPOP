@@ -966,11 +966,16 @@ d=socioecoMigrationModel()
 #' @slot sampleCell Int. Cells where the samples are located
 #' @slot sampleTime Int. Times when the samples where collected. These times are used to integrate the past samples into the coalescence simulations.
 #' @slot socioecoCoordinates Character list. Socioecological coordinates for the samples.
+#' @importFrom sp SpatialPoints
 #' @export
 
 setClass("sampledCells",
          representation(geoCoordinates = "SpatialPoints",sampleCell = "numeric", sampleTime ="numeric", socioecoCoordinates="list"),
-         prototype(sampleCell = setNames(c(1,4,5,2,3,2,5,6,7,7,3,2,1,9,8,7),1:16), sampleTime = c(0,0,0,0,0,-1,-3,-5,-15,-35,-50,-50,-72,-90,-90,-110)))
+         prototype(geoCoordinates = sp::SpatialPoints(data.frame(Lat = c(0 ,0 ,1 ,1 ,1 ,3 ,3 ,0, 1, 0, 2, 0, 2, 0, 1, 0), Long = c(2, 3, 2, 1, 0, 2, 2, 0, 3, 3, 1, 0, 3, 0, 2, 1)), proj4string = CRS(as.character("+proj=longlat +datum=WGS84 +no_defs"))), 
+                   sampleCell = setNames(c(4, 1, 5, 8, 8, 6, 6, 7, 2, 1, 9, 7, 3, 7, 5, 7),1:16), 
+                   sampleTime = c(0,0,0,0,0,-1,-3,-5,-15,-35,-50,-50,-72,-90,-90,-110)
+                   )
+         )
 
 #' Validity function for sampledCells objects.
 #' 
