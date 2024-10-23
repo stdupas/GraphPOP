@@ -2,15 +2,14 @@
 % Please edit documentation in R/graphPOP.R
 \name{socioecoGeoDataHistoryAndSample}
 \alias{socioecoGeoDataHistoryAndSample}
-\title{Builder function for objects of the class socioecoGeoDataHistoryAndSample.}
+\title{Creates an object of the class socioecoGeoDataHistoryAndSample.}
 \usage{
 socioecoGeoDataHistoryAndSample(
   SocioecoGeoData = socioecoGeoData(),
   PastSocioecoGeoData = list(socioecoGeoData(), socioecoGeoData(), socioecoGeoData()),
   ParsingTimes = c(0, -200, -500, -2000),
   TimeUnit = "days",
-  ZeroTime = as.POSIXlt("2005-4-19 7:01:00"),
-  samplePoints = new("samplePoints")
+  ZeroTime = as.POSIXlt("2005-4-19 7:01:00")
 )
 }
 \arguments{
@@ -21,8 +20,6 @@ socioecoGeoDataHistoryAndSample(
 \item{TimeUnit}{Character. Specifies the time unit. Defaults to "days".}
 
 \item{ZeroTime}{POSIXlt. The present time.}
-
-\item{samplePoints}{Numeric. The cells where the sampled organisms are located.}
 
 \item{socioecoGeoData}{socioecoGeoData object that contains the present data.}
 }

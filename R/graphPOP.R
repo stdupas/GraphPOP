@@ -1003,10 +1003,10 @@ setMethod("show", "samplePoints", function(object) {
   cat("An object of class 'samplePoints':\n\n")
   cat("Sample number:\n")
   cat(1:length(object@sampleTime),"\n")
-  cat("Sample coordinates:\n")
-  cat(object@geoCoordinates)
   cat("Sampling times:\n")
   cat(object@sampleTime, "\n")
+  cat("Summary of sample coordinates:\n")
+  show(object@geoCoordinates)
 })
 
 #' Create objects of class samplePoints
@@ -1141,7 +1141,7 @@ validitysocioecoGeoDataModel=function(object){
   if(!is(object@Kmodel,"nicheModel"))stop("Error in socioecoGeoDataModel Kmodel: Kmodel only accepts NicheModel !")
   if(!is(object@Rmodel,"nicheModel"))stop("Error in socioecoGeoDataModel Rmodel: Rmodel only accepts NicheModel !")
   if(!is(object@geoMigModel,"geoMigrationModel"))stop("Error in socioecoGeoDataModel migration: migration only accepts migrationModel !")
-  if(!is(object@samplePoints,"samplePoints"))stop("Error in socioecoGeoDataModel samplePoints: this must be a samplePoints object !")
+  if(!is(object@sampledPoints,"samplePoints"))stop("Error in socioecoGeoDataModel samplePoints: this must be a samplePoints object !")
   TRUE
 }
 
@@ -1156,14 +1156,14 @@ validitysocioecoGeoDataModel=function(object){
 #' @slot Rmodel nicheModel object. Reproductive potential niche model.
 #' @slot geoMigModel geoMigrationModel object. Contains the geographic migration model information.
 #' @slot socioecoMigModel socioecoMigrationModel object. Contains the socioecological migration model information.
-#' @slot samplePoints samplePoints object. Contains the coordinates of the samples, the sampling times and the cells where these samples are located.
+#' @slot sampledPoints samplePoints object. Contains the coordinates of the samples, the sampling times and the cells where these samples are located.
 #' @export
 
 setClass("socioecoGeoDataModel",
          contains = "socioecoGeoDataHistoryAndSample",
-         representation(SocioecoGeoData = "socioecoGeoData",Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel", sampledPoints = "sampledPoints"),
+         representation(SocioecoGeoData = "socioecoGeoData",Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel", sampledPoints = "samplePoints"),
          validity=validitysocioecoGeoDataModel,
-         prototype(new("socioecoGeoDataHistoryAndSample"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"), sampledPoints = new("sampledPoints"))
+         prototype(new("socioecoGeoDataHistoryAndSample"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"), sampledPoints = new("samplePoints"))
       
 )
 
@@ -1176,18 +1176,18 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistoryAndSample=NULL,
                                varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
                                varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
                                modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5),
-                               samplePoints = NULL)
+                               sampledPoints = NULL)
   
 {
-  if (is.null(socioecoGeoDataHistoryAndSample)) socioecoGeoDataHistoryAndSample=socioecoGeoDataHistoryAndSample(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime,samplePoints)
+  if (is.null(socioecoGeoDataHistoryAndSample)) socioecoGeoDataHistoryAndSample=socioecoGeoDataHistoryAndSample(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= geoMigrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
-  if (is.null(spatialPoints)) samplePoints = samplePoints()
+  if (is.null(sampledPoints)) sampledPoints = new("samplePoints")
   
-  samplePoints@sampleCell <- setNames(raster::cellFromXY(socioecoGeoDataHistoryAndSample,samplePoints@geoCoordinates),1:length(samplePoints@geoCoordinates))
+  sampledPoints@sampleCell <- setNames(raster::cellFromXY(socioecoGeoDataHistoryAndSample,sampledPoints@geoCoordinates),1:length(sampledPoints@geoCoordinates))
   
-  new("socioecoGeoDataModel",socioecoGeoDataHistoryAndSample,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel, samplePoints = samplePoints)
+  new("socioecoGeoDataModel",socioecoGeoDataHistoryAndSample,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel, sampledPoints = sampledPoints)
 }
 
 setValidity("socioecoGeoDataModel", validitysocioecoGeoDataModel)
@@ -1240,8 +1240,10 @@ setMethod("show",
             show(object@SocioecoGeoData)
             cat("\nslot\t\t: pastsocioecoGeoData \n")
             show(object@pastSocioecoGeoData)
-            cat("\nslot\t\t: samplePoints\n")
-            show(object@samplePoints)
+            cat("\nslot\t\t: sampledPoints\n")
+            show(object@sampledPoints)
+            cat("Sampled cells:\n")
+            cat(object@sampledPoints@sampleCell)
             cat("\nslot\t\t: Kmodel \n")
             show(object@Kmodel)
             cat("\nslot\t\t: Rmodel \n")

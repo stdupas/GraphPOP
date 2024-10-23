@@ -20,7 +20,5 @@ The last past socioecogeodata in the list goes from the last parsing time to min
 \item{\code{timeUnit}}{Character. Specifies the time unit.}
 
 \item{\code{zeroTime}}{POSIXlt. The present time.}
-
-\item{\code{samplePoints}}{Numeric. The cells where the sampled organisms are located.}
 }}
 
