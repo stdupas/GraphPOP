@@ -9,6 +9,9 @@
 \alias{show,socioecoGeoData}
 \alias{show,samplePoints}
 \alias{show,socioecoGeoDataHistoryAndSample}
+\alias{show,nicheModel}
+\alias{show,geoMigrationModel}
+\alias{show,socioecoGeoDataModel}
 \title{Show method for geoEnvData.}
 \usage{
 \S4method{show}{geoEnvData}(object)
@@ -22,6 +25,12 @@
 \S4method{show}{samplePoints}(object)
 
 \S4method{show}{socioecoGeoDataHistoryAndSample}(object)
+
+\S4method{show}{nicheModel}(object)
+
+\S4method{show}{geoMigrationModel}(object)
+
+\S4method{show}{socioecoGeoDataModel}(object)
 }
 \description{
 Show method for geoEnvData.
@@ -35,4 +44,10 @@ Show method for socioecoGeoData.
 show method for samplePoints objects.
 
 show method for socioecoGeoDataHistoryAndSample objects.
+
+show method for nicheModel objects.
+
+show method for geoMigrationModel objects.
+
+show method for socioecoGeoDataModel objects.
 }

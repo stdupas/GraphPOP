@@ -211,7 +211,7 @@ setMethod("show",
 #' 
 #' @slot layerConnectionTypes 
 #' @importClassesFrom raster RasterStack
-#' @inherit raster::RasterStack description
+#' @inherit raster::raster description
 #' @slot categories character. Vector establishing the types of connection types of each layer. The amount of connection types should be the same as the amount of layers.
 #' @export
 
@@ -1167,11 +1167,46 @@ setClass("socioecoGeoDataModel",
       
 )
 
+#' Create a socioecoGeoDataModel object.
+#' @description
+#' Create a socioecoGeoDataModel object.
+#' 
+#' @param socioecoGeoDataHistoryAndSample socioecoGeoDataHistoryAndSample object. This object contains the socio-ecological, geographical and historical data for the studied population. Default value `NULL`.
+#' @param SocioecoGeoData socioecoGeoData object. If the socioecoGeoDataHistoryAndSample object is missing, this parameter contains the present socio-ecological and geographical data.
+#' @param PastSocioecoGeoData List of socioecoGeoData objects. If the socioecoGeoDataHistoryAndSample object is missing, this parameter contains the past socio-ecological and geographical data.
+#' @param ParsingTimes Numeric. Parsing times for the present and past data.
+#' @param TimeUnit Character. The time unit for the Parsing Times.
+#' @param ZeroTime POSIXlt object. The zero or present time.
+#' @param sampledPoints samplePoints object. The coordinates and sampling times of the sampled individuals.
+#' @param nicheK nicheModel object. Niche model for the carrying capacity.
+#' @param nicheR nicheModel object. Niche model for the reproductive capacity.
+#' @param migModel migrationModel object. The migration model calculated for the studied landscape.
+#' @param EnvStack stack object. This object contains the environmental information of the landscape if it is not included in the socioecoGeoDataHistoryAndSample object.
+#' @param stackConnectionType Character. The type of connection between the nodes in the graph.
+#' @param envLayerNames Character. The names for the environmental layers.
+#' @param Extent Numeric. The extent of the raster layers.
+#' @param varNicheK Character. The variable name of which the carrying capacity K depends.
+#' @param reactNormsK Character. The type of reaction norm for the listed variable for the carrying capacity.
+#' @param varNicheR Character. The variable name of which the reproductive potential R depends.
+#' @param reactNormsR Character. The type of reaction norm for the listed variable for the reproductive potential.
+#' @param pNicheR Numeric. The parameter(s) for the reaction norm of the reproductive potential (R).
+#' @param pNicheK Numeric. The parameter(s) for the reaction norm of the carrying capacity (K).
+#' @param modelConnectionType Character. The types of connection types in the model.
+#' @param varMig Character. The variables involved in the migration model calculation.
+#' @param shapeMig Character. The shape of the migration probability distribution.
+#' @param pMig Numeric. Migration probability.
+#' @param pMixt Numeric. Mixture probability.
+#' @param sampledPoints samplePoints object. Object that contains the geographical information of the samples.
+#' @export
+#' @importFrom raster stack
+#' @importFrom raster raster
+#' @returns socioecoGeoDataModel object.
+
 socioecoGeoDataModel<-function(socioecoGeoDataHistoryAndSample=NULL,
                                SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),
-                               ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'),samplePoints = new("samplePoints"),
+                               ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'),
                                nicheK=NULL,nicheR=NULL,migModel=NULL,
-                               EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
+                               EnvStack=raster::stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster::raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
                                stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
                                varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
                                varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
@@ -1192,6 +1227,12 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistoryAndSample=NULL,
 
 setValidity("socioecoGeoDataModel", validitysocioecoGeoDataModel)
 
+#' show method for nicheModel objects.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,nicheModel
 
 setMethod("show",
           "nicheModel",
@@ -1210,6 +1251,12 @@ setMethod("show",
           }
 )
 
+#' show method for geoMigrationModel objects.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,geoMigrationModel
 
 setMethod("show",
           "geoMigrationModel",
@@ -1229,6 +1276,13 @@ setMethod("show",
             cat("mixture param \t: ")
             cat(object@pMixt,sep="\t")
           })
+
+#' show method for socioecoGeoDataModel objects.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,socioecoGeoDataModel
 
 setMethod("show",
           "socioecoGeoDataModel",
@@ -1255,20 +1309,50 @@ setMethod("show",
           }
 ) 
 
+#' Envelope reaction norm
+#' @description
+#' An envelope reaction norm. Its value is 1 when `X` is within the values of the `p` parameter, and 0 when `X` is above or below the `p` values.
+#' @param X Numeric. Present value for the parameter.
+#' @param p Numeric. Lower and higher limit for the reaction norm. `p` must have two values.
+#' @returns Numeric. 1 for values within the lower and upper limits, and 0 for values outside.
 
 enveloppe <- function(X,p){
   if(length(p)!=2)stop("The parameter of envelope must have two dimensions")
   else X>=p[1]&X<=p[2]
 }
 
+#' Envelope linear reaction norm
+#' @description
+#' An envelope linear reaction norm. Its value is 0 when `X` its above or below the range marked by `p`. The result value is 0 when `X = p[1]` and 1 when `X = p[2]`, and the resulting diagonal straight line between `(p[1],0)` and `(p[2],1)`.
+#' 
+#' @param X Numeric. Present value for the parameter.
+#' @param p Numeric. Lower and higher limit for the reaction norm. `p` must have two values.
+#' @returns Numeric. Value between 0 and 1.
+
 envelinear <- function(X, p) {
   if(length(p)!=2)stop("The parameter of envelinear must have two dimensions, p[1] is the value at Y = 0, p[2] is the value of X at Y = 1")
   else (X-p[1])/(p[2]-p[1])*enveloppe(X,p)
 }
 
+#' Scaling function
+#' @description
+#' Function used to scale the reaction norms.
+#' 
+#' @param X Numeric. Reaction norm value.
+#' @param p Numeric. Scaling parameter.
+#' @returns Scaled value.
+
 scaling <- function(X,p){X[]<-p
 X
 }
+
+#' conQuadratic reaction norm
+#' @description
+#' Quadratic reaction norm between the `p` parameter values and 0 outside.
+#' 
+#' @param X Numeric. Present value for the parameter.
+#' @param p Numeric. Lower and higher limit for the reaction norm. `p` must have two values.
+#' @returns Numeric. Value between 0 and 1.
 
 conQuadratic <- function(X,p)
 {
@@ -1276,15 +1360,41 @@ conQuadratic <- function(X,p)
   else -4*(X-p[2])*(X-p[1])/((p[2]-p[1])^2)*enveloppe(X,p)
 }
 
+#' conQuadraticSkw reaction norm
+#' @description
+#' Skewed quadratic reaction norm between the `p` parameter values and 0 outside. In this case the quadratic reaction is multiplied by an envelope linear norm to obtain a skewed quadratic reaction norm.
+#' 
+#' @param X Numeric. Present value for the parameter.
+#' @param p Numeric. Lower and higher limit for the reaction norm. `p` must have two values.
+#' @returns Numeric. Value between 0 and 1.
+
 conQuadraticSkw <- function(X,p){
   conQuadratic(X,p)*envelinear(X,p)
   X
 }
 
+#' Build an R/K landscape
+#' @description
+#' The niche function makes the product of the different layers results
+# typically the scaling times the shape (enveloppe, envelin, ocnQuadratic or conQuadraticSkw).
+#' @param object Object containing the information required to build the R/K landscape.
+#' @returns rasterStack object containing the R lanscape in a layer and the K landscape in another layer.
+#' @export
+
 setGeneric(
   name = "buildRKlandscape",
   def=function(object){return(standardGeneric("buildRKlandscape"))}
 )
+
+#' buildRKlandscape method for socioecoGeoDataModel objects.
+#' 
+#' @name buildRKlandscape
+#' @docType methods
+#' @rdname buildRKlandscape-methods
+#' @importFrom raster crs
+#' @importFrom raster stack
+#' @importFrom raster extent
+#' @aliases buildRKlandscape,socioecoGeoDataModel
 
 setMethod("buildRKlandscape",
           signature=c("socioecoGeoDataModel"),
@@ -1309,9 +1419,9 @@ setMethod("buildRKlandscape",
               )})
             if (length(Ri)==1) R=Ri[[1]] else R=prod(stack(Ri))
             if (length(Ki)==1) K=Ki[[1]] else K=prod(stack(Ki))
-            crs(R)<-crs(object)
-            extent(R)<-object@extent
-            result=stack(R,K)
+            raster::crs(R)<-raster::crs(object)
+            raster::extent(R)<-object@extent
+            result=raster::stack(R,K)
             names(result)<-c("R","K")
             result
             # the niche function makes the product of the different layers results
@@ -1319,10 +1429,26 @@ setMethod("buildRKlandscape",
           }
 )
 
+#' Build geographic distance matrix
+#' @description
+#' Builds a geographic distance matrix from raster data.
+#' 
+#' @param object Object containing raster data to calculate the geographical distance.
+#' @returns Matrix of dimension n^2 (being n the number of cells in the raster) with the geographic distance among cells.
+#' @export
+
 setGeneric(
   name = "buildGeodist",
   def=function(object){return(standardGeneric("buildGeodist"))}
 )
+
+#' buildGeodist method for socioecoGeoDataModel objects.
+#' 
+#' @name buildGeodist
+#' @docType methods
+#' @rdname buildGeodist-methods
+#' @importFrom raster distanceFromPoints
+#' @aliases buildGeodist,socioecoGeoDataModel
 
 setMethod(
   f="buildGeodist",
@@ -1333,7 +1459,7 @@ setMethod(
     #if model["shapeMig"]=="contiguous" matrix()
     geoDist = unlist(apply(xyA(object),1,
                            function(x){
-                             values(distanceFromPoints(object@geoEnvData,x))
+                             values(raster::distanceFromPoints(object@geoEnvData,x))
                              }))[Acells(object),]
     geoDist[which(geoDist==0)]<-sqrt(2*min(geoDist[which(geoDist!=0)])^2)/3
     # The distance between points within the same cell is one third 
@@ -1342,11 +1468,25 @@ setMethod(
   }
 )
 
+#' Build Migration Matrix
+#' @description
+#' Build a migration probability matrix for the landscape described in a raster.
+#' 
+#' @param object Object containing raster data to build the migration probability matrix,
+#' @returns Matrix of size n^2 * n^2 (being n the number of cells) containing the transition probability among cells.
+#' @export
+
 setGeneric(
   name = "buildMigrationMatrix",
   def=function(object){return(standardGeneric("buildMigrationMatrix"))}
 )
 
+#' buildMigrationMatrix method for socioecoGeoDataModel objects.
+#' 
+#' @name buildMigrationMatrix
+#' @docType methods
+#' @rdname buildMigrationMatrix-methods
+#' @aliases buildMigrationMatrix,socioecoGeoDataModel
 
 setMethod(
   f="buildMigrationMatrix",
@@ -1385,6 +1525,12 @@ setMethod(
 a=socioecoGeoDataModel(EnvStack = stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
 b=buildMigrationMatrix(a)
 
+#' Backward transition probabilities matrix
+#' 
+#' @description
+#' Square matrix containing the backward transition probabilities of a defined landscape.
+#' @export
+
 setClass("TransitionBackward",
          contains = "matrix",
          validity = function(object){
@@ -1393,6 +1539,13 @@ setClass("TransitionBackward",
            if (!all(rowSums(object)>0.999999999) && !all(rowSums(object)<1.000000001)) {stop("The sum of probabilities in each row is not 1")}
          }
 )
+
+#' Create a TransitionBackward object
+#' @description
+#' This function creates a TransitionBackward object.
+#' @param matrix Matrix containing the backwards transition probability.
+#' @returns TransitionBackward object.
+#' @export
 
 TransitionBackward<- function(matrix){
   if (nrow(matrix)!=ncol(matrix))stop("The matrix is not square")
@@ -1404,6 +1557,11 @@ TransitionBackward<- function(matrix){
   new(Class="TransitionBackward",matrix)
 }
 
+#' Forward transition probabilities matrix
+#' 
+#' @description
+#' Square matrix containing the forward transition probabilities of a defined landscape.
+#' @export
 
 setClass("TransitionForward",
          contains = "matrix",
@@ -1413,18 +1571,33 @@ setClass("TransitionForward",
          }
 )
 
+#' Build a backwards transition matrix
+#' @description
+#' Builds a backwards transition matrix from landscape and niche information.
+#' 
+#' @param object Object containing the landscape and niche information.
+#' @returns Backwards transition matrix.
+#' @export
+
 setGeneric(
   name = "buildTransitionBackward",
   def=function(object){return(standardGeneric("buildTransitionBackward"))}
 )
 
+#' buildTransitionBackward method for socioecoGeoDataModel objects.
+#' 
+#' @name buildTransitionBackward
+#' @docType methods
+#' @rdname buildTransitionBackward-methods
+#' @aliases buildTransitionBackward,socioecoGeoDataModel
+#' @importFrom raster values
 
 setMethod(f="buildTransitionBackward",
           signature=c("socioecoGeoDataModel"),
           definition=function(object){
             RKland <- buildRKlandscape(object)
-            R <- values(RKland)[,1]
-            K <- values(RKland)[,2]
+            R <- raster::values(RKland)[,1]
+            K <- raster::values(RKland)[,2]
             #R <- object@Rmodel@pNiche[[1]]
             #K <- object@Kmodel@pNiche[[1]]
             mig <- buildMigrationMatrix(object)
@@ -1451,10 +1624,26 @@ setMethod(f="buildTransitionBackward",
 #          }
 #)
 
+#' Build a forward transition matrix
+#' @description
+#' Builds a forward transition matrix from landscape and niche information.
+#' 
+#' @param object Object containing the landscape and niche information.
+#' @returns Forward transition matrix.
+#' @export
+
 setGeneric(
   name = "buildTransitionForward", 
   def = function(object,meth){return(standardGeneric("buildTransitionForward"))}
 )
+
+#' buildTransitionForward method for socioecoGeoDataModel objects.
+#' 
+#' @name buildTransitionForward
+#' @docType methods
+#' @rdname buildTransitionForward-methods
+#' @aliases buildTransitionForward,socioecoGeoDataModel,character
+#' @importFrom raster values
 
 setMethod(
   f="buildTransitionForward",
@@ -1462,8 +1651,8 @@ setMethod(
   definition=function(object,meth)
   {
     RKland <- buildRKlandscape(object)
-    R <- values(RKland)[,1]
-    K <- values(RKland)[,2]
+    R <- raster::values(RKland)[,1]
+    K <- raster::values(RKland)[,2]
     mig <- buildMigrationMatrix(object)
     rs = matrix(R,nrow=length(R),ncol=length(R))
     Ku = t(matrix(K,nrow=length(K),ncol=length(K)))
