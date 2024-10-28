@@ -1195,7 +1195,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="P7s0nD3wksXBl-qtJIA8-5" value="samplePoints: spatialPointsDataFrame" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="620.5" y="-270" width="180" height="152" as="geometry" />
+          <mxGeometry x="654" y="-270" width="180" height="152" as="geometry" />
         </mxCell>
         <mxCell id="P7s0nD3wksXBl-qtJIA8-6" value="&lt;div&gt;+ sampleCell: int[]&lt;/div&gt;&lt;div&gt;+ sampleTime: int[]&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ geoCoordinates: spatialPoints&lt;/div&gt;&lt;div&gt;+ socioEcoCoordinates: list[]&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="P7s0nD3wksXBl-qtJIA8-5" vertex="1">
           <mxGeometry y="40" width="180" height="74" as="geometry" />
