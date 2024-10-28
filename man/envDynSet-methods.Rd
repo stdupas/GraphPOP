@@ -4,9 +4,27 @@
 \name{simulCoal}
 \alias{simulCoal}
 \alias{simulCoal,envDynSet,boolean}
+\alias{#'}
+\alias{@description}
+\alias{Simulates}
+\alias{a}
+\alias{coalescence}
+\alias{from}
+\alias{socioecological}
+\alias{and}
+\alias{geographical}
+\alias{data.}
 \title{simulCoal method for envDynSet objects.}
 \usage{
 \S4method{simulCoal}{envDynSet,logical}(envDynSet, printCoal)
+}
+\arguments{
+\item{envDynSet}{envDynSet object. This object must contain all the information for the coalescence simulation.}
+
+\item{printCoal}{Boolean. If \code{TRUE} it prints the time elapsed during the simulations.}
+}
+\value{
+List. The first element is the coalescent, and the second is the summed forward probability.
 }
 \description{
 simulCoal method for envDynSet objects.

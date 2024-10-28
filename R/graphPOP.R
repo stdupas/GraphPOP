@@ -1781,6 +1781,11 @@ setGeneric(
 #' @docType methods
 #' @rdname envDynSet-methods
 #' @aliases simulCoal,envDynSet,boolean
+#' #' @description
+#' Simulates a coalescence from socioecological and geographical data.
+#' @param envDynSet envDynSet object. This object must contain all the information for the coalescence simulation.
+#' @param printCoal Boolean. If `TRUE` it prints the time elapsed during the simulations.
+#' @returns List. The first element is the coalescent, and the second is the summed forward probability. 
 
 setMethod(
   f="simulCoal", ##Simulates a coalescent
