@@ -1666,6 +1666,18 @@ setMethod(
   }
 )
 
+#' envDynSet class
+#' 
+#' @description
+#' This class calculates the forward and backwards socioecological transition matrices for the coalescence simulations starting from on the information present in the socioecoGeoDataModel object.
+#' @slot .Data socioecoGeoDataModel object containing the socioecological and geographical information of the studied area.
+#' @slot RKlandscape RasterStack object. R and K landscape calculated using the nicheModel objects corresponding to each environmental variable.
+#' @slot geoDist matrix. Distance matrix from each individual cell to each other in the raster.
+#' @slot migrationMatrix matrix. Calculated spatial migration matrix.
+#' @slot transitionForward matrix. Calculated forward transition matrix.
+#' @slot transitionBackward matrix. Calculated backwards transition matrix.
+#' @export
+
 setClass("envDynSet",
          contains = "socioecoGeoDataModel",
          representation(RKlandscape="RasterStack",geoDist="matrix",migrationMatrix="matrix",transitionForward="matrix",transitionBackward="matrix"),
@@ -1681,9 +1693,37 @@ setClass("envDynSet",
 #prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
 #representation(Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel")
 
+#' Creates an envDynSet object.
+#' @description
+#' This function creates an envDynSet object. It can either be created from a socioecoGeoDataModel object, or the information contained in that object separately.
+#' @param socioecoGeoDataModel socioecoGeoDataModel object containing the socioecological and geographical information of the studied area.
+#' @param RKlandscape RasterLayer object. This object will be calculated either from the data in the socioecoGeoDataModel or from the data provided directly to this function.
+#' @param geoDist matrix. Geographical distance calculated from each cell to each other.
+#' @param migrationMatrix matrix. Migration transition matrix calculated considering the socioecological and spatial variables.
+#' @param transitionForward matrix. Calculated transition forward matrix that considers the socioecological and spatial variables.
+#' @param transitionBackward matrix. Calculated transition backwards matrix that considers the socioecological and spatial variables.
+#' @param envData envData object. If the socioecoGeoDataModel is not provided, the spatial data must be provided as an [envData] object.
+#' @param EnvStack RasterStack object containing the environmental conditions of the studied area.
+#' @importFrom raster raster
+#' @importFrom raster stack
+#' @param stackConnectionType Character. The type of connection in the different raster layers. Can be either geographic or grouping.
+#' @param envLayerNames Character. Names of the different environmental layers of the raster.
+#' @param varNicheK Character. Names of the variables considered for the K niche model.
+#' @param varNicheR Character. Names of the variables considered for the R niche model.
+#' @param reactNormsK Character. Reaction norms for the K niche model.
+#' @param pNicheK Numeric list. Parameters for the K niche model calculation.
+#' @param pNicheR Numeric list. Parameters for the R niche model calculation
+#' @param reactNormsR Character. Reaction norms for the R niche model.
+#' @param modelConnectionType Character. Type of connection of the migration model.
+#' @param varMig Character. Variables involved in the calculation of the migration matrix. These are variables that should affect either the K or R values for a population.
+#' @param pMig Numeric list. Parameters for the migration model.
+#' @param pMixt Numeric. Parameters for the mixture model.
+#' @returns envDynSet object.
+#' @export
+
 envDynSet<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migrationMatrix=NULL,transitionForward=NULL,transitionBackward=NULL,
                           envData=NULL,
-                          EnvStack=stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
+                          EnvStack=raster::stack(x=c(temp=raster::raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster::raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
                           stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
                           varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
                           varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
@@ -1698,6 +1738,8 @@ envDynSet<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migr
   if (is.null(transitionBackward)) transitionBackward=buildTransitionBackward(socioecoGeoDataModel)
   new("envDynSet",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
 }
+
+#' Extracts data from envDynSet objects
 
 setMethod(
   f ="[",
@@ -1720,10 +1762,25 @@ a<-new("envDynSet")
 
 ###################Coalescence simulation methods#########################
 
+#' Coalescence simulation from socioecological and geographical data.
+#' @description
+#' Simulates a coalescence from socioecological and geographical data.
+#' @param envDynSet envDynSet object. This object must contain all the information for the coalescence simulation.
+#' @param printCoal Boolean. If `TRUE` it prints the time elapsed during the simulations.
+#' @returns List. The first element is the coalescent, and the second is the summed forward probability. 
+#' @export
+
 setGeneric(
   name = "simulCoal",
   def=function(envDynSet,printCoal){return(standardGeneric("simulCoal"))}
 )
+
+#' simulCoal method for envDynSet objects.
+#' 
+#' @name simulCoal
+#' @docType methods
+#' @rdname envDynSet-methods
+#' @aliases simulCoal,envDynSet,boolean
 
 setMethod(
   f="simulCoal", ##Simulates a coalescent
