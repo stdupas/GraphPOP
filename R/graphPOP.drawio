@@ -1175,7 +1175,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="i0fWGM7OPVL89fXLRVSB-1" value="genetSet" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="144" y="-370" width="200" height="134" as="geometry" />
+          <mxGeometry x="170" y="-290" width="200" height="134" as="geometry" />
         </mxCell>
         <mxCell id="i0fWGM7OPVL89fXLRVSB-2" value="&lt;div&gt;+ .Data: &lt;br&gt;&lt;/div&gt;&lt;div&gt;+ mutationModel: &lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ genetSample:&lt;/div&gt;&lt;div&gt;+ transitionMatrix: float[]&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="i0fWGM7OPVL89fXLRVSB-1">
           <mxGeometry y="26" width="200" height="74" as="geometry" />
