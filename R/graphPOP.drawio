@@ -194,7 +194,7 @@
           <mxGeometry x="665" y="732" width="140" height="40" as="geometry" />
         </mxCell>
         <mxCell id="mUlPBs0OehojVBWcTJut-1" value="envDynSet" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="448.5" y="-164" width="200" height="164" as="geometry" />
+          <mxGeometry x="453.5" y="-140" width="200" height="164" as="geometry" />
         </mxCell>
         <mxCell id="mUlPBs0OehojVBWcTJut-2" value="&lt;div&gt;+ .Data: socioecoGeoDataModel&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ RKLandscape: RasterStack&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ geoDist: float[,]&lt;/div&gt;+ migrationMatrix: float[,]&lt;/div&gt;+ transitionForward: float[,]&lt;div&gt;+ transitionBackward: float[,]&lt;/div&gt;&lt;div&gt;+ coordinates: coord&lt;br&gt;&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="mUlPBs0OehojVBWcTJut-1" vertex="1">
           <mxGeometry y="26" width="200" height="104" as="geometry" />
@@ -267,7 +267,7 @@
           <mxGeometry y="128" width="180" height="32" as="geometry" />
         </mxCell>
         <mxCell id="c0SSLgtnGO3cboPd4Nja-11" value="genet&lt;font color=&quot;#ff0000&quot;&gt;Sample&lt;/font&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="58" y="-50" width="160" height="78" as="geometry" />
+          <mxGeometry x="58" y="-190" width="160" height="78" as="geometry" />
         </mxCell>
         <mxCell id="c0SSLgtnGO3cboPd4Nja-12" value="&lt;div&gt;+ type: markerType&lt;/div&gt;&lt;div&gt;+ genetData: &lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="c0SSLgtnGO3cboPd4Nja-11" vertex="1">
           <mxGeometry y="26" width="160" height="44" as="geometry" />
@@ -282,7 +282,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="c0SSLgtnGO3cboPd4Nja-18" value="mutationModel" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="254" y="-58" width="160" height="86" as="geometry" />
+          <mxGeometry x="240" y="-190" width="160" height="86" as="geometry" />
         </mxCell>
         <mxCell id="c0SSLgtnGO3cboPd4Nja-19" value="+ field: type" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="c0SSLgtnGO3cboPd4Nja-18" vertex="1">
           <mxGeometry y="26" width="160" height="26" as="geometry" />
@@ -1115,7 +1115,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="P7s0nD3wksXBl-qtJIA8-5" value="samplePoints: spatialPointsDataFrame" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="130" y="90" width="180" height="152" as="geometry" />
+          <mxGeometry x="48" y="90" width="180" height="152" as="geometry" />
         </mxCell>
         <mxCell id="P7s0nD3wksXBl-qtJIA8-8" value="+ show() " style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="P7s0nD3wksXBl-qtJIA8-5" vertex="1">
           <mxGeometry y="40" width="180" height="30" as="geometry" />
@@ -1175,7 +1175,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="i0fWGM7OPVL89fXLRVSB-1" value="genetSet" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="170" y="-290" width="200" height="134" as="geometry" />
+          <mxGeometry x="130" y="-382" width="200" height="134" as="geometry" />
         </mxCell>
         <mxCell id="i0fWGM7OPVL89fXLRVSB-2" value="&lt;div&gt;+ .Data: &lt;br&gt;&lt;/div&gt;&lt;div&gt;+ mutationModel: &lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ genetSample:&lt;/div&gt;&lt;div&gt;+ transitionMatrix: float[]&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="i0fWGM7OPVL89fXLRVSB-1">
           <mxGeometry y="26" width="200" height="74" as="geometry" />
