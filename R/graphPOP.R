@@ -982,6 +982,19 @@ validityLocus<-function(object) {
 
 setValidity("locus", validityLocus)
 
+#' length method for locus objects.
+#' 
+#' @name length
+#' @docType methods
+#' @rdname length-methods
+#' @aliases length,locus
+
+setMethod("length",
+          "locus",
+          function(object){
+            length(object@alleles)
+          })
+
 #' genotype class to hold the genetic information of individual samples
 #' @description
 #' This object holds the collection of loci that represents an individual.
