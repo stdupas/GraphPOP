@@ -8,7 +8,7 @@
 \alias{show,socioecoGroupsData}
 \alias{show,socioecoGeoData}
 \alias{show,samplePoints}
-\alias{show,socioecoGeoDataHistoryAndSample}
+\alias{show,socioecoGeoDataHistory}
 \alias{show,nicheModel}
 \alias{show,geoMigrationModel}
 \alias{show,socioecoGeoDataModel}
@@ -24,7 +24,7 @@
 
 \S4method{show}{samplePoints}(object)
 
-\S4method{show}{socioecoGeoDataHistoryAndSample}(object)
+\S4method{show}{socioecoGeoDataHistory}(object)
 
 \S4method{show}{nicheModel}(object)
 
@@ -43,7 +43,7 @@ Show method for socioecoGeoData.
 
 show method for samplePoints objects.
 
-show method for socioecoGeoDataHistoryAndSample objects.
+show method for socioecoGeoDataHistory objects.
 
 show method for nicheModel objects.
 

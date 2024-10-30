@@ -957,6 +957,42 @@ d=socioecoMigrationModel()
 
 #connectionType=c("geographic","grouping") # two types of connection geo is related to geographic distance, grouping
 
+#' locus class to contain individual locus information
+#' @description
+#' The `locus` class is used to store the information of a particular locus. It contains the locus name and the allele values for either microsatellite markers or presence/absence.
+#' @slot name Character. The name of the locus.
+#' @slot markerType Character. The type of marker used. This is important for the selection of an appropriate mutation model.
+#' @slot alleles Numeric. Vector that contains the allele values.
+#' @export
+
+setClass("locus",
+         representation(name="character",markerType="character", alleles="integer"),
+         prototype(name="SSR", markerType="microsatellite",alleles=as.integer(runif(2,min = 100, max = 200)))
+         )
+
+#' Validity function for locus class
+#' @description
+#' This function tests the validity of the locus class objects.
+#' @param object locus object.
+#' @returns boolean. 
+
+validityLocus<-function(object) {
+  if(!is.vector(object@alleles)) stop("The alleles must be given in the form of a numeric vector")
+}
+
+setValidity("locus", validityLocus)
+
+#' genotype class to hold the genetic information of individual samples
+#' @description
+#' This object holds the collection of loci that represents an individual.
+#' 
+#' @slot loci list of locus objects. This list contains the information of all the loci in the sample.
+#' @export
+
+setClass("genotype",
+         representation(loci="list"),
+         prototype(loci=list(new("locus"),new("locus"),new("locus"))))
+
 #' Class that contains the information of the sampled cells.
 #' 
 #' @description
@@ -1037,11 +1073,32 @@ samplePoints <- function(sCoordinates, sTimes, proj4 = NULL) {
   new("samplePoints", geoCoordinates = sampleCoords,sampleCells = NULL, sampleTimes = sTimes)
 }
 
+#' Class that contains the genetic data of the samples
+#' @description
+#' This class contains the spatial and temporal information (inherited from [spatialPoints] object) as well as the genetic data of the samples.
+#' 
+#' @slot .Data spatialPoints object. 
+#' @slot type Character. 
+#' @slot genetData genotype object. information type.
+#' @slot recombUnit Recombination unit.
+#' @export
+
+setClass("genetData",
+         contains="samplePoints",
+         representation(type="character", genetData = "character",recombUnit = "character")
+         )
+
+validityGenetData <- function(object) {
+  if(length(object@.Data) != length(object@genetData)) {stop("All sampled points should have its corresponding genetic data")}
+}
+
+setValidity("genetData", validityGenetData)
+
 #' Class that reunites the present and past socioecoData.
 #' 
 #' @description
-#' Class to represent environmental dynamic data history. It inherits from socioecoData as the present socioecogeodata. Includes a past socioecogeodata list with parsing times.
-#' The last past socioecogeodata in the list goes from the last parsing time to minus infinite.
+#' Class to represent environmental dynamic data history. It inherits from socioecoData as the present socioecoGeoData. Includes a past socioecoGeoData list with parsing times.
+#' The last past socioecoGeoData in the list goes from the last parsing time to minus infinite.
 #' @slot .Data socioecoGeoData object that contains the present data.
 #' @slot pastSocioecoGeoData List of socioecoGeoData representing the past socio-ecological and geographical data.
 #' @slot parsingTimes Numeric. List of the parsing times.
@@ -1049,7 +1106,7 @@ samplePoints <- function(sCoordinates, sTimes, proj4 = NULL) {
 #' @slot zeroTime POSIXlt. The present time.
 #' @export
 
-setClass("socioecoGeoDataHistoryAndSample",
+setClass("socioecoGeoDataHistory",
          contains="socioecoGeoData",
          representation(pastSocioecoGeoData="list",parsingTimes="numeric",timeUnit="character",zeroTime="POSIXlt"),
          prototype(new("socioecoGeoData"),pastSocioecoGeoData=list(new("socioecoGeoData"),new("socioecoGeoData"),new("socioecoGeoData")),parsingTimes=c(0,-200,-5000,-20000),timeUnit="days",zeroTime=as.POSIXlt('2005-4-19 7:01:00'))
@@ -1061,9 +1118,9 @@ validitysocioecoGeoDataHistory = function(object){
   if (length(object@parsingTimes)>1) for (i in 2:length(object@parsingTimes)) {if (object@parsingTimes[i]>=object@parsingTimes[i-1]) stop("the socioecoGeoDataList should order from recent to past")}
 }
 
-setValidity("socioecoGeoDataHistoryAndSample", validitysocioecoGeoDataHistory)
+setValidity("socioecoGeoDataHistory", validitysocioecoGeoDataHistory)
 
-#' Creates an object of the class socioecoGeoDataHistoryAndSample.
+#' Creates an object of the class socioecoGeoDataHistory.
 #' 
 #' @description
 #' Class to represent environmental dynamic data history. It inherits from socioecoData as the present socioecogeodata. Includes a past socioecogeodata list with parsing times.
@@ -1073,26 +1130,24 @@ setValidity("socioecoGeoDataHistoryAndSample", validitysocioecoGeoDataHistory)
 #' @param ParsingTimes Numeric. List of the parsing times.
 #' @param TimeUnit Character. Specifies the time unit. Defaults to "days".
 #' @param ZeroTime POSIXlt. The present time.
-#' @returns An object of the socioecoGeoDataHistoryAndSample class.
+#' @returns An object of the socioecoGeoDataHistory class.
 #' @export
 
-socioecoGeoDataHistoryAndSample <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00')) {
-  new("socioecoGeoDataHistoryAndSample",SocioecoGeoData,pastSocioecoGeoData=PastSocioecoGeoData,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
+socioecoGeoDataHistory <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00')) {
+  new("socioecoGeoDataHistory",SocioecoGeoData,pastSocioecoGeoData=PastSocioecoGeoData,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
 }
 
-#socioecoGeoDataHistory <- function(socioecoGeoData)
-
-#' show method for socioecoGeoDataHistoryAndSample objects.
+#' show method for socioecoGeoDataHistory objects.
 #' 
 #' @name show
 #' @docType methods
 #' @rdname show-methods
-#' @aliases show,socioecoGeoDataHistoryAndSample
+#' @aliases show,socioecoGeoDataHistory
 
 setMethod("show",
-          "socioecoGeoDataHistoryAndSample",
+          "socioecoGeoDataHistory",
           function(object){
-            cat("An object of class 'socioecoGeoDataHistoryAndSample':\n\n")
+            cat("An object of class 'socioecoGeoDataHistory':\n\n")
             if (length(object@parsingTimes)==2) {
               cat("unique socioecoGeoData :")
               cat("(Time frame from", as.character(object@zeroTime),"to",object@parsingTimes[2],object@timeUnit,")")
@@ -1150,7 +1205,7 @@ validitysocioecoGeoDataModel=function(object){
 #' @description
 #' This class builds the migration models using the historical and present socioecological and geographical information. 
 #' 
-#' @slot .Data socioecoGeoDataHistoryAndSample object containing all the historical and present socioecological and geographical information.
+#' @slot .Data socioecoGeoDataHistory object containing all the historical and present socioecological and geographical information.
 #' @slot SocioecoGeoData socioecoGeoData object.
 #' @slot Kmodel nicheModel object. Carrying capacity niche model.
 #' @slot Rmodel nicheModel object. Reproductive potential niche model.
@@ -1160,10 +1215,10 @@ validitysocioecoGeoDataModel=function(object){
 #' @export
 
 setClass("socioecoGeoDataModel",
-         contains = "socioecoGeoDataHistoryAndSample",
+         contains = "socioecoGeoDataHistory",
          representation(SocioecoGeoData = "socioecoGeoData",Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel", sampledPoints = "samplePoints"),
          validity=validitysocioecoGeoDataModel,
-         prototype(new("socioecoGeoDataHistoryAndSample"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"), sampledPoints = new("samplePoints"))
+         prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"), sampledPoints = new("samplePoints"))
       
 )
 
@@ -1171,9 +1226,9 @@ setClass("socioecoGeoDataModel",
 #' @description
 #' Create a socioecoGeoDataModel object.
 #' 
-#' @param socioecoGeoDataHistoryAndSample socioecoGeoDataHistoryAndSample object. This object contains the socio-ecological, geographical and historical data for the studied population. Default value `NULL`.
-#' @param SocioecoGeoData socioecoGeoData object. If the socioecoGeoDataHistoryAndSample object is missing, this parameter contains the present socio-ecological and geographical data.
-#' @param PastSocioecoGeoData List of socioecoGeoData objects. If the socioecoGeoDataHistoryAndSample object is missing, this parameter contains the past socio-ecological and geographical data.
+#' @param socioecoGeoDataHistory socioecoGeoDataHistory object. This object contains the socio-ecological, geographical and historical data for the studied population. Default value `NULL`.
+#' @param SocioecoGeoData socioecoGeoData object. If the socioecoGeoDataHistory object is missing, this parameter contains the present socio-ecological and geographical data.
+#' @param PastSocioecoGeoData List of socioecoGeoData objects. If the socioecoGeoDataHistory object is missing, this parameter contains the past socio-ecological and geographical data.
 #' @param ParsingTimes Numeric. Parsing times for the present and past data.
 #' @param TimeUnit Character. The time unit for the Parsing Times.
 #' @param ZeroTime POSIXlt object. The zero or present time.
@@ -1181,7 +1236,7 @@ setClass("socioecoGeoDataModel",
 #' @param nicheK nicheModel object. Niche model for the carrying capacity.
 #' @param nicheR nicheModel object. Niche model for the reproductive capacity.
 #' @param migModel migrationModel object. The migration model calculated for the studied landscape.
-#' @param EnvStack stack object. This object contains the environmental information of the landscape if it is not included in the socioecoGeoDataHistoryAndSample object.
+#' @param EnvStack stack object. This object contains the environmental information of the landscape if it is not included in the socioecoGeoDataHistory object.
 #' @param stackConnectionType Character. The type of connection between the nodes in the graph.
 #' @param envLayerNames Character. The names for the environmental layers.
 #' @param Extent Numeric. The extent of the raster layers.
@@ -1202,7 +1257,7 @@ setClass("socioecoGeoDataModel",
 #' @importFrom raster raster
 #' @returns socioecoGeoDataModel object.
 
-socioecoGeoDataModel<-function(socioecoGeoDataHistoryAndSample=NULL,
+socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
                                SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),
                                ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'),
                                nicheK=NULL,nicheR=NULL,migModel=NULL,
@@ -1214,15 +1269,15 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistoryAndSample=NULL,
                                sampledPoints = NULL)
   
 {
-  if (is.null(socioecoGeoDataHistoryAndSample)) socioecoGeoDataHistoryAndSample=socioecoGeoDataHistoryAndSample(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime)
+  if (is.null(socioecoGeoDataHistory)) socioecoGeoDataHistory=socioecoGeoDataHistory(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= geoMigrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
   if (is.null(sampledPoints)) sampledPoints = new("samplePoints")
   
-  sampledPoints@sampleCell <- setNames(raster::cellFromXY(socioecoGeoDataHistoryAndSample,sampledPoints@geoCoordinates),1:length(sampledPoints@geoCoordinates))
+  sampledPoints@sampleCell <- setNames(raster::cellFromXY(socioecoGeoDataHistory,sampledPoints@geoCoordinates),1:length(sampledPoints@geoCoordinates))
   
-  new("socioecoGeoDataModel",socioecoGeoDataHistoryAndSample,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel, sampledPoints = sampledPoints)
+  new("socioecoGeoDataModel",socioecoGeoDataHistory,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel, sampledPoints = sampledPoints)
 }
 
 setValidity("socioecoGeoDataModel", validitysocioecoGeoDataModel)
@@ -1288,7 +1343,7 @@ setMethod("show",
           "socioecoGeoDataModel",
           function(object) {
             cat("class\t\t: socioecoGeoDataModel\n\n")
-            cat("Data (Inherited)\t\t: socioecoGeoDataHistoryAndSample\n")
+            cat("Data (Inherited)\t\t: socioecoGeoDataHistory\n")
             show(object@.Data)
             cat("\nslot\t\t: socioecoGeoData\n")
             show(object@SocioecoGeoData)

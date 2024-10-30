@@ -5,7 +5,7 @@
 \title{Create a socioecoGeoDataModel object.}
 \usage{
 socioecoGeoDataModel(
-  socioecoGeoDataHistoryAndSample = NULL,
+  socioecoGeoDataHistory = NULL,
   SocioecoGeoData = socioecoGeoData(),
   PastSocioecoGeoData = list(socioecoGeoData(), socioecoGeoData(), socioecoGeoData()),
   ParsingTimes = c(0, -200, -500, -2000),
@@ -36,11 +36,11 @@ socioecoGeoDataModel(
 )
 }
 \arguments{
-\item{socioecoGeoDataHistoryAndSample}{socioecoGeoDataHistoryAndSample object. This object contains the socio-ecological, geographical and historical data for the studied population. Default value \code{NULL}.}
+\item{socioecoGeoDataHistory}{socioecoGeoDataHistory object. This object contains the socio-ecological, geographical and historical data for the studied population. Default value \code{NULL}.}
 
-\item{SocioecoGeoData}{socioecoGeoData object. If the socioecoGeoDataHistoryAndSample object is missing, this parameter contains the present socio-ecological and geographical data.}
+\item{SocioecoGeoData}{socioecoGeoData object. If the socioecoGeoDataHistory object is missing, this parameter contains the present socio-ecological and geographical data.}
 
-\item{PastSocioecoGeoData}{List of socioecoGeoData objects. If the socioecoGeoDataHistoryAndSample object is missing, this parameter contains the past socio-ecological and geographical data.}
+\item{PastSocioecoGeoData}{List of socioecoGeoData objects. If the socioecoGeoDataHistory object is missing, this parameter contains the past socio-ecological and geographical data.}
 
 \item{ParsingTimes}{Numeric. Parsing times for the present and past data.}
 
@@ -54,7 +54,7 @@ socioecoGeoDataModel(
 
 \item{migModel}{migrationModel object. The migration model calculated for the studied landscape.}
 
-\item{EnvStack}{stack object. This object contains the environmental information of the landscape if it is not included in the socioecoGeoDataHistoryAndSample object.}
+\item{EnvStack}{stack object. This object contains the environmental information of the landscape if it is not included in the socioecoGeoDataHistory object.}
 
 \item{stackConnectionType}{Character. The type of connection between the nodes in the graph.}
 

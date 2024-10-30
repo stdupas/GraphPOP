@@ -10,7 +10,7 @@ This class builds the migration models using the historical and present socioeco
 \section{Slots}{
 
 \describe{
-\item{\code{.Data}}{socioecoGeoDataHistoryAndSample object containing all the historical and present socioecological and geographical information.}
+\item{\code{.Data}}{socioecoGeoDataHistory object containing all the historical and present socioecological and geographical information.}
 
 \item{\code{SocioecoGeoData}}{socioecoGeoData object.}
 
