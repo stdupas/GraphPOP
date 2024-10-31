@@ -982,6 +982,22 @@ validityLocus<-function(object) {
 
 setValidity("locus", validityLocus)
 
+#' Create a locus object
+#' @description
+#' This function creates a locus object.
+#' @param locusName Character. The name of the marker.
+#' @param mType Character. The type of marker used. This class accepts `microsatellite` and `SNP` data.
+#' @param mValues Numeric. The value(s) of the marker alleles.
+#' @returns a locus object.
+#' @export 
+
+locus <- function(locusName, mType, mValues) {
+  if(is.null(locusName)) { locusName <- "SSR" }
+  if(is.null(mType)) { mType <- "microsatellite" }
+  if(is.null(mValues)) { mValues <- runif(2, min = 100, max = 250) }
+  new("locus", name = locusName, markerType = mType, alleles = as.integer(mValues))
+}
+
 #' Generic method for to obtain the ploidy of a genotype.
 #' @description
 #' This method returns the ploidy for a marker or a genotype.
@@ -1034,7 +1050,14 @@ setMethod("show",
 
 setClass("genotype",
          representation(loci="list"),
-         prototype(loci=list(new("locus"),new("locus"),new("locus"))))
+         prototype(loci=list(locus("SSR1", "microsatellite",c(125,127)),locus("SSR2", "microsatellite", c(127,132)), locus("SSR3","microsatellite",c(200,188)))))
+
+validityGenotype <- function(object){
+  if(any(!is(object@loci,"locus"))) { stop("All objects in the genotype must be locus objects!")}
+  if(anyDuplicated(sapply(object@loci,FUN = function(x) x@name))) { stop("The names of the markers cannot be repeated!") }
+}
+
+setValidity("genotype", validityGenotype)
 
 #' getPloidy method for genotype objects.
 #' 
@@ -1067,6 +1090,20 @@ setMethod("show",
               cat("\n")
             }
           })
+
+#' Creates a genotype object.
+#' @description
+#' This function creates an object of genotype class.
+#' @param samLoci List of `locus` objects. All the objects on this list should be of the class `locus`.
+#' @returns Object of the class `genotype`.
+#' @export
+
+genotype <- function(samLoci=NULL) {
+  if(is.null(samLoci)) {
+    samLoci <- list(locus("SSR1","microsatellite", c(122,130)),locus("SSR2","microsatellite",c(102,105)), locus("SSR3", "microsatellite", c(115,115)))
+  }
+  new("genotype", loci = samLoci)
+}
 
 #' Class that contains the information of the sampled cells.
 #' 
