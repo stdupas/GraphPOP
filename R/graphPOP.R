@@ -1053,7 +1053,7 @@ setClass("genotype",
          prototype(loci=list(locus("SSR1", "microsatellite",c(125,127)),locus("SSR2", "microsatellite", c(127,132)), locus("SSR3","microsatellite",c(200,188)))))
 
 validityGenotype <- function(object){
-  if(any(!is(object@loci,"locus"))) { stop("All objects in the genotype must be locus objects!")}
+  if(any(sapply(object@loci,FUN= is, class2 = "locus"))) { stop("All objects in the genotype must be locus objects!")}
   if(anyDuplicated(sapply(object@loci,FUN = function(x) x@name))) { stop("The names of the markers cannot be repeated!") }
 }
 
@@ -1100,7 +1100,7 @@ setMethod("show",
 
 genotype <- function(samLoci=NULL) {
   if(is.null(samLoci)) {
-    samLoci <- list(locus("SSR1","microsatellite", c(122,130)),locus("SSR2","microsatellite",c(102,105)), locus("SSR3", "microsatellite", c(115,115)))
+    samLoci <- list(locus("SSR1","microsatellite", c(128,138)),locus("SSR2","microsatellite",c(102,105)), locus("SSR3", "microsatellite", c(115,115)))
   }
   new("genotype", loci = samLoci)
 }
