@@ -982,17 +982,47 @@ validityLocus<-function(object) {
 
 setValidity("locus", validityLocus)
 
-#' length method for locus objects.
+#' Generic method for to obtain the ploidy of a genotype.
+#' @description
+#' This method returns the ploidy for a marker or a genotype.
 #' 
-#' @name length
-#' @docType methods
-#' @rdname length-methods
-#' @aliases length,locus
+#' @param object object with genetic markers.
+#' @returns Int. Ploidy level of the marker(s).
+#' @export
 
-setMethod("length",
+setGeneric("getPloidy",
+           def=function(object){
+             return(standardGeneric("getPloidy"))
+           })
+
+#' getPloidy method for locus objects.
+#' 
+#' @name getPloidy
+#' @docType methods
+#' @rdname getPloidy-methods
+#' @description
+#' This method returns the ploidy level for the objects of class locus.
+#' @aliases getPloidy,locus
+
+setMethod("getPloidy",
           "locus",
           function(object){
             length(object@alleles)
+          })
+
+#' show method for locus objects.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,locus
+
+setMethod("show",
+          "locus",
+          function(object){
+            cat("Locus",object@name,"\n")
+            cat(object@markerType,":\n")
+            cat(object@alleles)
           })
 
 #' genotype class to hold the genetic information of individual samples
@@ -1005,6 +1035,38 @@ setMethod("length",
 setClass("genotype",
          representation(loci="list"),
          prototype(loci=list(new("locus"),new("locus"),new("locus"))))
+
+#' getPloidy method for genotype objects.
+#' 
+#' @name getPloidy
+#' @docType methods
+#' @rdname getPloidy-methods
+#' @description
+#' This method returns the ploidy level for each of the markers in a genotype object.
+#' @aliases getPloidy,genotype
+
+setMethod("getPloidy",
+          "genotype",
+          function(object){
+            return(sapply(object@loci, FUN = getPloidy))
+          })
+
+#' Show method for genotype objects.
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,genotype
+
+setMethod("show",
+          "genotype",
+          function(object) {
+            cat("Genotype object:\n\n")
+            for(i in 1:length(object@loci)) {
+              cat(i,". ")
+              show(object@loci[[i]])
+              cat("\n")
+            }
+          })
 
 #' Class that contains the information of the sampled cells.
 #' 

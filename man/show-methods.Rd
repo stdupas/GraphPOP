@@ -7,6 +7,8 @@
 \alias{show,socioecoGroupData}
 \alias{show,socioecoGroupsData}
 \alias{show,socioecoGeoData}
+\alias{show,locus}
+\alias{show,genotype}
 \alias{show,samplePoints}
 \alias{show,socioecoGeoDataHistory}
 \alias{show,nicheModel}
@@ -21,6 +23,10 @@
 \S4method{show}{socioecoGroupsData}(object)
 
 \S4method{show}{socioecoGeoData}(object)
+
+\S4method{show}{locus}(object)
+
+\S4method{show}{genotype}(object)
 
 \S4method{show}{samplePoints}(object)
 
@@ -40,6 +46,10 @@ Show method for socioecoGroupData.
 show method for socioecoGroupsData.
 
 Show method for socioecoGeoData.
+
+show method for locus objects.
+
+Show method for genotype objects.
 
 show method for samplePoints objects.
 
