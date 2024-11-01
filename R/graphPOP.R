@@ -1391,14 +1391,13 @@ samplePoints <- function(sCoordinates, sTimes, proj4 = NULL) {
 #' This class contains the spatial and temporal information (inherited from [spatialPoints] object) as well as the genetic data of the samples.
 #' 
 #' @slot .Data spatialPoints object. 
-#' @slot type Character. 
-#' @slot genetData genotype object. information type.
-#' @slot recombUnit Recombination unit.
+#' @slot genetData list of `genotype` objects. This list contains the information for the genetic markers of each of the sampled individuals.
+#' @slot recombDist matrix. This matrix contains the recombination probability between the studied markers. All marker names in the genotypes should also be in this recombination matrix.
 #' @export
 
 setClass("genetData",
          contains="samplePoints",
-         representation(type="character", genetData = "character",recombUnit = "character")
+         representation(genetData = "list",recombDist = "matrix"),
          )
 
 validityGenetData <- function(object) {

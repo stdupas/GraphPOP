@@ -12,10 +12,8 @@ This class contains the spatial and temporal information (inherited from \link{s
 \describe{
 \item{\code{.Data}}{spatialPoints object.}
 
-\item{\code{type}}{Character.}
+\item{\code{genetData}}{list of \code{genotype} objects. This list contains the information for the genetic markers of each of the sampled individuals.}
 
-\item{\code{genetData}}{genotype object. information type.}
-
-\item{\code{recombUnit}}{Recombination unit.}
+\item{\code{recombDist}}{matrix. This matrix contains the recombination probability between the studied markers. All marker names in the genotypes should also be in this recombination matrix.}
 }}
 
