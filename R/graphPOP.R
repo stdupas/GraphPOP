@@ -1053,7 +1053,7 @@ setClass("genotype",
          prototype(loci=list(locus("SSR1", "microsatellite",c(125,127)),locus("SSR2", "microsatellite", c(127,132)), locus("SSR3","microsatellite",c(200,188)))))
 
 validityGenotype <- function(object){
-  if(any(sapply(object@loci,FUN= is, class2 = "locus"))) { stop("All objects in the genotype must be locus objects!")}
+  if(!any(sapply(object@loci,FUN= is, class2 = "locus"))) { stop("All objects in the genotype must be locus objects!")}
   if(anyDuplicated(sapply(object@loci,FUN = function(x) x@name))) { stop("The names of the markers cannot be repeated!") }
 }
 
@@ -1104,6 +1104,207 @@ genotype <- function(samLoci=NULL) {
   }
   new("genotype", loci = samLoci)
 }
+
+#' Class that contains a single haplotype
+#' @description
+#' An object of this class contains represents a single haplotype. For this reason it cannot have more than one allele at each locus.
+#' @slot .Data Genotype object. This is a class that inherits from the `genotype` with the constrain that it can only have one allele per locus.
+#' @export
+
+setClass("haplotype",
+         contains = "genotype",
+         representation(loci="list"),
+         prototype(loci=list(locus("SSR1","microsatellite",128), locus("SSR2", "microsatellite", 102), locus("SSR3","microsatellite",115))))
+
+validityHaplotype <- function(object) {
+  if(any(getPloidy(object) != 1)) {stop("All markers must be haploid in a haplotype!")}
+}
+
+setValidity("haplotype",validityHaplotype)
+
+#' Creates a haplotype object
+#' @description
+#' This function creates a haplotype object.
+#' @param samLoci List of `locus` objects. All the objects on this list should be of the class `locus`. For `haplotype` objects there must be only one allele per locus.
+#' @returns Object of the haplotype class.
+#' @export
+
+haplotype <- function(samLoci=NULL){
+  if(is.null(samLoci)) {
+    samLoci <- list(locus("SSR1","microsatellite",128), locus("SSR2", "microsatellite", 102), locus("SSR3","microsatellite",115))
+  }
+  new("haplotype",loci = samLoci)
+}
+
+#' Show method for haplotype objects.
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,haplotype
+
+setMethod("show","haplotype",function(object) {
+  cat("Haplotype object:\n\n")
+  for(i in 1:length(object@loci)) {
+    cat(i,". ")
+    show(object@loci[[i]])
+    cat("\n")
+  }
+})
+
+#' Generic method setName
+#' @description
+#' Sets the genetic marker name of a locus.
+#' @param object `locus` class object. This method changes the name of a marker in a locus.
+#' @returns locus object
+#' @export
+
+setGeneric("setName",
+           def=function(object, newName = NULL){
+             return(standardGeneric("setName"))
+           })
+
+#' setName method for locus objects.
+#' @name setName
+#' @docType methods
+#' @rdname setName-methods
+#' @aliases setName,locus
+
+setMethod("setName", "locus", function(object, newName = NULL){
+  if(is.null(newName)) { stop("You must provide a name for the marker!")}
+  object@name <- newName
+  return(object)
+})
+
+#' Generic method setType
+#' @description
+#' Sets the genetic marker type of a locus.
+#' @param object `locus` class object. This method changes the type of a marker in a locus.
+#' @returns locus object.
+#' @export
+
+setGeneric("setType",
+           def=function(object, newType = NULL){
+             return(standardGeneric("setType"))
+           })
+
+#' setType method for locus objects.
+#' @name setType
+#' @docType methods
+#' @rdname setType-methods
+#' @aliases setType,locus
+
+setMethod("setType", "locus", function(object, newType = NULL){
+  if(is.null(newType)) { stop("You must provide a type for the marker!")}
+  object@markerType <- newType
+  return(object)
+})
+
+#' Generic method getAlleles
+#' @description
+#' This method obtains all the alleles in a genotype or haplotype.
+#' @param object `genotype` or `haplotype` class object. This method returns the allele values for each marker in the genotype or haplotype.
+#' @returns Numeric list.
+#' @export
+
+setGeneric("getAlleles",
+           def=function(object){
+             return(standardGeneric("getAlleles"))
+           })
+
+#' getAlleles method for genotype objects.
+#' @name getAlleles
+#' @docType methods
+#' @rdname getAlleles-methods
+#' @aliases getAlleles,genotype
+
+setMethod("getAlleles", "genotype", function(object){
+  lapply(object@loci,FUN = function(x) x@alleles)
+})
+
+#' Generic method markerNames
+#' @description
+#' This method obtains all the marker names in a genotype or haplotype.
+#' @param object `genotype` or `haplotype` class object. This method returns the names for each marker in the genotype or haplotype.
+#' @returns Character containing the names of the markers.
+#' @export
+
+setGeneric("markerNames",
+           def=function(object){
+             return(standardGeneric("markerNames"))
+           })
+
+#' markerNames method for genotype objects.
+#' @name markerNames
+#' @docType methods
+#' @rdname markerNames-methods
+#' @aliases markerNames,genotype
+
+setMethod("markerNames", "genotype", function(object){
+  unlist(lapply(object@loci,FUN = function(x) x@name))
+})
+
+#' Generic method markerTypes
+#' @description
+#' This method obtains all the marker types in a genotype or haplotype.
+#' @param object `genotype` or `haplotype` class object. This method returns the type of each marker in the genotype or haplotype.
+#' @returns Character containing the type of the markers.
+#' @export
+
+setGeneric("markerTypes",
+           def=function(object){
+             return(standardGeneric("markerTypes"))
+           })
+
+#' markerTypes method for genotype objects.
+#' @name markerTypes
+#' @docType methods
+#' @rdname markerTypes-methods
+#' @aliases markerTypes,genotype
+
+setMethod("markerTypes", "genotype", function(object){
+  unlist(lapply(object@loci,FUN = function(x) x@markerType))
+})
+
+#' Generic method getHaplotypes
+#' @description
+#' This method obtains all or the specified number of possible haplotypes that a genotype could produce.
+#' @param object `genotype` class object. From this object the haplotypes are sampled.
+#' @returns haplotype objects.
+#' @export
+
+setGeneric("getHaplotypes",
+           def=function(object, num = NULL){
+             return(standardGeneric("getHaplotypes"))
+           })
+
+#' getHaplotypes method for genotype objects.
+#' @name getHaplotypes
+#' @docType methods
+#' @rdname getHaplotypes-methods
+#' @aliases getHaplotypes,genotype
+
+setMethod("getHaplotypes", "genotype", function(object, num = NULL) {
+  posHap <- unique(expand.grid(getAlleles(object)))
+  lociTab <- apply(posHap, MARGIN = c(1,2), locus, locusName = "Locus", mType = "Marker")
+  
+  for(i in 1:dim(posHap)[2]) {
+    lociTab[,i] <- lapply(lociTab[,i], setName, newName = markerNames(object)[i])
+    lociTab[,i] <- lapply(lociTab[,i], setType, newType = markerTypes(object)[i])
+  }
+  
+  if(is.null(num)){
+    hapList <- apply(lociTab, MARGIN = 1, haplotype)
+  }
+  else if(is.numeric(num)) {
+    num <- as.integer(num)
+    numVect <- sample(dim(lociTab)[1], size = num, replace = TRUE)
+    hapList <- lapply(numVect, FUN = function(x) haplotype(lociTab[x,]))
+  }
+  else {
+    stop("The number of haplotypes must be a number!")
+  }
+  return(hapList)
+})
 
 #' Class that contains the information of the sampled cells.
 #' 
