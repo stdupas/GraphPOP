@@ -11,6 +11,7 @@
 \alias{show,genotype}
 \alias{show,haplotype}
 \alias{show,samplePoints}
+\alias{show,genetSample}
 \alias{show,socioecoGeoDataHistory}
 \alias{show,nicheModel}
 \alias{show,geoMigrationModel}
@@ -32,6 +33,8 @@
 \S4method{show}{haplotype}(object)
 
 \S4method{show}{samplePoints}(object)
+
+\S4method{show}{genetSample}(object)
 
 \S4method{show}{socioecoGeoDataHistory}(object)
 
@@ -57,6 +60,8 @@ Show method for genotype objects.
 Show method for haplotype objects.
 
 show method for samplePoints objects.
+
+show method for genetSample objects.
 
 show method for socioecoGeoDataHistory objects.
 

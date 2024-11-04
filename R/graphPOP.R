@@ -1383,7 +1383,7 @@ samplePoints <- function(sCoordinates, sTimes, proj4 = NULL) {
                 )
         }
   
-  new("samplePoints", geoCoordinates = sampleCoords,sampleCells = NULL, sampleTimes = sTimes)
+  new("samplePoints", geoCoordinates = sampleCoords,sampleCells = 0, sampleTimes = sTimes)
 }
 
 #' Class that contains the genetic data of the samples
@@ -1401,10 +1401,58 @@ setClass("genetSample",
          )
 
 validityGenetSample <- function(object) {
-  if(length(object@.Data) != length(object@genetData)) {stop("All sampled points should have its corresponding genetic data")}
+  if(length(object@geoCoordinates) != length(object@genetData)) {stop("All sampled points should have its corresponding genetic data")}
 }
 
 setValidity("genetSample", validityGenetSample)
+
+#' Creates a genetSample object.
+#' @description
+#' This function creates a genetSample object.
+#' @param sampledPoints samplePoints object containing the spatial information of the samples.
+#' @param samGenotypes List of genotype objects corresponding to the sampled organisms.
+#' @param recDist Either a matrix or a data.frame containing the distance or the recombination probability between the markers.
+#' @param mDist Boolean. This indicates if the recombination matrix (or data.frame) contains recombination probabilities (`FALSE`) or distances in cM (`TRUE`). Defaults to `FALSE`.
+#' @returns genetSample object.
+#' @export
+
+genetSample <- function(sampledPoints=NULL, samGenotypes=NULL, recDist=NULL, mDist = TRUE) {
+  if(is.null(sampledPoints)) {sampledPoints <- new("samplePoints", sampleCell = 0)}
+  if(is.null(samGenotypes)) {
+    genList <- list()
+    for(i in 1:length(sampledPoints@geoCoordinates)) {genList <- append(genList,genotype())}
+    samGenotypes <- genList
+  }
+  if(is.null(recDist)) {
+    markers <- unique(c(sapply(samGenotypes,markerNames)))
+    recDist <- matrix(0.5,ncol = length(markers), nrow = length(markers),dimnames = list(markers,markers))
+    diag(recDist) <- 0
+  }
+  if(!mDist) { recDist <- (1-exp(-(2*recDist)/100))/2 }
+  
+  new("genetSample", sampledPoints, genetData = samGenotypes, recombDist = recDist)
+}
+
+#' show method for genetSample objects.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,genetSample
+
+setMethod("show", "genetSample", function(object){
+  cat("An object of the class 'genetSample':\n\n")
+  cat("Sample number:\n")
+  cat(1:length(object@sampleTime),"\n")
+  cat("Sampling times:\n")
+  cat(object@sampleTime, "\n")
+  cat("Summary of sample coordinates:\n")
+  show(object@geoCoordinates)
+  cat("\n")
+  cat(length(object@genetData)," genotypes\n")
+  cat("Characterized by:\t", unique(c(sapply(object@genetData, markerNames))), " markers\n")
+  cat("Ploidy levels:\t", unique(c(sapply(object@genetData, getPloidy))),"\n")
+})
 
 #' Class that includes genetSample, the mutation model and the gene distance matrix.
 #' @description
@@ -1416,7 +1464,7 @@ setValidity("genetSample", validityGenetSample)
 
 setClass("genetSet",
          contains="genetSample",
-         representation(mutationModel = "character", genDistMatrix = "matrix")
+         representation(mutationModel = "character", transitionMatrix = "matrix")
          )
 
 validityGenetSet <- function(object) {
