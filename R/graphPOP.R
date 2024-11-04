@@ -1240,7 +1240,7 @@ setGeneric("markerNames",
 #' @aliases markerNames,genotype
 
 setMethod("markerNames", "genotype", function(object){
-  unlist(lapply(object@loci,FUN = function(x) x@name))
+  sapply(object@loci,FUN = function(x) x@name)
 })
 
 #' Generic method markerTypes
@@ -1262,7 +1262,7 @@ setGeneric("markerTypes",
 #' @aliases markerTypes,genotype
 
 setMethod("markerTypes", "genotype", function(object){
-  unlist(lapply(object@loci,FUN = function(x) x@markerType))
+  sapply(object@loci,FUN = function(x) x@markerType)
 })
 
 #' Generic method getHaplotypes
@@ -1395,16 +1395,36 @@ samplePoints <- function(sCoordinates, sTimes, proj4 = NULL) {
 #' @slot recombDist matrix. This matrix contains the recombination probability between the studied markers. All marker names in the genotypes should also be in this recombination matrix.
 #' @export
 
-setClass("genetData",
+setClass("genetSample",
          contains="samplePoints",
          representation(genetData = "list",recombDist = "matrix"),
          )
 
-validityGenetData <- function(object) {
+validityGenetSample <- function(object) {
   if(length(object@.Data) != length(object@genetData)) {stop("All sampled points should have its corresponding genetic data")}
 }
 
-setValidity("genetData", validityGenetData)
+setValidity("genetSample", validityGenetSample)
+
+#' Class that includes genetSample, the mutation model and the gene distance matrix.
+#' @description
+#' This class includes inherits from genetSample the spatial and genetic data of the samples, and contains also the mutation model for the markers and the distance between the loci.
+#' @slot .Data genetSample object that contains the genetic and spatial information.
+#' @slot mutationModel Character. One of the implemented mutation models used to calculate the probability of coalescence. 
+#' @slot genDistMatrix Matrix. Recombination probability matrix between the represented loci.
+#' @export
+
+setClass("genetSet",
+         contains="genetSample",
+         representation(mutationModel = "character", genDistMatrix = "matrix")
+         )
+
+validityGenetSet <- function(object) {
+  if(any(!(unique(dimnames(object@genDistMatrix)) %in% sapply(object@genetData, function(x) unique(markerNames(x)))))) {stop("All of the markers in the distance matrix must be represented in the data")}
+  if(any(!(sapply(object@genetData, function(x) unique(markerNames(x))) %in% unique(dimnames(object@genDistMatrix))))) {stop("All of the markers in the data must be present in the distance matrix")}
+}
+
+setValidity("genetSet", validityGenetSet)
 
 #' Class that reunites the present and past socioecoData.
 #' 
