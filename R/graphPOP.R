@@ -1041,6 +1041,33 @@ setMethod("show",
             cat(object@alleles)
           })
 
+#' Method to retrieve the distance between two loci.
+#' @description
+#' This method returns the steps distance between pairs of loci. The loci must have the same name.
+#' @param objectA First locus to compare.
+#' @param objectB Second locus to compare.
+#' @returns Int. Steps distance between loci.
+#' @export
+
+setGeneric("markerDist",
+           def=function(objectA,objectB){
+             return(standardGeneric("markerDist"))
+           })
+
+#' markerDist method for locus objects.
+#' 
+#' @name markerDist
+#' @docType methods
+#' @rdname markerDist-methods
+#' @description
+#' This method returns the step distance between two representatives of the same locus.
+#' @aliases markerDist,locus
+
+setMethod("markerDist",c("locus","locus"), function(objectA,objectB) {
+  if(objectA@name != objectB@name) {stop("The comparison must be done on the same loci!")}
+  return(sum(abs(sort(objectA@alleles)-sort(objectB@alleles))))
+})
+
 #' genotype class to hold the genetic information of individual samples
 #' @description
 #' This object holds the collection of loci that represents an individual.
@@ -1104,6 +1131,23 @@ genotype <- function(samLoci=NULL) {
   }
   new("genotype", loci = samLoci)
 }
+
+#' markerDist method for genotype objects.
+#' 
+#' @name markerDist
+#' @docType methods
+#' @rdname markerDist-methods
+#' @description
+#' This method returns the step distance for all markers in a pair of genotype objects.
+#' @aliases markerDist,genotype
+
+setMethod("markerDist",c("genotype","genotype"), function(objectA,objectB) {
+  distVect <- vector()
+  for(i in 1:length(objectA@loci)) {
+    distVect <- c(distVect,markerDist(objectA@loci[[i]], objectB@loci[[i]]))
+  }
+  return(distVect)
+})
 
 #' Class that contains a single haplotype
 #' @description
