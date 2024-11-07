@@ -1635,14 +1635,13 @@ validitysocioecoGeoDataModel=function(object){
 #' @slot Rmodel nicheModel object. Reproductive potential niche model.
 #' @slot geoMigModel geoMigrationModel object. Contains the geographic migration model information.
 #' @slot socioecoMigModel socioecoMigrationModel object. Contains the socioecological migration model information.
-#' @slot sampledPoints samplePoints object. Contains the coordinates of the samples, the sampling times and the cells where these samples are located.
 #' @export
 
 setClass("socioecoGeoDataModel",
          contains = "socioecoGeoDataHistory",
          representation(SocioecoGeoData = "socioecoGeoData",Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel", sampledPoints = "samplePoints"),
          validity=validitysocioecoGeoDataModel,
-         prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"), sampledPoints = new("samplePoints"))
+         prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
       
 )
 
@@ -1675,7 +1674,6 @@ setClass("socioecoGeoDataModel",
 #' @param shapeMig Character. The shape of the migration probability distribution.
 #' @param pMig Numeric. Migration probability.
 #' @param pMixt Numeric. Mixture probability.
-#' @param sampledPoints samplePoints object. Object that contains the geographical information of the samples.
 #' @export
 #' @importFrom raster stack
 #' @importFrom raster raster
@@ -1689,19 +1687,15 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
                                stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
                                varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
                                varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
-                               modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5),
-                               sampledPoints = NULL)
+                               modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
   
 {
   if (is.null(socioecoGeoDataHistory)) socioecoGeoDataHistory=socioecoGeoDataHistory(SocioecoGeoData,PastSocioecoGeoData,ParsingTimes,TimeUnit,ZeroTime)
   if (is.null(nicheK)) nicheK=nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK)
   if (is.null(nicheR)) nicheR=nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR)
   if (is.null(migModel)) migModel= geoMigrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt)
-  if (is.null(sampledPoints)) sampledPoints = new("samplePoints")
   
-  sampledPoints@sampleCell <- setNames(raster::cellFromXY(socioecoGeoDataHistory,sampledPoints@geoCoordinates),1:length(sampledPoints@geoCoordinates))
-  
-  new("socioecoGeoDataModel",socioecoGeoDataHistory,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel, sampledPoints = sampledPoints)
+  new("socioecoGeoDataModel",socioecoGeoDataHistory,Kmodel=nicheK,Rmodel=nicheR,geoMigModel=migModel)
 }
 
 setValidity("socioecoGeoDataModel", validitysocioecoGeoDataModel)
@@ -1773,10 +1767,6 @@ setMethod("show",
             show(object@SocioecoGeoData)
             cat("\nslot\t\t: pastsocioecoGeoData \n")
             show(object@pastSocioecoGeoData)
-            cat("\nslot\t\t: sampledPoints\n")
-            show(object@sampledPoints)
-            cat("Sampled cells:\n")
-            cat(object@sampledPoints@sampleCell)
             cat("\nslot\t\t: Kmodel \n")
             show(object@Kmodel)
             cat("\nslot\t\t: Rmodel \n")
@@ -2237,7 +2227,9 @@ setMethod(
   }
 )
 
-a<-new("envDynSet")
+#setClass("ecoGenetSet", 
+#         contains = "envDynSet",
+#         representation(genetData = "genetSet", transitionMatrix = "matrix"))
 
 ###################Coalescence simulation methods#########################
 
@@ -2397,55 +2389,35 @@ setMethod(
   }
 )
 
+#' Method to simulate multiple coalescents.
+#' @description
+#' This method is used to simulate multiple coalescents for parameter inference.
+#' @param ecoGenetSet ecoGenetSet object that contains the spatial, demographic and genetic information.
+#' @param printCoal Boolean. `TRUE` if the time of each simulation should be displayed.
+#' @param iteration Int. The amount of simulations to perform.
+#' @returns list of coalescent objects.
+#' @export
+
 setGeneric(
   name = "simulMultiCoal",
-  def=function(envDynSet,printCoal,iteration){return(standardGeneric("simulMultiCoal"))}
+  def=function(ecoGenetSet,printCoal,iteration){return(standardGeneric("simulMultiCoal"))}
 )
+
+#' simulMultiCoal method for ecoGenetData objects.
+#' 
+#' @name simulMultiCoal
+#' @docType methods
+#' @rdname simulMultiCoal-methods
+#' @aliases simulMultiCoal,ecoGenetSet
 
 setMethod(
   f="simulMultiCoal",
-  signature=c("envDynSet","logical","numeric"),
-  definition=function(envDynSet,printCoal,iteration){
-    lapply(1:iteration,function(x)simulCoal(envDynSet,printCoal))
+  signature=c("ecoGenetSet","logical","numeric"),
+  definition=function(ecoGenetSet,printCoal,iteration){
+    lapply(1:iteration,function(x)simulCoal(ecoGenetSet,printCoal))
   }
 )
 
-##,transFor="transitionMatrixForward",transBack="getTransitionBackward",environment="landscape"
-
-
-######################### |          | ############################### 
-######################### | To TRASH | ############################### 
-######################### V          V ############################### 
-
-
-
-#Demographic<-setClass("Demographic",
-#                      contains = "envDynLandscape",
-#                      slots = c(sampleCells="integer"),
-#                      validity = function(object){
-#                        if(any(object@K<0))stop("K is negative")
-#                        if(any(object@R<0))stop("R is negative")
-#                        if(any(object@sampleCells>nCellA(object)))stop("Sample cell number outside the range")
-#                      }
-#)# Demographic contains all the information to run a coalescent and calculate probabilities and graph statistics
-
-
-############## METHODS #####
-
-#setGeneric(
-#  name = "getTransitionBackward",
-#  def=function(K,R,mig){return(standardGeneric("getTransitionBackward"))}
-#)
-
-#setGeneric(
-#  name = "sampleLandscape",
-#  def=function(demographic, sampleSize,xy, option){return(standardGeneric("sampleLandscape"))}
-#)
-
-#setGeneric(
-#  name = "transitionMatrixForward",
-#  def=function(K,R,mig,meth){return(standardGeneric("transitionMatrixForward"))}
-#)
 
 setGeneric(
   name = "getLaplacian",
@@ -2498,27 +2470,6 @@ setGeneric(
 )
 
 
-#setMethod("buildRKLandscape",
-#          signature=c("landscape","NicheModel"),
-#          definition = function(object,model){                  #X=object, p=,shape=
-#            Y=lapply(model@variables,function(x){
-#              switch(model@reactNorms[[x]],
-#                     scaling={setValues(object[[x]],rep(model@pNiche[[x]],ncell(object[[x]])))},
-                     #proportional = {values(object[[x]])=object[[x]]*model@pNiche[[x]]},
-#                     enveloppe = {object[[x]]=enveloppe(object[[x]],model@pNiche[[x]])},
-#                     envelin={object[[x]]=envelinear(object[[x]],model@pNiche[[x]])},
-#                     conQuadratic={object[[x]]=conQuadratic(object[[x]],model@pNiche[[x]])},
-#                     conQuadraticSkw={object[[x]]=conQuadraticSkw(object[[x]],model@pNiche[[x]])},#conquadraticskewed=conquadraticskewed(object[,,(model@variables==x)],p),
-#                     #conquadraticsq=conquadraticsq(object[,,(model@variables==x)],p),
-                     #conquadraticskewedsq=conquadraticskewedsq(object[,,(model@variables==x)],p)
-#                     stop("This variable does not exist for NicheModel !")
-#              )
-#            }
-#            )
-#            Y=prod(stack(Y))
-#          }
-#)
-
 enveloppe <- function(X,p){
   if(length(p)!=2)stop("The parameter of envelope must have two dimensions")
   else X>=p[1]&X<=p[2]
@@ -2541,6 +2492,217 @@ conQuadraticSkw <- function(X,p){
   conQuadratic(X,p)*envelinear(X,p)
   X
 }
+
+setMethod(
+  f = "getLaplacian",
+  signature = "TransitionBackward",
+  definition = function(object){
+    matrixD = diag(rep(1,dim(object)[1])) # diagonal equals to 1
+    laplacianMatrix = matrixD - object
+    laplacianMatrix[is.na(laplacianMatrix)]<-0 # replace NA by 0
+    #cat("laplacian",laplacianMatrix)
+    return(laplacianMatrix)
+  }
+)
+
+setMethod(
+  f="getOrdinaryLaplacian",
+  signature = "TransitionBackward",
+  definition = function(object){
+    markovB<-new("markovchain", states=dimnames(transition)[[1]], transitionMatrix=transition)
+    PI<-diag(steadyStates(markovB)[1,])
+    PI - PI%*%transition
+  }
+)
+
+setMethod(
+  f="hitting_time_digraph",
+  signature = "TransitionBackward",
+  definition = function(object){
+    Ones <- rep(1,dim(object)[1])
+    markovB<-new("markovchain", states=dimnames(object)[[1]], transitionMatrix=object)
+    pi_<-steadyStates(markovB)[1,]
+    PI <- diag(pi_)
+    L <- PI - PI%*%object
+    Z <- ginv(L + pi_%*%t(pi_))
+    H <- Ones%*%t(diag(Z))-Z
+    H
+  }
+)
+
+
+setMethod(
+  f="commute_time_digraph",
+  signature = "TransitionBackward",
+  definition = function(object){
+    mat<-hitting_time_digraph(object)
+    sapply(1:ncol(mat),function(x)sapply(1:nrow(mat),function(y)mat[x,y]+mat[y,x]))
+  }
+)
+
+
+
+setMethod(
+  f="compare",
+  signature=c("ecoGenetSet","numeric","logical","numeric","character"),
+  definition=function(demographic,popSize,printCoal,iteration,fname){
+    coalescent<-simulMultiCoal(demographic,printCoal,iteration)
+    lcoal<-lapply(1:iteration,function(n){
+      coal_2<-coalescent_2_newick(coalescent[[n]][[1]])
+      cat(coal_2, file = "ex.tre", sep = "\n")
+      tree<-read.tree("ex.tre")
+      cophenetic(tree)
+    })
+    a<-matrix(data = apply(sapply(lcoal,as.vector),1,mean),nrow = nrow(lcoal[[1]]),ncol = ncol(lcoal[[1]]))
+    log10timescale = ceiling(log10(max(a))) 
+    # we calculate the time scale of the distance matrix 
+    # as the number of digit the maximum time distance 
+    # do not reach
+    ascaled = a/10^log10timescale
+    # a is scaled to bep plotted by NJ
+    b<-linearizedFstDigraph(demographic["TransiBackw"],popSize)
+    c<-linearizedFstUndigraph(demographic["TransiBackw"],popSize)
+    d<-apply(popSize["distanceMatrix"],c(1,2),log)
+    mat<-list(ascaled,b,c,d)
+    par(mfrow=c(2,2))
+    if (fname!="") pdf(fname)
+    for(i in 1:4){
+      plot(bionj(mat[[i]]),main=title(switch(EXPR=as.character(i),
+                                             "1"=paste("simulCoal, t/10^",log10timescale),
+                                             "2"="linearizedFstDigraph",
+                                             "3"="linearizedFstUnDigraph",
+                                             "4"="Stepping_Stone"))
+      )
+    }
+    mat
+  }
+)
+
+setMethod(
+  f="Collisionijk",
+  signature="matrix",
+  definition=function(Hitting_mat)
+  {
+    Tijk=array(NA,dim=c(dim(Hitting_mat)[1],dim(Hitting_mat)[2],dim(Hitting_mat)[1]))
+    for (k in 1:dim(Hitting_mat)[1]){
+      for (i in 1:dim(Hitting_mat)[1]){
+        for (j in 1:dim(Hitting_mat)[2]){
+          Tijk[i,j,k] <- max(Hitting_mat[i,k],Hitting_mat[j,k])
+        }
+      }
+    }
+    Tijk
+  }
+)
+
+setMethod(
+  f="linearizedFstDigraph",
+  signature=c("TransitionBackward","numeric"),
+  definition=function(transition, popSize)#popSize is raster class
+  {
+    H <- hitting_time_digraph(transition)
+    dim2 <- dim(H);dim2[[3]]=2
+    H2 <- array(c(H,t(H)),dim=dim2)
+    MaxH <- apply(H2,c(1,2),max)
+    genetic_dist = MaxH / (8*sum(valuesA(popSize))*nCellA(popSize))
+    genetic_dist
+  }
+)
+
+setMethod(
+  f="coalescent_2_newick",
+  signature="list",
+  definition=function(coalescent)
+  {
+    tree=paste(" ",coalescent[[length(coalescent)]]$new_node," ",sep="")
+    for (i in length(coalescent):1)
+    {
+      Time = coalescent[[i]]$time
+      coalesc <- as.character(coalescent[[i]]$coalescing)
+      tree <- str_replace(tree,paste(" ",as.character(coalescent[[i]]$new_node)," ",sep=""),paste(" ( ",paste(" ",coalesc," :",coalescent[[i]]$br_length,collapse=" ,",sep=""),") ",sep=""))
+    }
+    tree <- gsub(" ","",paste(tree,";",sep=""))
+    tree
+  }
+)
+
+setMethod(
+  f="linearizedFstUndigraph",
+  signature=c("TransitionBackward","numeric"),
+  definition=function(transition, popSize)
+  {
+    commute_time <- commute_time_undigraph(transition)
+    linearizedFst = commute_time / (16*sum(valuesA(popSize))*nCellA(popSize))
+    linearizedFst
+  }
+)
+
+setMethod(
+  f="commute_time_undigraph",
+  signature = "TransitionBackward",
+  definition = function(object){
+    laplacian = getLaplacian(object)
+    inverseMP = ginv(laplacian) # generalized inverse matrix  (Moore Penrose)
+    diag = diag(inverseMP) # get diagonal of the inverse matrix
+    mii = matrix(diag, nrow =dim(inverseMP), ncol = dim(inverseMP))
+    mjj = t(mii)
+    mij = inverseMP
+    #mji = t(mij)
+    commute_time = mii + mjj - 2*mij #- mji
+    commute_time
+  }
+)
+
+#################DEPRECATED METHODS###################
+
+##,transFor="transitionMatrixForward",transBack="getTransitionBackward",environment="landscape"
+
+#Demographic<-setClass("Demographic",
+#                      contains = "envDynLandscape",
+#                      slots = c(sampleCells="integer"),
+#                      validity = function(object){
+#                        if(any(object@K<0))stop("K is negative")
+#                        if(any(object@R<0))stop("R is negative")
+#                        if(any(object@sampleCells>nCellA(object)))stop("Sample cell number outside the range")
+#                      }
+#)# Demographic contains all the information to run a coalescent and calculate probabilities and graph statistics
+
+#setGeneric(
+#  name = "getTransitionBackward",
+#  def=function(K,R,mig){return(standardGeneric("getTransitionBackward"))}
+#)
+
+#setGeneric(
+#  name = "sampleLandscape",
+#  def=function(demographic, sampleSize,xy, option){return(standardGeneric("sampleLandscape"))}
+#)
+
+#setGeneric(
+#  name = "transitionMatrixForward",
+#  def=function(K,R,mig,meth){return(standardGeneric("transitionMatrixForward"))}
+#)
+
+#setMethod("buildRKLandscape",
+#          signature=c("landscape","NicheModel"),
+#          definition = function(object,model){                  #X=object, p=,shape=
+#            Y=lapply(model@variables,function(x){
+#              switch(model@reactNorms[[x]],
+#                     scaling={setValues(object[[x]],rep(model@pNiche[[x]],ncell(object[[x]])))},
+                     #proportional = {values(object[[x]])=object[[x]]*model@pNiche[[x]]},
+#                     enveloppe = {object[[x]]=enveloppe(object[[x]],model@pNiche[[x]])},
+#                     envelin={object[[x]]=envelinear(object[[x]],model@pNiche[[x]])},
+#                     conQuadratic={object[[x]]=conQuadratic(object[[x]],model@pNiche[[x]])},
+#                     conQuadraticSkw={object[[x]]=conQuadraticSkw(object[[x]],model@pNiche[[x]])},#conquadraticskewed=conquadraticskewed(object[,,(model@variables==x)],p),
+#                     #conquadraticsq=conquadraticsq(object[,,(model@variables==x)],p),
+                     #conquadraticskewedsq=conquadraticskewedsq(object[,,(model@variables==x)],p)
+#                     stop("This variable does not exist for NicheModel !")
+#              )
+#            }
+#            )
+#            Y=prod(stack(Y))
+#          }
+#)
+
 
 ######### CREER TRANSITION MATRIX ###############################################################################
 #setMethod(f="runsocioecoGeoDataModel",
@@ -2676,107 +2838,6 @@ conQuadraticSkw <- function(X,p){
 #)
 
 
-setMethod(
-  f = "getLaplacian",
-  signature = "TransitionBackward",
-  definition = function(object){
-    matrixD = diag(rep(1,dim(object)[1])) # diagonal equals to 1
-    laplacianMatrix = matrixD - object
-    laplacianMatrix[is.na(laplacianMatrix)]<-0 # replace NA by 0
-    #cat("laplacian",laplacianMatrix)
-    return(laplacianMatrix)
-  }
-)
-
-setMethod(
-  f="getOrdinaryLaplacian",
-  signature = "TransitionBackward",
-  definition = function(object){
-    markovB<-new("markovchain", states=dimnames(transition)[[1]], transitionMatrix=transition)
-    PI<-diag(steadyStates(markovB)[1,])
-    PI - PI%*%transition
-  }
-)
-
-setMethod(
-  f="hitting_time_digraph",
-  signature = "TransitionBackward",
-  definition = function(object){
-    Ones <- rep(1,dim(object)[1])
-    markovB<-new("markovchain", states=dimnames(object)[[1]], transitionMatrix=object)
-    pi_<-steadyStates(markovB)[1,]
-    PI <- diag(pi_)
-    L <- PI - PI%*%object
-    Z <- ginv(L + pi_%*%t(pi_))
-    H <- Ones%*%t(diag(Z))-Z
-    H
-  }
-)
-
-
-setMethod(
-  f="commute_time_digraph",
-  signature = "TransitionBackward",
-  definition = function(object){
-    mat<-hitting_time_digraph(object)
-    sapply(1:ncol(mat),function(x)sapply(1:nrow(mat),function(y)mat[x,y]+mat[y,x]))
-  }
-)
-
-
-
-setMethod(
-  f="compare",
-  signature=c("Demographic","Landscape","logical","numeric","character"),
-  definition=function(demographic,popSize,printCoal,iteration,fname){
-    coalescent<-simulMultiCoal(demographic,printCoal,iteration)
-    lcoal<-lapply(1:iteration,function(n){
-      coal_2<-coalescent_2_newick(coalescent[[n]][[1]])
-      cat(coal_2, file = "ex.tre", sep = "\n")
-      tree<-read.tree("ex.tre")
-      cophenetic(tree)
-    })
-    a<-matrix(data = apply(sapply(lcoal,as.vector),1,mean),nrow = nrow(lcoal[[1]]),ncol = ncol(lcoal[[1]]))
-    log10timescale = ceiling(log10(max(a))) 
-    # we calculate the time scale of the distance matrix 
-    # as the number of digit the maximum time distance 
-    # do not reach
-    ascaled = a/10^log10timescale
-    # a is scaled to bep plotted by NJ
-    b<-linearizedFstDigraph(demographic["TransiBackw"],popSize)
-    c<-linearizedFstUndigraph(demographic["TransiBackw"],popSize)
-    d<-apply(popSize["distanceMatrix"],c(1,2),log)
-    mat<-list(ascaled,b,c,d)
-    par(mfrow=c(2,2))
-    if (fname!="") pdf(fname)
-    for(i in 1:4){
-      plot(bionj(mat[[i]]),main=title(switch(EXPR=as.character(i),
-                                        "1"=paste("simulCoal, t/10^",log10timescale),,
-                                        "2"="linearizedFstDigraph",
-                                        "3"="linearizedFstUnDigraph",
-                                        "4"="Stepping_Stone"))
-           )
-    }
-    mat
-  }
-)
-
-setMethod(
-  f="Collisionijk",
-  signature="matrix",
-  definition=function(Hitting_mat)
-  {
-    Tijk=array(NA,dim=c(dim(Hitting_mat)[1],dim(Hitting_mat)[2],dim(Hitting_mat)[1]))
-    for (k in 1:dim(Hitting_mat)[1]){
-      for (i in 1:dim(Hitting_mat)[1]){
-        for (j in 1:dim(Hitting_mat)[2]){
-          Tijk[i,j,k] <- max(Hitting_mat[i,k],Hitting_mat[j,k])
-        }
-      }
-    }
-    Tijk
-  }
-)
 
 ############################################
 #setMethod(
@@ -2790,63 +2851,7 @@ setMethod(
 #  }
 #)
 
-setMethod(
-  f="linearizedFstDigraph",
-  signature=c("TransitionBackward","Landscape"),
-  definition=function(transition, popSize)#popSize is raster class
-  {
-    H <- hitting_time_digraph(transition)
-    dim2 <- dim(H);dim2[[3]]=2
-    H2 <- array(c(H,t(H)),dim=dim2)
-    MaxH <- apply(H2,c(1,2),max)
-    genetic_dist = MaxH / (8*sum(valuesA(popSize))*nCellA(popSize))
-    genetic_dist
-  }
-)
 
-setMethod(
-  f="coalescent_2_newick",
-  signature="list",
-  definition=function(coalescent)
-  {
-    tree=paste(" ",coalescent[[length(coalescent)]]$new_node," ",sep="")
-    for (i in length(coalescent):1)
-    {
-      Time = coalescent[[i]]$time
-      coalesc <- as.character(coalescent[[i]]$coalescing)
-      tree <- str_replace(tree,paste(" ",as.character(coalescent[[i]]$new_node)," ",sep=""),paste(" ( ",paste(" ",coalesc," :",coalescent[[i]]$br_length,collapse=" ,",sep=""),") ",sep=""))
-    }
-    tree <- gsub(" ","",paste(tree,";",sep=""))
-    tree
-  }
-)
-
-setMethod(
-  f="linearizedFstUndigraph",
-  signature=c("TransitionBackward","Landscape"),
-  definition=function(transition, popSize)
-  {
-    commute_time <- commute_time_undigraph(transition)
-    linearizedFst = commute_time / (16*sum(valuesA(popSize))*nCellA(popSize))
-    linearizedFst
-  }
-)
-
-setMethod(
-  f="commute_time_undigraph",
-  signature = "TransitionBackward",
-  definition = function(object){
-    laplacian = getLaplacian(object)
-    inverseMP = ginv(laplacian) # generalized inverse matrix  (Moore Penrose)
-    diag = diag(inverseMP) # get diagonal of the inverse matrix
-    mii = matrix(diag, nrow =dim(inverseMP), ncol = dim(inverseMP))
-    mjj = t(mii)
-    mij = inverseMP
-    #mji = t(mij)
-    commute_time = mii + mjj - 2*mij #- mji
-    commute_time
-  }
-)
 
  
 ## removed > Trash

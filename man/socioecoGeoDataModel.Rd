@@ -31,8 +31,7 @@ socioecoGeoDataModel(
   varMig = c("temp", "pops"),
   shapeMig = c("gaussian", "popSep"),
   pMig = list(110574/1.96, numeric(0)),
-  pMixt = c(0.5, 0.5),
-  sampledPoints = NULL
+  pMixt = c(0.5, 0.5)
 )
 }
 \arguments{
@@ -84,7 +83,7 @@ socioecoGeoDataModel(
 
 \item{pMixt}{Numeric. Mixture probability.}
 
-\item{sampledPoints}{samplePoints object. Object that contains the geographical information of the samples.}
+\item{sampledPoints}{samplePoints object. The coordinates and sampling times of the sampled individuals.}
 }
 \value{
 socioecoGeoDataModel object.

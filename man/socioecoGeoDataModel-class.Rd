@@ -21,7 +21,5 @@ This class builds the migration models using the historical and present socioeco
 \item{\code{geoMigModel}}{geoMigrationModel object. Contains the geographic migration model information.}
 
 \item{\code{socioecoMigModel}}{socioecoMigrationModel object. Contains the socioecological migration model information.}
-
-\item{\code{sampledPoints}}{samplePoints object. Contains the coordinates of the samples, the sampling times and the cells where these samples are located.}
 }}
 
