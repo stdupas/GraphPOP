@@ -1218,7 +1218,7 @@ setGeneric("getAlleles",
 #' @aliases getAlleles,genotype
 
 setMethod("getAlleles", "genotype", function(object){
-  lapply(object@loci,FUN = function(x) x@alleles)
+  c(sapply(object@loci,FUN = function(x) paste(x@name,".",x@alleles,sep="")))
 })
 
 #' Generic method markerNames
@@ -1228,7 +1228,7 @@ setMethod("getAlleles", "genotype", function(object){
 #' @returns Character containing the names of the markers.
 #' @export
 
-setGeneric("markerNames",
+setGeneric("markerNames", #This could be deprecated
            def=function(object){
              return(standardGeneric("markerNames"))
            })
@@ -1250,7 +1250,7 @@ setMethod("markerNames", "genotype", function(object){
 #' @returns Character containing the type of the markers.
 #' @export
 
-setGeneric("markerTypes",
+setGeneric("markerTypes", #This function could also be deprecated
            def=function(object){
              return(standardGeneric("markerTypes"))
            })
@@ -1454,6 +1454,46 @@ setMethod("show", "genetSample", function(object){
   cat("Ploidy levels:\t", unique(c(sapply(object@genetData, getPloidy))),"\n")
 })
 
+#' Method to generate a genetic allele matrix
+#' @description
+#' This method generates a genetic allele matrix from an object containing genotypes.
+#' @param object Object that contains the genotypes of the samples.
+#' @returns Matrix of the probabilities of the alleles in a sample of genotypes.
+#' @export
+
+setGeneric("genetMatrix",
+           def = function(object) {
+             standardGeneric("genetMatrix")
+           })
+
+#' genetMatrix method for genotype objects.
+#' 
+#' @name genetMatrix
+#' @docType methods
+#' @rdname genetMatrix-methods
+#' @aliases genetMatrix,genotype
+
+setMethod("genetMatrix", "genotype", function(object) {
+  tempAll <- sapply(unique(getAlleles(object)), FUN = function(x) length(grep(x,getAlleles(object))))
+  
+  resAll <- sapply(names(tempAll), FUN = function(y) {
+    tempAll[y]/sum(tempAll[grep(sub("\\..*",x=y,replacement = ""),names(tempAll))])
+  })
+  
+  return(matrix(resAll, nrow = 1, dimnames = list("",names(tempAll))))
+})
+
+#' genetMatrix method for genetSample objects.
+#' 
+#' @name genetMatrix
+#' @docType methods
+#' @rdname genetMatrix-methods
+#' @aliases genetMatrix,genetSample
+
+setMethod("genetMatrix","genetSample", function(object){
+  lapply(object@genetData, FUN = genetMatrix)
+})
+
 #' Class that includes genetSample, the mutation model and the gene distance matrix.
 #' @description
 #' This class includes inherits from genetSample the spatial and genetic data of the samples, and contains also the mutation model for the markers and the distance between the loci.
@@ -1465,6 +1505,8 @@ setMethod("show", "genetSample", function(object){
 setClass("genetSet",
          contains="genetSample",
          representation(sampleMatrix = "matrix",mutationModel = "character", transitionMatrix = "matrix"))
+
+
 
 validityGenetSet <- function(object) {
   if(any(!(unique(dimnames(object@genDistMatrix)) %in% sapply(object@genetData, function(x) unique(markerNames(x)))))) {stop("All of the markers in the distance matrix must be represented in the data")}
