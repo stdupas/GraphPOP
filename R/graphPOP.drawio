@@ -1311,7 +1311,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="k3M8AutXpwCsEZZQdBd5-11" value="+likelihood(parametros)" style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="345" y="-890" width="160" height="40" as="geometry" />
+          <mxGeometry x="334" y="-900" width="146" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
