@@ -1444,7 +1444,7 @@ setMethod("genetMatrix", "genotype", function(object) {
 
 setMethod("genetMatrix","genetSample", function(object){
   samList <- lapply(object@genetData, FUN = genetMatrix)
-  markLabels <- sort(unique(c(sapply(samList,colnames))))
+  markLabels <- sort(unique(unlist(sapply(samList,colnames))))
   tempMat <- matrix(data = 0, nrow = length(samList), ncol = length(markLabels), dimnames = list(1:length(samList),markLabels))
   
   for(i in 1:length(samList)) {
@@ -1467,12 +1467,13 @@ setMethod("genetMatrix","genetSample", function(object){
 geneticDistance <- function(x,y,mark,dist) {
   
   P <- 0.1
-  Mu <- 10e-2
+  Mu <- 1e-2
   
   switch(mark,
          microsatellite=switch(dist,
                                simple = (Mu)^abs(x-y),
-                               geometric = (Mu)*(1-P)*((P)^(abs(x-y)-1)) )
+                               geometric = (Mu)*(1-P)*((P)^(abs(x-y)-1))),
+         snp = abs((1-abs(x-y))-Mu)
   )
 }
 
@@ -1488,14 +1489,16 @@ setClass("genetSet",
          contains="genetSample",
          representation(sampleMatrix = "matrix",mutationModel = "character", transitionMatrix = "matrix"))
 
-
-
 validityGenetSet <- function(object) {
   if(any(!(unique(dimnames(object@genDistMatrix)) %in% sapply(object@genetData, function(x) unique(markerNames(x)))))) {stop("All of the markers in the distance matrix must be represented in the data")}
   if(any(!(sapply(object@genetData, function(x) unique(markerNames(x))) %in% unique(dimnames(object@genDistMatrix))))) {stop("All of the markers in the data must be present in the distance matrix")}
 }
 
 setValidity("genetSet", validityGenetSet)
+
+genetSet <- function(genData = NULL, sampleMatrix = NULL, mutationModel = NULL, transitionMatrix = NULL) {
+  
+}
 
 #' Class that reunites the present and past socioecoData.
 #' 
