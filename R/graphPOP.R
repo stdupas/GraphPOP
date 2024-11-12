@@ -1505,7 +1505,6 @@ validityGenetSet <- function(object) {
 
 setValidity("genetSet", validityGenetSet)
 
-<<<<<<< HEAD
 genetSet <- function(genData = NULL, mutModel = NULL) {
   if(is.null(genData)) {genData <- genetSample()}
   if(is.null(mutModel)) {mutModel <- "geometric"}
@@ -1513,11 +1512,6 @@ genetSet <- function(genData = NULL, mutModel = NULL) {
   samMatrix <- genetMatrix(genData)
   geneLabs <- colnames(samMatrix)
   transMat <- matrix(data = 0, ncol = length(geneLabs), nrow = length(geneLabs), dimnames = list(geneLabs,geneLabs))
-  
-  
-=======
-genetSet <- function(genData = NULL, sampleMatrix = NULL, mutationModel = NULL, transitionMatrix = NULL) {
->>>>>>> ccb0df79803abbf46922d4ba4a31b9d4026deddc
   
 }
 
