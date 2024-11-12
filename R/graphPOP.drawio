@@ -255,9 +255,9 @@
           <mxGeometry x="684" y="1082" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="c0SSLgtnGO3cboPd4Nja-6" value="ecoCoaLikInf" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="464" y="-620" width="180" height="160" as="geometry" />
+          <mxGeometry x="505" y="-1032" width="180" height="160" as="geometry" />
         </mxCell>
-        <mxCell id="c0SSLgtnGO3cboPd4Nja-7" value="&lt;div&gt;&lt;div&gt;+ .Data: ecoGenetSet&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ genetSet: genetSet&lt;br&gt;&lt;/div&gt;&lt;div&gt;+simulatedData:genetData&lt;/div&gt;&lt;div&gt;+ecoCoalProbs&lt;br&gt;+likelihood&lt;/div&gt;&lt;div&gt;+likelihoodParamInf&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="c0SSLgtnGO3cboPd4Nja-6" vertex="1">
+        <mxCell id="c0SSLgtnGO3cboPd4Nja-7" value="&lt;div&gt;&lt;div&gt;+ .Data: ecoGenetSetLik&lt;/div&gt;&lt;/div&gt;+ maxLik: parametros, hessmatrix, parameterVariance&lt;div&gt;&lt;br/&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="c0SSLgtnGO3cboPd4Nja-6" vertex="1">
           <mxGeometry y="26" width="180" height="94" as="geometry" />
         </mxCell>
         <mxCell id="c0SSLgtnGO3cboPd4Nja-8" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="c0SSLgtnGO3cboPd4Nja-6" vertex="1">
@@ -1165,7 +1165,7 @@
             <mxPoint x="590" y="232" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="i0fWGM7OPVL89fXLRVSB-13" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" parent="1" source="c0SSLgtnGO3cboPd4Nja-6" target="i0fWGM7OPVL89fXLRVSB-15" edge="1">
+        <mxCell id="i0fWGM7OPVL89fXLRVSB-13" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" parent="1" source="k3M8AutXpwCsEZZQdBd5-1" target="i0fWGM7OPVL89fXLRVSB-15" edge="1">
           <mxGeometry x="0.3861" y="1" width="160" relative="1" as="geometry">
             <mxPoint x="215" y="-514" as="sourcePoint" />
             <mxPoint x="250" y="-440" as="targetPoint" />
@@ -1269,6 +1269,49 @@
         </mxCell>
         <mxCell id="__1glaIduucKlwK_dSx6-9" value="+ show" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="__1glaIduucKlwK_dSx6-6" vertex="1">
           <mxGeometry y="60" width="160" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-1" value="genealSimProb" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="-600" width="160" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-2" value="&lt;div&gt;+simulatedGeneal:genealogy&lt;/div&gt;&lt;div&gt;+demoProb&lt;/div&gt;&lt;div&gt;+genetProb&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="k3M8AutXpwCsEZZQdBd5-1">
+          <mxGeometry y="26" width="160" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-3" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="k3M8AutXpwCsEZZQdBd5-1">
+          <mxGeometry y="100" width="160" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-4" value="&lt;div&gt;+&amp;nbsp;simulGenal()&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ demoProb(genealogy) &lt;br&gt;&lt;/div&gt;&lt;div&gt;+ genetProb(genealogy)&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="k3M8AutXpwCsEZZQdBd5-1">
+          <mxGeometry y="108" width="160" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-5" value="ecogenetSetLik" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="465" y="-820" width="220" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-6" value="&lt;div&gt;+genealSimProbList:genealSimProb&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;+likelihood(parametros)&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="k3M8AutXpwCsEZZQdBd5-5">
+          <mxGeometry y="26" width="220" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-7" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="k3M8AutXpwCsEZZQdBd5-5">
+          <mxGeometry y="80" width="220" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-8" value="&lt;div&gt;+ addGenealSimProb&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ecoGentetSetLikelihood&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="k3M8AutXpwCsEZZQdBd5-5">
+          <mxGeometry y="88" width="220" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-9" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" edge="1" parent="1" source="k3M8AutXpwCsEZZQdBd5-5" target="k3M8AutXpwCsEZZQdBd5-1">
+          <mxGeometry x="0.3861" y="1" width="160" relative="1" as="geometry">
+            <mxPoint x="567" y="-420" as="sourcePoint" />
+            <mxPoint x="566" y="-381" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-10" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" edge="1" parent="1" source="c0SSLgtnGO3cboPd4Nja-6" target="k3M8AutXpwCsEZZQdBd5-5">
+          <mxGeometry x="0.3861" y="1" width="160" relative="1" as="geometry">
+            <mxPoint x="577" y="-410" as="sourcePoint" />
+            <mxPoint x="440" y="-830" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="k3M8AutXpwCsEZZQdBd5-11" value="+likelihood(parametros)" style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="345" y="-890" width="160" height="40" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
