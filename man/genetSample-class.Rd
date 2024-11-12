@@ -14,6 +14,8 @@ This class contains the spatial and temporal information (inherited from \link{s
 
 \item{\code{genetData}}{list of \code{genotype} objects. This list contains the information for the genetic markers of each of the sampled individuals.}
 
+\item{\code{markerType}}{character. The t}
+
 \item{\code{recombDist}}{matrix. This matrix contains the recombination probability between the studied markers. All marker names in the genotypes should also be in this recombination matrix.}
 }}
 

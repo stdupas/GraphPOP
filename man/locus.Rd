@@ -4,12 +4,10 @@
 \alias{locus}
 \title{Create a locus object}
 \usage{
-locus(locusName, mType, mValues)
+locus(locusName = NULL, mValues = NULL)
 }
 \arguments{
 \item{locusName}{Character. The name of the marker.}
-
-\item{mType}{Character. The type of marker used. This class accepts \code{microsatellite} and \code{SNP} data.}
 
 \item{mValues}{Numeric. The value(s) of the marker alleles.}
 }

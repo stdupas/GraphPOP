@@ -7,6 +7,7 @@
 genetSample(
   sampledPoints = NULL,
   samGenotypes = NULL,
+  mType = NULL,
   recDist = NULL,
   mDist = TRUE
 )
@@ -14,11 +15,13 @@ genetSample(
 \arguments{
 \item{sampledPoints}{samplePoints object containing the spatial information of the samples.}
 
-\item{samGenotypes}{List of genotype objects corresponding to the sampled organisms.}
+\item{samGenotypes}{list of genotype objects corresponding to the sampled organisms.}
 
-\item{recDist}{Either a matrix or a data.frame containing the distance or the recombination probability between the markers.}
+\item{mType}{character. Type of markers used. \code{microsatellite} is the name used for microsatellite markers.}
 
-\item{mDist}{Boolean. This indicates if the recombination matrix (or data.frame) contains recombination probabilities (\code{FALSE}) or distances in cM (\code{TRUE}). Defaults to \code{FALSE}.}
+\item{recDist}{either a matrix or a data.frame containing the distance or the recombination probability between the markers.}
+
+\item{mDist}{boolean. This indicates if the recombination matrix (or data.frame) contains recombination probabilities (\code{FALSE}) or distances in cM (\code{TRUE}). Defaults to \code{FALSE}.}
 }
 \value{
 genetSample object.

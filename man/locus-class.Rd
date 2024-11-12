@@ -12,8 +12,6 @@ The \code{locus} class is used to store the information of a particular locus. I
 \describe{
 \item{\code{name}}{Character. The name of the locus.}
 
-\item{\code{markerType}}{Character. The type of marker used. This is important for the selection of an appropriate mutation model.}
-
 \item{\code{alleles}}{Numeric. Vector that contains the allele values.}
 }}
 

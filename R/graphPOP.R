@@ -961,13 +961,12 @@ d=socioecoMigrationModel()
 #' @description
 #' The `locus` class is used to store the information of a particular locus. It contains the locus name and the allele values for either microsatellite markers or presence/absence.
 #' @slot name Character. The name of the locus.
-#' @slot markerType Character. The type of marker used. This is important for the selection of an appropriate mutation model.
 #' @slot alleles Numeric. Vector that contains the allele values.
 #' @export
 
 setClass("locus",
-         representation(name="character",markerType="character", alleles="integer"),
-         prototype(name="SSR", markerType="microsatellite",alleles=as.integer(runif(2,min = 100, max = 200)))
+         representation(name="character", alleles="integer"),
+         prototype(name="SSR",alleles=as.integer(runif(2,min = 100, max = 200)))
          )
 
 #' Validity function for locus class
@@ -986,16 +985,14 @@ setValidity("locus", validityLocus)
 #' @description
 #' This function creates a locus object.
 #' @param locusName Character. The name of the marker.
-#' @param mType Character. The type of marker used. This class accepts `microsatellite` and `SNP` data.
 #' @param mValues Numeric. The value(s) of the marker alleles.
 #' @returns a locus object.
 #' @export 
 
-locus <- function(locusName, mType, mValues) {
+locus <- function(locusName=NULL, mValues=NULL) {
   if(is.null(locusName)) { locusName <- "SSR" }
-  if(is.null(mType)) { mType <- "microsatellite" }
   if(is.null(mValues)) { mValues <- runif(2, min = 100, max = 250) }
-  new("locus", name = locusName, markerType = mType, alleles = as.integer(mValues))
+  new("locus", name = locusName, alleles = as.integer(mValues))
 }
 
 #' Generic method for to obtain the ploidy of a genotype.
@@ -1037,7 +1034,6 @@ setMethod("show",
           "locus",
           function(object){
             cat("Locus",object@name,"\n")
-            cat(object@markerType,":\n")
             cat(object@alleles)
           })
 
@@ -1050,7 +1046,7 @@ setMethod("show",
 
 setClass("genotype",
          representation(loci="list"),
-         prototype(loci=list(locus("SSR1", "microsatellite",c(125,127)),locus("SSR2", "microsatellite", c(127,132)), locus("SSR3","microsatellite",c(200,188)))))
+         prototype(loci=list(locus("SSR1",c(125,127)),locus("SSR2", c(127,132)), locus("SSR3",c(200,188)))))
 
 validityGenotype <- function(object){
   if(!any(sapply(object@loci,FUN= is, class2 = "locus"))) { stop("All objects in the genotype must be locus objects!")}
@@ -1100,7 +1096,7 @@ setMethod("show",
 
 genotype <- function(samLoci=NULL) {
   if(is.null(samLoci)) {
-    samLoci <- list(locus("SSR1","microsatellite", as.integer(runif(2,min = 100,max = 200))),locus("SSR2","microsatellite",as.integer(runif(2,min = 100,max = 200))), locus("SSR3", "microsatellite", as.integer(runif(2,min = 100,max = 200))))
+    samLoci <- list(locus("SSR1", as.integer(runif(2,min = 100,max = 200))),locus("SSR2",as.integer(runif(2,min = 100,max = 200))), locus("SSR3", as.integer(runif(2,min = 100,max = 200))))
   }
   new("genotype", loci = samLoci)
 }
@@ -1114,7 +1110,7 @@ genotype <- function(samLoci=NULL) {
 setClass("haplotype",
          contains = "genotype",
          representation(loci="list"),
-         prototype(loci=list(locus("SSR1","microsatellite",128), locus("SSR2", "microsatellite", 102), locus("SSR3","microsatellite",115))))
+         prototype(loci=list(locus("SSR1",128), locus("SSR2", 102), locus("SSR3",115))))
 
 validityHaplotype <- function(object) {
   if(any(getPloidy(object) != 1)) {stop("All markers must be haploid in a haplotype!")}
@@ -1131,7 +1127,7 @@ setValidity("haplotype",validityHaplotype)
 
 haplotype <- function(samLoci=NULL){
   if(is.null(samLoci)) {
-    samLoci <- list(locus("SSR1","microsatellite",128), locus("SSR2", "microsatellite", 102), locus("SSR3","microsatellite",115))
+    samLoci <- list(locus("SSR1",128), locus("SSR2", 102), locus("SSR3",115))
   }
   new("haplotype",loci = samLoci)
 }
@@ -1172,30 +1168,6 @@ setGeneric("setName",
 setMethod("setName", "locus", function(object, newName = NULL){
   if(is.null(newName)) { stop("You must provide a name for the marker!")}
   object@name <- newName
-  return(object)
-})
-
-#' Generic method setType
-#' @description
-#' Sets the genetic marker type of a locus.
-#' @param object `locus` class object. This method changes the type of a marker in a locus.
-#' @returns locus object.
-#' @export
-
-setGeneric("setType",
-           def=function(object, newType = NULL){
-             return(standardGeneric("setType"))
-           })
-
-#' setType method for locus objects.
-#' @name setType
-#' @docType methods
-#' @rdname setType-methods
-#' @aliases setType,locus
-
-setMethod("setType", "locus", function(object, newType = NULL){
-  if(is.null(newType)) { stop("You must provide a type for the marker!")}
-  object@markerType <- newType
   return(object)
 })
 
@@ -1243,28 +1215,6 @@ setMethod("markerNames", "genotype", function(object){
   sapply(object@loci,FUN = function(x) x@name)
 })
 
-#' Generic method markerTypes
-#' @description
-#' This method obtains all the marker types in a genotype or haplotype.
-#' @param object `genotype` or `haplotype` class object. This method returns the type of each marker in the genotype or haplotype.
-#' @returns Character containing the type of the markers.
-#' @export
-
-setGeneric("markerTypes", #This function could also be deprecated
-           def=function(object){
-             return(standardGeneric("markerTypes"))
-           })
-
-#' markerTypes method for genotype objects.
-#' @name markerTypes
-#' @docType methods
-#' @rdname markerTypes-methods
-#' @aliases markerTypes,genotype
-
-setMethod("markerTypes", "genotype", function(object){
-  sapply(object@loci,FUN = function(x) x@markerType)
-})
-
 #' Generic method getHaplotypes
 #' @description
 #' This method obtains all or the specified number of possible haplotypes that a genotype could produce.
@@ -1285,11 +1235,10 @@ setGeneric("getHaplotypes",
 
 setMethod("getHaplotypes", "genotype", function(object, num = NULL) {
   posHap <- unique(expand.grid(getAlleles(object)))
-  lociTab <- apply(posHap, MARGIN = c(1,2), locus, locusName = "Locus", mType = "Marker")
+  lociTab <- apply(posHap, MARGIN = c(1,2), locus, locusName = "Locus")
   
   for(i in 1:dim(posHap)[2]) {
     lociTab[,i] <- lapply(lociTab[,i], setName, newName = markerNames(object)[i])
-    lociTab[,i] <- lapply(lociTab[,i], setType, newType = markerTypes(object)[i])
   }
   
   if(is.null(num)){
@@ -1392,12 +1341,13 @@ samplePoints <- function(sCoordinates, sTimes, proj4 = NULL) {
 #' 
 #' @slot .Data spatialPoints object. 
 #' @slot genetData list of `genotype` objects. This list contains the information for the genetic markers of each of the sampled individuals.
+#' @slot markerType character. The t
 #' @slot recombDist matrix. This matrix contains the recombination probability between the studied markers. All marker names in the genotypes should also be in this recombination matrix.
 #' @export
 
 setClass("genetSample",
          contains="samplePoints",
-         representation(genetData = "list",recombDist = "matrix"),
+         representation(genetData = "list", markerType = "character" ,recombDist = "matrix"),
          )
 
 validityGenetSample <- function(object) {
@@ -1410,13 +1360,14 @@ setValidity("genetSample", validityGenetSample)
 #' @description
 #' This function creates a genetSample object.
 #' @param sampledPoints samplePoints object containing the spatial information of the samples.
-#' @param samGenotypes List of genotype objects corresponding to the sampled organisms.
-#' @param recDist Either a matrix or a data.frame containing the distance or the recombination probability between the markers.
-#' @param mDist Boolean. This indicates if the recombination matrix (or data.frame) contains recombination probabilities (`FALSE`) or distances in cM (`TRUE`). Defaults to `FALSE`.
+#' @param samGenotypes list of genotype objects corresponding to the sampled organisms.
+#' @param mType character. Type of markers used. `microsatellite` is the name used for microsatellite markers.
+#' @param recDist either a matrix or a data.frame containing the distance or the recombination probability between the markers.
+#' @param mDist boolean. This indicates if the recombination matrix (or data.frame) contains recombination probabilities (`FALSE`) or distances in cM (`TRUE`). Defaults to `FALSE`.
 #' @returns genetSample object.
 #' @export
 
-genetSample <- function(sampledPoints=NULL, samGenotypes=NULL, recDist=NULL, mDist = TRUE) {
+genetSample <- function(sampledPoints=NULL, samGenotypes=NULL, mType = NULL, recDist=NULL, mDist = TRUE) {
   if(is.null(sampledPoints)) {sampledPoints <- new("samplePoints", sampleCell = 0)}
   if(is.null(samGenotypes)) {
     genList <- list()
@@ -1429,8 +1380,9 @@ genetSample <- function(sampledPoints=NULL, samGenotypes=NULL, recDist=NULL, mDi
     diag(recDist) <- 0
   }
   if(!mDist) { recDist <- (1-exp(-(2*recDist)/100))/2 }
+  if(is.null(mType)) {mType <- "microsatellite"}
   
-  new("genetSample", sampledPoints, genetData = samGenotypes, recombDist = recDist)
+  new("genetSample", sampledPoints, genetData = samGenotypes, markerType = mType, recombDist = recDist)
 }
 
 #' show method for genetSample objects.
@@ -1502,6 +1454,27 @@ setMethod("genetMatrix","genetSample", function(object){
   
   return(tempMat)
 })
+
+#' Calculates the genetic transition probability between two markers
+#' @description
+#' This function calculates the transition probability between two markers according to the type of marker and the distance metric selected.
+#' @param x First marker to compare.
+#' @param y Second marker to compare.
+#' @param mark Character. Marker type. It can only be `microsatellite`.
+#' @param dist Character. Genetic distance metric. Can be either `simple` or `geometric`.
+#' @returns Double. Transition probability between two markers.
+
+geneticDistance <- function(x,y,mark,dist) {
+  
+  P <- 0.1
+  Mu <- 10e-2
+  
+  switch(mark,
+         microsatellite=switch(dist,
+                               simple = (Mu)^abs(x-y),
+                               geometric = (Mu)*(1-P)*((P)^(abs(x-y)-1)) )
+  )
+}
 
 #' Class that includes genetSample, the mutation model and the gene distance matrix.
 #' @description
