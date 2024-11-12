@@ -1100,7 +1100,7 @@ setMethod("show",
 
 genotype <- function(samLoci=NULL) {
   if(is.null(samLoci)) {
-    samLoci <- list(locus("SSR1","microsatellite", c(128,138)),locus("SSR2","microsatellite",c(102,105)), locus("SSR3", "microsatellite", c(115,115)))
+    samLoci <- list(locus("SSR1","microsatellite", as.integer(runif(2,min = 100,max = 200))),locus("SSR2","microsatellite",as.integer(runif(2,min = 100,max = 200))), locus("SSR3", "microsatellite", as.integer(runif(2,min = 100,max = 200))))
   }
   new("genotype", loci = samLoci)
 }
@@ -1491,7 +1491,16 @@ setMethod("genetMatrix", "genotype", function(object) {
 #' @aliases genetMatrix,genetSample
 
 setMethod("genetMatrix","genetSample", function(object){
-  lapply(object@genetData, FUN = genetMatrix)
+  samList <- lapply(object@genetData, FUN = genetMatrix)
+  markLabels <- sort(unique(c(sapply(samList,colnames))))
+  tempMat <- matrix(data = 0, nrow = length(samList), ncol = length(markLabels), dimnames = list(1:length(samList),markLabels))
+  
+  for(i in 1:length(samList)) {
+    genepos <- sapply(colnames(samList[[i]]), FUN = function(x) {grep(x,colnames(tempMat))})
+    tempMat[i,genepos] <- tempMat[i,genepos] + samList[[i]]
+  }
+  
+  return(tempMat)
 })
 
 #' Class that includes genetSample, the mutation model and the gene distance matrix.
