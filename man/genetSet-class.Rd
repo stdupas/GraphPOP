@@ -13,7 +13,5 @@ This class includes inherits from genetSample the spatial and genetic data of th
 \item{\code{.Data}}{genetSample object that contains the genetic and spatial information.}
 
 \item{\code{mutationModel}}{Character. One of the implemented mutation models used to calculate the probability of coalescence.}
-
-\item{\code{genDistMatrix}}{Matrix. Recombination probability matrix between the represented loci.}
 }}
 

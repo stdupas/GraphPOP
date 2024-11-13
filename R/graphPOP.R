@@ -1477,12 +1477,20 @@ geneticDistance <- function(x,y,mark,dist) {
   )
 }
 
-markerCompare <- function(x,y, marker, distMet){
-  if(gsub("\\..*",x=x,replacement = "") != gsub("\\..*",x=x,replacement = "")) {
+#' Compare genetic markers
+#' @description
+#' This function compares genetic markers after the genetic matrix is done.
+#' @param x the markers to be compared.
+#' @param marker the type of marker used.
+#' @param distMet the distance metric used.
+#' @returns a probability transition matrix.
+
+markerCompare <- function(x, marker, distMet){
+  if(gsub("\\..*",x=x[1],replacement = "") != gsub("\\..*",x=x[2],replacement = "")) {
     0
   }
   else {
-    geneticDistance(gsub("^.*?\\.",x=x,replacement = ""),gsub("^.*?\\.",x=y,replacement = ""),mark = marker, dist = distMet)
+    geneticDistance(as.numeric(gsub("^.*?\\.",x=x[1],replacement = "")),as.numeric(gsub("^.*?\\.",x=x[2],replacement = "")),mark = marker, dist = distMet)
   }
 }
 
@@ -1491,7 +1499,6 @@ markerCompare <- function(x,y, marker, distMet){
 #' This class includes inherits from genetSample the spatial and genetic data of the samples, and contains also the mutation model for the markers and the distance between the loci.
 #' @slot .Data genetSample object that contains the genetic and spatial information.
 #' @slot mutationModel Character. One of the implemented mutation models used to calculate the probability of coalescence. 
-#' @slot genDistMatrix Matrix. Recombination probability matrix between the represented loci.
 #' @export
 
 setClass("genetSet",
@@ -1499,11 +1506,18 @@ setClass("genetSet",
          representation(sampleMatrix = "matrix",mutationModel = "character", transitionMatrix = "matrix"))
 
 validityGenetSet <- function(object) {
-  if(any(!(unique(dimnames(object@genDistMatrix)) %in% sapply(object@genetData, function(x) unique(markerNames(x)))))) {stop("All of the markers in the distance matrix must be represented in the data")}
-  if(any(!(sapply(object@genetData, function(x) unique(markerNames(x))) %in% unique(dimnames(object@genDistMatrix))))) {stop("All of the markers in the data must be present in the distance matrix")}
+TRUE
 }
 
 setValidity("genetSet", validityGenetSet)
+
+#' Creates a genetSet object
+#' @description
+#' This function creates a genetSet object. This uses a genetSample object and a mutation model object to calculate the genetic transition matrix.
+#' @param genData genetSample object. This object should contain the genetic and spatial information of the sampled individuals.
+#' @param mutModel mutationModel object. This specifies the mutation model selected for the calculation of the genetic transition probabilities.
+#' @returns genetSet object.
+#' @export
 
 genetSet <- function(genData = NULL, mutModel = NULL) {
   if(is.null(genData)) {genData <- genetSample()}
@@ -1513,6 +1527,12 @@ genetSet <- function(genData = NULL, mutModel = NULL) {
   geneLabs <- colnames(samMatrix)
   transMat <- matrix(data = 0, ncol = length(geneLabs), nrow = length(geneLabs), dimnames = list(geneLabs,geneLabs))
   
+  triang <- combn(geneLabs,2, FUN = markerCompare, marker=genData@markerType, distMet = mutModel)
+  transMat[lower.tri(transMat)] <- triang
+  transMat <- t(transMat)
+  transMat[lower.tri(transMat)] <- triang
+  diag(transMat) <- 1 - colSums(transMat)
+  new("genetSet", genData, sampleMatrix = samMatrix, mutationModel = mutModel, transitionMatrix = transMat)
 }
 
 #' Class that reunites the present and past socioecoData.
