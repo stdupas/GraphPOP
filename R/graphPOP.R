@@ -1332,7 +1332,7 @@ samplePoints <- function(sCoordinates, sTimes, proj4 = NULL) {
                 )
         }
   
-  new("samplePoints", geoCoordinates = sampleCoords,sampleCells = 0, sampleTimes = sTimes)
+  new("samplePoints", geoCoordinates = sampleCoords,sampleCell = 0, sampleTime = sTimes)
 }
 
 #' Class that contains the genetic data of the samples
