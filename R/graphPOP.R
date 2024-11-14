@@ -1444,7 +1444,7 @@ setMethod("genetMatrix", "genotype", function(object) {
 
 setMethod("genetMatrix","genetSample", function(object){
   samList <- lapply(object@genetData, FUN = genetMatrix)
-  markLabels <- sort(unique(c(sapply(samList,colnames))))
+  markLabels <- sort(unique(unlist(lapply(samList,colnames))))
   tempMat <- matrix(data = 0, nrow = length(samList), ncol = length(markLabels), dimnames = list(1:length(samList),markLabels))
   
   for(i in 1:length(samList)) {
