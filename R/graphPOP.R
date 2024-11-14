@@ -1352,6 +1352,7 @@ setClass("genetSample",
 
 validityGenetSample <- function(object) {
   if(length(object@geoCoordinates) != length(object@genetData)) {stop("All sampled points should have its corresponding genetic data")}
+  if(!(object@markerType %in% c("microsatellite", "snp"))) {stop("The marker is not within the accepted values: 'microsatellite' or 'snp'")}
 }
 
 setValidity("genetSample", validityGenetSample)
@@ -1361,7 +1362,7 @@ setValidity("genetSample", validityGenetSample)
 #' This function creates a genetSample object.
 #' @param sampledPoints samplePoints object containing the spatial information of the samples.
 #' @param samGenotypes list of genotype objects corresponding to the sampled organisms.
-#' @param mType character. Type of markers used. `microsatellite` is the name used for microsatellite markers.
+#' @param mType character. Type of markers used. `microsatellite` is the name used for microsatellite markers and `snp` for SNPs.
 #' @param recDist either a matrix or a data.frame containing the distance or the recombination probability between the markers.
 #' @param mDist boolean. This indicates if the recombination matrix (or data.frame) contains recombination probabilities (`FALSE`) or distances in cM (`TRUE`). Defaults to `FALSE`.
 #' @returns genetSample object.
@@ -1404,6 +1405,43 @@ setMethod("show", "genetSample", function(object){
   cat(length(object@genetData)," genotypes\n")
   cat("Characterized by:\t", unique(c(sapply(object@genetData, markerNames))), " markers\n")
   cat("Ploidy levels:\t", unique(c(sapply(object@genetData, getPloidy))),"\n")
+})
+
+#' mutationModel class
+#' @description
+#' This class holds the mutation model used for calculating the genetic transition matrix. This only provides some barriers to coerce the possible values of the mutation models.
+#' @export
+
+setClass("mutationModel",
+         contains="character")
+
+validityMutationModel <- function(object){
+  if(!(object %in% c("simple","geometric"))) {stop("The mutation model should be either 'simple' or 'geometric")}
+  if(length(object) > 1) {stop("The mutation model should contain only one value")}
+}
+
+setValidity("mutationModel", validityMutationModel)
+
+#' Creates a mutationModel object
+#' @description
+#' This function creates a mutationModel object.
+#' @param x character string indicating the mutation models. Currently only `simple` and `geometric` are supported.
+#' @returns mutationModel object.
+#' @export
+
+mutationModel <- function(x) {
+  new("mutationModel", x)
+}
+
+#' show method for mutationModel
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,mutationModel
+
+setMethod("show","mutationModel",function(object){
+  cat("Mutation model:\n")
+  cat(object)
 })
 
 #' Method to generate a genetic allele matrix
@@ -1506,7 +1544,10 @@ setClass("genetSet",
          representation(sampleMatrix = "matrix",mutationModel = "character", transitionMatrix = "matrix"))
 
 validityGenetSet <- function(object) {
-TRUE
+  if(any(colnames(object@sampleMatrix) != colnames(object@transitionMatrix))) {stop("The same marker-allele combinations should be both on the sample matrix and the transition matrix")}
+  if(any(colnames(object@sampleMatrix) != rownames(object@transitionMatrix))) {stop("The same marker-allele combinations should be both on the sample matrix and the transition matrix")}
+  if(any(rowSums(object@transitionMatrix) != 1)) {stop("The sum of probabilities should be 1 for all rows")}
+  if(any(colSums(object@transitionMatrix) != 1)) {stop("The sum of probabilities should be 1 for all columns")}
 }
 
 setValidity("genetSet", validityGenetSet)
@@ -1534,6 +1575,21 @@ genetSet <- function(genData = NULL, mutModel = NULL) {
   diag(transMat) <- 1 - colSums(transMat)
   new("genetSet", genData, sampleMatrix = samMatrix, mutationModel = mutModel, transitionMatrix = transMat)
 }
+
+#' show method for genetSet objects
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,genetSet
+
+setMethod("show", "genetSet", function(object){
+  cat("Object of the class: \tgenetSet\n\n")
+  show(object@genetSample)
+  cat("Marker type:\t")
+  cat(object@markerType)
+  cat("Mutation model:\t")
+  cat(object@mutationModel)
+})
 
 #' Class that reunites the present and past socioecoData.
 #' 

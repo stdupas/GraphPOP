@@ -17,7 +17,7 @@ genetSample(
 
 \item{samGenotypes}{list of genotype objects corresponding to the sampled organisms.}
 
-\item{mType}{character. Type of markers used. \code{microsatellite} is the name used for microsatellite markers.}
+\item{mType}{character. Type of markers used. \code{microsatellite} is the name used for microsatellite markers and \code{snp} for SNPs.}
 
 \item{recDist}{either a matrix or a data.frame containing the distance or the recombination probability between the markers.}
 
