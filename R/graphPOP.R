@@ -2293,9 +2293,10 @@ setMethod(
 #"Times" = return(x@samplePoints@sampleTime),
 ###
 
-#setClass("ecoGenetSet", 
-#         contains = "envDynSet",
-#         representation(genetSample = "genetSet", transitionMatrix = "matrix"))
+setClass("ecoGenetSet", 
+         contains = "socioecoGeoDataModel",
+         representation(genetSample = "genetSet"),
+         prototype(socioecoGeoDataModel(), genetSample = genetSet()))
 
 ###################Coalescence simulation methods#########################
 
