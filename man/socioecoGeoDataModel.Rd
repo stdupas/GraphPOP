@@ -14,13 +14,6 @@ socioecoGeoDataModel(
   nicheK = NULL,
   nicheR = NULL,
   migModel = NULL,
-  EnvStack = raster::stack(x = c(temp = raster(matrix(c(5, 4, 2, 4, 2, 4, 2, 4, 5), nrow
-    = 3), xmn = 0, xmx = 3, ymn = 0, ymx = 3, crs = "+proj=longlat"), pops =
-    raster::raster(matrix(c(1, 2, 2, 1, 1, 2, 1, 1, 1), nrow = 3), xmn = 0, xmx = 3, ymn
-    = 0, ymx = 3))),
-  stackConnectionType = c("geographic", "grouping"),
-  envLayerNames = NULL,
-  Extent = NULL,
   varNicheK = "temp",
   reactNormsK = c(temp = "scaling"),
   pNicheK = list(scalingK = 100),
@@ -53,14 +46,6 @@ socioecoGeoDataModel(
 
 \item{migModel}{migrationModel object. The migration model calculated for the studied landscape.}
 
-\item{EnvStack}{stack object. This object contains the environmental information of the landscape if it is not included in the socioecoGeoDataHistory object.}
-
-\item{stackConnectionType}{Character. The type of connection between the nodes in the graph.}
-
-\item{envLayerNames}{Character. The names for the environmental layers.}
-
-\item{Extent}{Numeric. The extent of the raster layers.}
-
 \item{varNicheK}{Character. The variable name of which the carrying capacity K depends.}
 
 \item{reactNormsK}{Character. The type of reaction norm for the listed variable for the carrying capacity.}
@@ -82,8 +67,6 @@ socioecoGeoDataModel(
 \item{pMig}{Numeric. Migration probability.}
 
 \item{pMixt}{Numeric. Mixture probability.}
-
-\item{sampledPoints}{samplePoints object. The coordinates and sampling times of the sampled individuals.}
 }
 \value{
 socioecoGeoDataModel object.

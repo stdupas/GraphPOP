@@ -1728,14 +1728,9 @@ setClass("socioecoGeoDataModel",
 #' @param ParsingTimes Numeric. Parsing times for the present and past data.
 #' @param TimeUnit Character. The time unit for the Parsing Times.
 #' @param ZeroTime POSIXlt object. The zero or present time.
-#' @param sampledPoints samplePoints object. The coordinates and sampling times of the sampled individuals.
 #' @param nicheK nicheModel object. Niche model for the carrying capacity.
 #' @param nicheR nicheModel object. Niche model for the reproductive capacity.
 #' @param migModel migrationModel object. The migration model calculated for the studied landscape.
-#' @param EnvStack stack object. This object contains the environmental information of the landscape if it is not included in the socioecoGeoDataHistory object.
-#' @param stackConnectionType Character. The type of connection between the nodes in the graph.
-#' @param envLayerNames Character. The names for the environmental layers.
-#' @param Extent Numeric. The extent of the raster layers.
 #' @param varNicheK Character. The variable name of which the carrying capacity K depends.
 #' @param reactNormsK Character. The type of reaction norm for the listed variable for the carrying capacity.
 #' @param varNicheR Character. The variable name of which the reproductive potential R depends.
@@ -1756,8 +1751,6 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
                                SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),
                                ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00'),
                                nicheK=NULL,nicheR=NULL,migModel=NULL,
-                               EnvStack=raster::stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster::raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),
-                               stackConnectionType=c("geographic","grouping"),envLayerNames=NULL,Extent=NULL,
                                varNicheK="temp",reactNormsK=c(temp="scaling"),pNicheK=list(scalingK=100),
                                varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
                                modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
@@ -2064,9 +2057,6 @@ setMethod(
   }
 )
 
-a=socioecoGeoDataModel(EnvStack = stack(x=c(temp=raster(matrix(c(5,4,2,4,2,4,2,4,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs="+proj=longlat"),pops=raster(matrix(c(1,2,2,1,1,2,1,1,1),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5))
-b=buildMigrationMatrix(a)
-
 #' Backward transition probabilities matrix
 #' 
 #' @description
@@ -2271,14 +2261,14 @@ envDynSet<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migr
                           varNicheR=c("temp","temp"),reactNormsR=c(temp="envelin",temp="scaling"),pNicheR=list(envelin=c(1,4),scalingR=10),
                           modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(1.10574E5/1.96,numeric(0)),pMixt=c(.5,.5)){
   if (is.null(socioecoGeoDataModel)) {
-    if (is.null(envData)) envData=new("geoEnvData")
-    socioecoGeoDataModel=socioecoGeoDataModel(envData = envData,nicheK = nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK),nicheR = nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR), migModel = migrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt))}
-  if (is.null(RKlandscape)) RKlandscape=buildRKLandscape(socioecoGeoDataModel)
+    if (is.null(envData)) envData= geoEnvData(rasterStack = EnvStack, layerConnectionTypes = stackConnectionType)
+    socioecoGeoDataModel=socioecoGeoDataModel(SocioecoGeoData = envData,nicheK = nicheModel(varNiche = varNicheK,reactNorms = reactNormsK, pNiche = pNicheK),nicheR = nicheModel(varNiche = varNicheR,reactNorms = reactNormsR, pNiche = pNicheR), migModel = geoMigrationModel(modelConnectionType = modelConnectionType,varMig = varMig,shapeMig = shapeMig,pMig = pMig,pMixt = pMixt))}
+  if (is.null(RKlandscape)) RKlandscape=buildRKlandscape(socioecoGeoDataModel)
   if (is.null(geoDist)) geoDist=buildGeodist(socioecoGeoDataModel)
-  if (is.null(migrationMatrix)) RKlandscape=buildMigrationMatrix(socioecoGeoDataModel)
-  if (is.null(transitionForward)) transitionForward=buildTransitionForward(socioecoGeoDataModel)
+  if (is.null(migrationMatrix)) migrationMatrix=buildMigrationMatrix(socioecoGeoDataModel)
+  if (is.null(transitionForward)) transitionForward=buildTransitionForward(socioecoGeoDataModel, "non_overlap")
   if (is.null(transitionBackward)) transitionBackward=buildTransitionBackward(socioecoGeoDataModel)
-  new("envDynSet",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForwar=transitionForward,transitionBackward=transitionBackward)
+  new("envDynSet",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForward=transitionForward,transitionBackward=transitionBackward)
 }
 
 #' Extracts data from envDynSet objects
@@ -2292,17 +2282,20 @@ setMethod(
              "R" ={return(values(x@RKlandscape$R))} ,
              "TransiBackw" ={return(x@transitionBackward)},
              "TransiForw" = {return(x@transitionForward)},
-             "Present" = {return(x@samplePoints@sampleCell[which(x@samplePoints@sampleTime == 0)])},
-             "Past" = {return(x@samplePoints@sampleCell[which(x@samplePoints@sampleTime != 0)])},
-             "Times" = return(x@samplePoints@sampleTime),
              stop("This slot doesn't exist!")
     )
   }
 )
 
+###
+#"Present" = {return(x@samplePoints@sampleCell[which(x@samplePoints@sampleTime == 0)])},
+#"Past" = {return(x@samplePoints@sampleCell[which(x@samplePoints@sampleTime != 0)])},
+#"Times" = return(x@samplePoints@sampleTime),
+###
+
 #setClass("ecoGenetSet", 
 #         contains = "envDynSet",
-#         representation(genetData = "genetSet", transitionMatrix = "matrix"))
+#         representation(genetSample = "genetSet", transitionMatrix = "matrix"))
 
 ###################Coalescence simulation methods#########################
 
