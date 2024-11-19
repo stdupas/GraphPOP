@@ -1584,10 +1584,22 @@ genetSet <- function(genData = NULL, mutModel = NULL) {
 
 setMethod("show", "genetSet", function(object){
   cat("Object of the class: \tgenetSet\n\n")
-  show(object@genetSample)
+  cat("Sample number:\n")
+  cat(1:length(object@sampleTime),"\n")
+  cat("Sampling times:\n")
+  cat(object@sampleTime, "\n")
+  cat("Sample cells:\n")
+  cat(object@sampleCell)
+  cat("\n")
+  cat("Summary of sample coordinates:\n")
+  show(object@geoCoordinates)
+  cat("\n")
+  cat(length(object@genetData)," genotypes\n")
+  cat("Characterized by:\t", unique(c(sapply(object@genetData, markerNames))), " markers\n")
+  cat("Ploidy levels:\t", unique(c(sapply(object@genetData, getPloidy))),"\n")
   cat("Marker type:\t")
   cat(object@markerType)
-  cat("Mutation model:\t")
+  cat("\nMutation model:\t")
   cat(object@mutationModel)
 })
 
@@ -1693,8 +1705,6 @@ validitysocioecoGeoDataModel=function(object){
   if(!is(object@Kmodel,"nicheModel"))stop("Error in socioecoGeoDataModel Kmodel: Kmodel only accepts NicheModel !")
   if(!is(object@Rmodel,"nicheModel"))stop("Error in socioecoGeoDataModel Rmodel: Rmodel only accepts NicheModel !")
   if(!is(object@geoMigModel,"geoMigrationModel"))stop("Error in socioecoGeoDataModel migration: migration only accepts migrationModel !")
-  if(!is(object@sampledPoints,"samplePoints"))stop("Error in socioecoGeoDataModel samplePoints: this must be a samplePoints object !")
-  TRUE
 }
 
 #' Class to contain the socioecoGeoDataModel built on the historical information
@@ -1712,7 +1722,7 @@ validitysocioecoGeoDataModel=function(object){
 
 setClass("socioecoGeoDataModel",
          contains = "socioecoGeoDataHistory",
-         representation(SocioecoGeoData = "socioecoGeoData",Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel", sampledPoints = "samplePoints"),
+         representation(SocioecoGeoData = "socioecoGeoData",Kmodel="nicheModel",Rmodel="nicheModel",geoMigModel="geoMigrationModel",socioecoMigModel="socioecoMigrationModel"),
          validity=validitysocioecoGeoDataModel,
          prototype(new("socioecoGeoDataHistory"),Kmodel=new("nicheModel"),Rmodel=new("nicheModel"),geoMigModel=new("geoMigrationModel"),socioecoMigModel=new("socioecoMigrationModel"))
       
@@ -2293,10 +2303,34 @@ setMethod(
 #"Times" = return(x@samplePoints@sampleTime),
 ###
 
+#' ecoGenetSet class
+#' @description
+#' This class reunites the genetic information of the samples contained in a genetSet object together with the spatial, demographic and social information contained in envDynSet.
+#'  @slot .Data envDynSet object containing all socioecological and demographic information.
+#'  @slot genetSample genetSet object containing all genetic and spatial information for the samples collected.
+#'  @export
+
 setClass("ecoGenetSet", 
-         contains = "socioecoGeoDataModel",
+         contains = "envDynSet",
          representation(genetSample = "genetSet"),
-         prototype(socioecoGeoDataModel(), genetSample = genetSet()))
+         prototype(envDynSet(), genetSample = genetSet()))
+
+#' Creates an ecoGenetSet object
+#' @description
+#' This function creates an ecoGenetSet object from an envDynSet and a genetSet objects.
+#' This is the preferred method for creating an ecoGenetSet object as opposed to `new("ecoGenetSet")` as this way some important calculations would not be performed.
+#' @param envDyn envDynSet object. The object containing the spatial, social and demographic information of the region under study.
+#' @param genetData genetSet object. The object containing the genetic, temporal and location information of the collected samples.
+#' @returns ecoGenetSet object.
+#' @importFrom raster cellFromXY
+#' @export
+
+ecoGenetSet <- function(envDyn = NULL, genetData = NULL) {
+  if(is.null(envDyn)) {envDyn <- envDynSet()}
+  if(is.null(genetData)) {genetData <- genetSet()}
+  genetData@sampleCell <- raster::cellFromXY(envDyn,genetData@geoCoordinates)
+  new("ecoGenetSet",envDyn, genetSample = genetData)
+}
 
 ###################Coalescence simulation methods#########################
 
