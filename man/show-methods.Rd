@@ -18,6 +18,7 @@
 \alias{show,nicheModel}
 \alias{show,geoMigrationModel}
 \alias{show,socioecoGeoDataModel}
+\alias{show,coalescent}
 \title{Show method for geoEnvData.}
 \usage{
 \S4method{show}{geoEnvData}(object)
@@ -49,6 +50,8 @@
 \S4method{show}{geoMigrationModel}(object)
 
 \S4method{show}{socioecoGeoDataModel}(object)
+
+\S4method{show}{coalescent}(object)
 }
 \description{
 Show method for geoEnvData.
@@ -80,4 +83,6 @@ show method for nicheModel objects.
 show method for geoMigrationModel objects.
 
 show method for socioecoGeoDataModel objects.
+
+show method for coalescent objects.
 }
