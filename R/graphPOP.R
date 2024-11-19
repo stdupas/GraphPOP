@@ -2763,18 +2763,20 @@ setMethod(
   }
 )
 
-# plot method for coalescent objects.
-# 
-# @name plot
-# @docType methods
-# @rdname plot-methods
-# @aliases plot,coalescent
-# @importFrom ape plot.phylo
-# @importFrom ape read.tree
-# 
-# setMethod(f="plot",signature = c("coalescent"),definition=function(object){
-#   ape::plot.phylo(ape::read.tree(text=coalescent_2_newick(object)))
-# })
+#' Print method for coalescent objects
+#' @description
+#' Print method for coalescent objects.
+#' @param object coalescent. The coalescent object.
+#' @returns plot of the tree representing the coalescent.
+#' @aliases print
+#' @rdname print-methods
+#' @importFrom ape plot.phylo
+#' @importFrom ape read.tree
+#' @export
+ 
+print.coalescent <- function(object) {
+  ape::plot.phylo(ape::read.tree(text=coalescent_2_newick(object)))
+}
 
 setMethod(
   f="linearizedFstUndigraph",
