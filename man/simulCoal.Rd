@@ -4,10 +4,10 @@
 \alias{simulCoal}
 \title{Coalescence simulation from socioecological and geographical data.}
 \usage{
-simulCoal(envDynSet, printCoal)
+simulCoal(ecoGenetSet, printCoal)
 }
 \arguments{
-\item{envDynSet}{envDynSet object. This object must contain all the information for the coalescence simulation.}
+\item{ecoGenetSet}{ecoGenetSet object. This object must contain all the information for the coalescence simulation.}
 
 \item{printCoal}{Boolean. If \code{TRUE} it prints the time elapsed during the simulations.}
 }

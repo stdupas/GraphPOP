@@ -3,7 +3,7 @@
 \docType{methods}
 \name{simulCoal}
 \alias{simulCoal}
-\alias{simulCoal,envDynSet,boolean}
+\alias{simulCoal,ecoGenetSet,boolean}
 \alias{#'}
 \alias{@description}
 \alias{Simulates}
@@ -14,12 +14,12 @@
 \alias{and}
 \alias{geographical}
 \alias{data.}
-\title{simulCoal method for envDynSet objects.}
+\title{simulCoal method for ecoGenetSet objects.}
 \usage{
-\S4method{simulCoal}{envDynSet,logical}(envDynSet, printCoal)
+\S4method{simulCoal}{ecoGenetSet,logical}(ecoGenetSet, printCoal)
 }
 \arguments{
-\item{envDynSet}{envDynSet object. This object must contain all the information for the coalescence simulation.}
+\item{ecoGenetSet}{ecoGenetSet object. This object must contain all the information for the coalescence simulation.}
 
 \item{printCoal}{Boolean. If \code{TRUE} it prints the time elapsed during the simulations.}
 }
@@ -27,5 +27,5 @@
 List. The first element is the coalescent, and the second is the summed forward probability.
 }
 \description{
-simulCoal method for envDynSet objects.
+simulCoal method for ecoGenetSet objects.
 }

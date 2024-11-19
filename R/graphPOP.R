@@ -2281,28 +2281,6 @@ envDynSet<-function(socioecoGeoDataModel=NULL,RKlandscape=NULL,geoDist=NULL,migr
   new("envDynSet",socioecoGeoDataModel,RKlandscape=RKlandscape,migrationMatrix=migrationMatrix,transitionForward=transitionForward,transitionBackward=transitionBackward)
 }
 
-#' Extracts data from envDynSet objects
-
-setMethod(
-  f ="[",
-  signature = c(x="envDynSet" ,i="character",j="missing"),
-  definition = function (x ,i ,j , drop ){
-    switch ( EXPR =i,
-             "K" ={return(values(x@RKlandscape$K))} ,
-             "R" ={return(values(x@RKlandscape$R))} ,
-             "TransiBackw" ={return(x@transitionBackward)},
-             "TransiForw" = {return(x@transitionForward)},
-             stop("This slot doesn't exist!")
-    )
-  }
-)
-
-###
-#"Present" = {return(x@samplePoints@sampleCell[which(x@samplePoints@sampleTime == 0)])},
-#"Past" = {return(x@samplePoints@sampleCell[which(x@samplePoints@sampleTime != 0)])},
-#"Times" = return(x@samplePoints@sampleTime),
-###
-
 #' ecoGenetSet class
 #' @description
 #' This class reunites the genetic information of the samples contained in a genetSet object together with the spatial, demographic and social information contained in envDynSet.
@@ -2328,55 +2306,74 @@ setClass("ecoGenetSet",
 ecoGenetSet <- function(envDyn = NULL, genetData = NULL) {
   if(is.null(envDyn)) {envDyn <- envDynSet()}
   if(is.null(genetData)) {genetData <- genetSet()}
-  genetData@sampleCell <- raster::cellFromXY(envDyn,genetData@geoCoordinates)
+  genetData@sampleCell <- setNames(raster::cellFromXY(envDyn,genetData@geoCoordinates),1:length(genetData@genetData))
   new("ecoGenetSet",envDyn, genetSample = genetData)
 }
+
+#' Extracts data from ecoGenetSet objects
+
+setMethod(
+  f ="[",
+  signature = c(x="ecoGenetSet" ,i="character",j="missing"),
+  definition = function (x ,i ,j , drop ){
+    switch ( EXPR =i,
+             "K" ={return(values(x@RKlandscape$K))} ,
+             "R" ={return(values(x@RKlandscape$R))} ,
+             "TransiBackw" ={return(x@transitionBackward)},
+             "TransiForw" = {return(x@transitionForward)},
+             "Present" = {return(x@genetSample@sampleCell[which(x@genetSample@sampleTime == 0)])},
+             "Past" = {return(x@genetSample@sampleCell[which(x@genetSample@sampleTime != 0)])},
+             "Times" = return(x@genetSample@sampleTime),
+             stop("This slot doesn't exist!")
+    )
+  }
+)
 
 ###################Coalescence simulation methods#########################
 
 #' Coalescence simulation from socioecological and geographical data.
 #' @description
 #' Simulates a coalescence from socioecological and geographical data.
-#' @param envDynSet envDynSet object. This object must contain all the information for the coalescence simulation.
+#' @param ecoGenetSet ecoGenetSet object. This object must contain all the information for the coalescence simulation.
 #' @param printCoal Boolean. If `TRUE` it prints the time elapsed during the simulations.
 #' @returns List. The first element is the coalescent, and the second is the summed forward probability. 
 #' @export
 
 setGeneric(
   name = "simulCoal",
-  def=function(envDynSet,printCoal){return(standardGeneric("simulCoal"))}
+  def=function(ecoGenetSet,printCoal){return(standardGeneric("simulCoal"))}
 )
 
-#' simulCoal method for envDynSet objects.
+#' simulCoal method for ecoGenetSet objects.
 #' 
 #' @name simulCoal
 #' @docType methods
-#' @rdname envDynSet-methods
-#' @aliases simulCoal,envDynSet,boolean
+#' @rdname ecoGenetSet-methods
+#' @aliases simulCoal,ecoGenetSet,boolean
 #' #' @description
 #' Simulates a coalescence from socioecological and geographical data.
-#' @param envDynSet envDynSet object. This object must contain all the information for the coalescence simulation.
+#' @param ecoGenetSet ecoGenetSet object. This object must contain all the information for the coalescence simulation.
 #' @param printCoal Boolean. If `TRUE` it prints the time elapsed during the simulations.
 #' @returns List. The first element is the coalescent, and the second is the summed forward probability. 
 
 setMethod(
   f="simulCoal", ##Simulates a coalescent
-  signature=c("envDynSet","logical"),
-  definition=function(envDynSet,printCoal)
+  signature=c("ecoGenetSet","logical"),
+  definition=function(ecoGenetSet,printCoal)
   {
     #Initialization of the objects that will store the information about the coalescent
     prob_forward=NA
-    N <- round(envDynSet["K"]);#N[N==0]<-1
+    N <- round(ecoGenetSet["K"]);#N[N==0]<-1
     coalescent = list() #
-    cell_number_of_nodes <- parent_cell_number_of_nodes <- envDynSet["Present"]
+    cell_number_of_nodes <- parent_cell_number_of_nodes <- ecoGenetSet["Present"]
     nodes_remaining_by_cell = list()
-    nodes_remaining <- as.numeric(names(envDynSet@samplePoints@sampleCell))
+    nodes_remaining <- as.numeric(names(ecoGenetSet@genetSample@sampleCell))
     time=0
     single_coalescence_events=0
     single_and_multiple_coalescence_events=0
     
     #Adds the remaining nodes per cell to the nodes_remaining_by_cell list for the coalescent simulation
-    for (cell in 1:nCellA(envDynSet)[1])
+    for (cell in 1:nCellA(ecoGenetSet)[1])
     {
       nodes_remaining_by_cell[[cell]] <- which(cell_number_of_nodes==cell)
     }
@@ -2385,9 +2382,9 @@ setMethod(
     while (length(nodes_remaining)>1) 
     {
       #Adding the nodes sampled in the past if there is any
-      if(time > 0 && any(abs(envDynSet["Times"]) == time)) 
+      if(time > 0 && any(abs(ecoGenetSet["Times"]) == time)) 
       {
-        past_nodes_remaining <- envDynSet@samplePoints@sampleCell[which(abs(envDynSet["Times"]) == time)]
+        past_nodes_remaining <- ecoGenetSet@genetSample@sampleCell[which(abs(ecoGenetSet["Times"]) == time)]
         
         #This cycle adds the past nodes present in each of the cells. It cycles only through the cells where the past nodes are
         for(cell in unique(past_nodes_remaining)) 
@@ -2404,21 +2401,21 @@ setMethod(
       #Spatial transition backwards of each node with a probability given by the Backwards Transition matrix of the envDynSet object
       for (node in 1:length(parent_cell_number_of_nodes))
       {
-        parent_cell_number_of_nodes[node] = sample(x=nCellA(envDynSet)[1],size=1,prob=c(envDynSet["TransiBackw"][cell_number_of_nodes[node],]))
+        parent_cell_number_of_nodes[node] = sample(x=nCellA(ecoGenetSet)[1],size=1,prob=c(ecoGenetSet["TransiBackw"][cell_number_of_nodes[node],]))
       }
       
       #After the spatial transition backwards, the nodes newly positioned in the cells are accounted for in this cycle
-      for (cell in 1:nCellA(envDynSet)[1])
+      for (cell in 1:nCellA(ecoGenetSet)[1])
       {
         nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
       }
       
       #Calculation of the Forward transition probability of each iteration
-      prob_forward[time] = sum(log(envDynSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
+      prob_forward[time] = sum(log(ecoGenetSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1;  if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
       
       #The coalescent events are calculated in this cycle accounting for the new cell position of each node
-      for (cell in 1:nCellA(envDynSet)[1])
+      for (cell in 1:nCellA(ecoGenetSet)[1])
       {
         nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(names(which(parent_cell_number_of_nodes==cell)))
         #nodes_remaining_in_the_cell = nodes_remaining_by_cell[[cell]] <- as.numeric(which(parent_cell_number_of_nodes==cell))
@@ -2479,7 +2476,7 @@ setMethod(
       for (coalescing in coalescent[[i]]$coalescing)# coalescing = coalescent[[i]]$coalescing[1]
       {
         #The branch length of the nodes is calculated. The sampling time is subtracted from the tips
-        if (coalescing %in% tips) {coalescent[[i]]$br_length <- append(coalescent[[i]]$br_length,(coalescent[[i]]$time - abs(envDynSet@samplePoints@sampleTime[coalescing])))
+        if (coalescing %in% tips) {coalescent[[i]]$br_length <- append(coalescent[[i]]$br_length,(coalescent[[i]]$time - abs(ecoGenetSet@genetSample@sampleTime[coalescing])))
         } else {
           coalescent[[i]]$br_length <- append(coalescent[[i]]$br_length,coalescent[[i]]$time-times[which(internals==coalescing)])
         }
