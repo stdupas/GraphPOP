@@ -2352,9 +2352,24 @@ setMethod("show", "coalescent", function(object){
   cat("Object of the class coalescent:\n")
   cat("Forward probability:\n")
   cat(object@probForward)
-  cat("Coalescent:\n")
-  cat(object@coalescent)
+  cat("\nCoalescent:\n")
+  for(i in object@coalescent){
+    cat(i)
+  }
 })
+
+#' Calculates the genetic probability of a genealogy
+#' @description
+#' This function calculates the probability of a genealogy given the genetic data.
+#' @param sampleObj object containing the genetic sample information.
+#' @param coalSim genealogy from a coalescent simulation.
+#' @returns numeric. Probability of a genealogy given the genetic information in the sample.
+#' @export
+
+setGeneric(
+  name = "genetProb", 
+  def = function(sampleObj,coalSim){return(standardGeneric("genetProb"))}
+)
 
 #' Coalescence simulation from socioecological and geographical data.
 #' @description
@@ -2512,7 +2527,7 @@ setMethod(
   }
 )
 
-#' Method to simulate multiple coalescents.
+#' Method to simulate multiple coalescent.
 #' @description
 #' This method is used to simulate multiple coalescents for parameter inference.
 #' @param ecoGenetSet ecoGenetSet object that contains the spatial, demographic and genetic information.
