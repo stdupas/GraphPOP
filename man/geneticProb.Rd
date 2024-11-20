@@ -4,12 +4,12 @@
 \alias{geneticProb}
 \title{Genetic probability calculation for a genealogy}
 \usage{
-geneticProb(coalSim, ecoGenetData)
+geneticProb(coalescent, ecoGenetData)
 }
 \arguments{
-\item{coalSim}{coalescent object. This object should contain the simulated genealogy.}
-
 \item{ecoGenetData}{ecoGenetSet object. This object should contain the genetic information of the samples.}
+
+\item{coalSim}{coalescent object. This object should contain the simulated genealogy.}
 }
 \value{
 numeric. The calculated probability of the genealogy given the genetic characterization of the samples.

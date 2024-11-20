@@ -2340,7 +2340,7 @@ setMethod(
 #' @export
 
 setClass("coalescent",
-         representation(coalescent = "list", probForward = "numeric"))
+         representation(coalescent = "list", probForward = "numeric", genetProb = "numeric"))
 
 #' show method for coalescent objects.
 #' 
@@ -2353,24 +2353,36 @@ setMethod("show", "coalescent", function(object){
   cat("Object of the class coalescent:\n")
   cat("Forward probability:\n")
   cat(object@probForward)
+  cat("Genetic probability:\n")
+  cat(object@genetProb)
   cat("\nCoalescent:\n")
-  for(i in object@coalescent){
-    cat(i)
-  }
+  show(object@coalescent)
 })
 
-#' Calculates the genetic probability of a genealogy
+#' Genetic probability calculation for a genealogy
 #' @description
-#' This function calculates the probability of a genealogy given the genetic data.
-#' @param sampleObj object containing the genetic sample information.
-#' @param coalSim genealogy from a coalescent simulation.
-#' @returns numeric. Probability of a genealogy given the genetic information in the sample.
-#' @export
+#' This function calculates the probability of a genealogy given the genetic data of a sample. This function requires a coalescent (simulated genealogy) and a ecoGenetSet object containing the marker information for the samples as well as the genetic transition matrix.
+#' @param coalSim coalescent object. This object should contain the simulated genealogy.
+#' @param ecoGenetData ecoGenetSet object. This object should contain the genetic information of the samples.
+#' @importFrom matrixcalc matrix.power
+#' @returns numeric. The calculated probability of the genealogy given the genetic characterization of the samples.
 
-setGeneric(
-  name = "genetProb", 
-  def = function(sampleObj,coalSim){return(standardGeneric("genetProb"))}
-)
+geneticProb<-function(coalescent, ecoGenetData) {
+  probability <- 1
+  #Ne <- mean(ecoGenetData["K"])
+  genTransMat <- ecoGenetData@genetSample@transitionMatrix
+  sampleMat <- ecoGenetData@genetSample@sampleMatrix
+  for(tc in coalescent) {
+    tempProb <- (sampleMat[as.character(tc$coalescing[1]),] %*% matrixcalc::matrix.power(genTransMat,(tc$br_length[1]-1))) %*% t(sampleMat[as.character(tc$coalescing[2]),] %*% matrixcalc::matrix.power(genTransMat,(tc$br_length[2]-1)))
+    probability <- probability * tempProb
+    
+    newNode <- apply(rbind(sampleMat[as.character(tc$coalescing[1]),],sampleMat[as.character(tc$coalescing[2]),]), MARGIN = 2, FUN = mean)
+    sampleMat <- rbind(sampleMat, newNode)
+    rownames(sampleMat)[nrow(sampleMat)] <- tc$new_node
+    
+  }
+  return(as.numeric(probability))
+}
 
 #' Coalescence simulation from socioecological and geographical data.
 #' @description
@@ -2523,8 +2535,9 @@ setMethod(
         }
       }
     }
+    
     #Return a list with the coalescent and the total probability forward
-    new("coalescent",coalescent=coalescent,probForward=sum(prob_forward))
+    new("coalescent",coalescent=coalescent,probForward=sum(prob_forward), genetProb = geneticProb(coalescent, ecoGenetSet))
   }
 )
 
@@ -2556,31 +2569,6 @@ setMethod(
     lapply(1:iteration,function(x)simulCoal(ecoGenetSet,printCoal))
   }
 )
-
-#' Genetic probability calculation for a genealogy
-#' @description
-#' This function calculates the probability of a genealogy given the genetic data of a sample. This function requires a coalescent (simulated genealogy) and a ecoGenetSet object containing the marker information for the samples as well as the genetic transition matrix.
-#' @param coalSim coalescent object. This object should contain the simulated genealogy.
-#' @param ecoGenetData ecoGenetSet object. This object should contain the genetic information of the samples.
-#' @returns numeric. The calculated probability of the genealogy given the genetic characterization of the samples.
-
-geneticProb<-function(coalSim, ecoGenetData) {
-  probability <- 1
-  #Ne <- mean(ecoGenetData["K"])
-  genTransMat <- ecoGenetData@genetSample@transitionMatrix
-  sampleMat <- ecoGenetData@genetSample@sampleMatrix
-  for(tc in coalSim@coalescent) {
-    tempProb <- (sampleMat[as.character(tc$coalescing[1])] %*% matrixcalc::matrix.power(genTransMat,(tc$br_length[1]-1))) %*% t(sampleMat[as.character(tc$coalescing[2])] %*% matrixcalc::matrix.power(genTransMat,(tc$br_length[2]-1)))
-    probability <- probability * tempProb
-    
-    newNode <- apply(rbind(sampleMat[tc$coalescing[1]],sampleMat[tc$coalescing[2]]), MARGIN = 2, FUN = mean)
-    rownames(newNode) <- tc$new_node
-    
-    sampleMat <- sampleMat[-as.character(tc$coalescing),]
-    sampleMat <- rbind(sampleMat, newNode)
-  }
-  return(probability)
-}
 
 setGeneric(
   name = "getLaplacian",
