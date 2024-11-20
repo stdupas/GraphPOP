@@ -1467,7 +1467,8 @@ setMethod("genetMatrix", "genotype", function(object) {
   tempAll <- sapply(unique(getAlleles(object)), FUN = function(x) length(grep(x,getAlleles(object))))
   
   resAll <- sapply(names(tempAll), FUN = function(y) {
-    tempAll[y]/sum(tempAll[grep(sub("\\..*",x=y,replacement = ""),names(tempAll))])
+    #tempAll[y]/sum(tempAll[grep(sub("\\..*",x=y,replacement = ""),names(tempAll))]) #Done so the sum of probabilities for each locus was 1.
+    tempAll[y]/sum(tempAll)
   })
   
   return(matrix(resAll, nrow = 1, dimnames = list("",names(tempAll))))
@@ -2556,6 +2557,30 @@ setMethod(
   }
 )
 
+#' Genetic probability calculation for a genealogy
+#' @description
+#' This function calculates the probability of a genealogy given the genetic data of a sample. This function requires a coalescent (simulated genealogy) and a ecoGenetSet object containing the marker information for the samples as well as the genetic transition matrix.
+#' @param coalSim coalescent object. This object should contain the simulated genealogy.
+#' @param ecoGenetData ecoGenetSet object. This object should contain the genetic information of the samples.
+#' @returns numeric. The calculated probability of the genealogy given the genetic characterization of the samples.
+
+geneticProb<-function(coalSim, ecoGenetData) {
+  probability <- 1
+  #Ne <- mean(ecoGenetData["K"])
+  genTransMat <- ecoGenetData@genetSample@transitionMatrix
+  sampleMat <- ecoGenetData@genetSample@sampleMatrix
+  for(tc in coalSim@coalescent) {
+    tempProb <- (sampleMat[as.character(tc$coalescing[1])] %*% matrixcalc::matrix.power(genTransMat,(tc$br_length[1]-1))) %*% t(sampleMat[as.character(tc$coalescing[2])] %*% matrixcalc::matrix.power(genTransMat,(tc$br_length[2]-1)))
+    probability <- probability * tempProb
+    
+    newNode <- apply(rbind(sampleMat[tc$coalescing[1]],sampleMat[tc$coalescing[2]]), MARGIN = 2, FUN = mean)
+    rownames(newNode) <- tc$new_node
+    
+    sampleMat <- sampleMat[-as.character(tc$coalescing),]
+    sampleMat <- rbind(sampleMat, newNode)
+  }
+  return(probability)
+}
 
 setGeneric(
   name = "getLaplacian",
