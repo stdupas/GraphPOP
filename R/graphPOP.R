@@ -2778,18 +2778,18 @@ setMethod(
   }
 )
 
-#' Print method for coalescent objects
+#' Plot method for coalescent objects
 #' @description
-#' Print method for coalescent objects.
+#' Plot method for coalescent objects.
 #' @param object coalescent. The coalescent object.
 #' @returns plot of the tree representing the coalescent.
-#' @aliases print
-#' @rdname print-methods
+#' @aliases plot
+#' @rdname plot-methods
 #' @importFrom ape plot.phylo
 #' @importFrom ape read.tree
 #' @export
  
-print.coalescent <- function(object) {
+plot.coalescent <- function(object) {
   ape::plot.phylo(ape::read.tree(text=coalescent_2_newick(object)))
 }
 
