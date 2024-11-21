@@ -2353,7 +2353,7 @@ setMethod("show", "coalescent", function(object){
   cat("Object of the class coalescent:\n")
   cat("Forward probability:\n")
   cat(object@probForward)
-  cat("Genetic probability:\n")
+  cat("\nGenetic probability:\n")
   cat(object@genetProb)
   cat("\nCoalescent:\n")
   show(object@coalescent)
