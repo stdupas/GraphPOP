@@ -4,10 +4,27 @@
 \name{simulMultiCoal}
 \alias{simulMultiCoal}
 \alias{simulMultiCoal,ecoGenetSet}
+\alias{simulMultiCoal,genealSimProb}
 \title{simulMultiCoal method for ecoGenetData objects.}
 \usage{
-\S4method{simulMultiCoal}{ecoGenetSet,logical,numeric}(ecoGenetSet, printCoal, iteration)
+\S4method{simulMultiCoal}{ecoGenetSet,logical,numeric,logical,numeric}(
+  ecoGenetSet,
+  printCoal,
+  iteration,
+  multiCore = FALSE,
+  cores = NULL
+)
+
+\S4method{simulMultiCoal}{genealSimProb,logical,numeric,logical,numeric}(
+  ecoGenetSet,
+  printCoal,
+  iteration,
+  multiCore = FALSE,
+  cores = NULL
+)
 }
 \description{
 simulMultiCoal method for ecoGenetData objects.
+
+simulMultiCoal method for genealSimProb objects.
 }

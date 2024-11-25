@@ -2330,6 +2330,34 @@ setMethod(
   }
 )
 
+#' genealSimProb class
+#' @description
+#' This class contains the ecoGenetSet information and a list of different coalescence simulations with its respective demographic and genetic probabilities.
+#' @slot .Data ecoGenetSet object containing the demographic and genetic information.
+#' @slot genealogies list of coalSim objects (simulated genealogies) with its corresponding probabilities.
+#' @export
+
+setClass("genealSimProb",
+         contains="ecoGenetSet",
+         representation(genealogies = "list"),
+         prototype(ecoGenetSet(),genealogies = list())
+         )
+
+#' Creates a genealSimProb object
+#' @description
+#' This function creates a genealSimProb object which contains the environmental, demographic, genetic information and the coalescent simulations together with its demographic and genetic probabilities.
+#' @param ecoGenetSet ecoGenetSet object. This contains all the environmental, demographic and genetic information required.
+#' @param geneal list of coalSim simulations of the corresponding ecoGenetSet object. If `NULL`, an empty list will be created to store the coalescent simulations made from the ecoGenetSet object.
+#' @returns genealSimProb
+#' @export
+
+genealSimProb <- function(ecoGenetSet = NULL, geneal = NULL) {
+  if(is.null(ecoGenetSet)) { ecoGenetSet <- ecoGenetSet() }
+  genealogies <- list()
+  if(!is.null(geneal)) { genealogies <- append(genealogies,geneal) }
+  new("genealSimProb", ecoGenetSet, genealogies = genealogies)
+}
+
 ###################Coalescence simulation methods#########################
 
 #' coalSim class
@@ -2552,7 +2580,7 @@ setMethod(
 
 setGeneric(
   name = "simulMultiCoal",
-  def=function(ecoGenetSet,printCoal,iteration){return(standardGeneric("simulMultiCoal"))}
+  def=function(ecoGenetSet,printCoal,iteration,multiCore,cores){return(standardGeneric("simulMultiCoal"))}
 )
 
 #' simulMultiCoal method for ecoGenetData objects.
@@ -2561,12 +2589,61 @@ setGeneric(
 #' @docType methods
 #' @rdname simulMultiCoal-methods
 #' @aliases simulMultiCoal,ecoGenetSet
+#' @importFrom parallel detectCores
+#' @importFrom parallel mclapply
 
 setMethod(
   f="simulMultiCoal",
-  signature=c("ecoGenetSet","logical","numeric"),
-  definition=function(ecoGenetSet,printCoal,iteration){
-    lapply(1:iteration,function(x)simulCoal(ecoGenetSet,printCoal))
+  signature=c("ecoGenetSet","logical","numeric","logical","numeric"),
+  definition=function(ecoGenetSet,printCoal,iteration,multiCore=FALSE,cores = NULL){
+    if(multiCore){
+      if(is.null(cores)) { cores <- parallel::detectCores() }
+      parallel::mclapply(1:iteration,function(x) simulCoal(ecoGenetSet, FALSE), mc.cores = cores)
+    }
+    else {
+      lapply(1:iteration,function(x)simulCoal(ecoGenetSet,printCoal))
+    }
+  }
+)
+
+#' simulCoal method for genealSimProb objects.
+#' 
+#' @name simulCoal
+#' @docType methods
+#' @rdname simulCoal-methods
+#' @aliases simulCoal,genealSimProb,boolean
+#' #' @description
+#' Simulates a coalescence from socioecological and geographical data.
+#' @param ecoGenetSet genealSimProb object. This object must contain all the information for the coalescence simulation.
+#' @param printCoal Boolean. If `TRUE` it prints the time elapsed during the simulations.
+#' @returns List. The first element is the coalescent, and the second is the summed forward probability. 
+
+setMethod(
+  f="simulCoal",
+  signature = c("genealSimProb", "logical"),
+  definition = function(ecoGenetSet, printCoal){
+    ecoGenetSet@genealogies <- append(ecoGenetSet@genealogies, simulCoal(ecoGenetSet, printCoal))
+  })
+
+#' simulMultiCoal method for genealSimProb objects.
+#' 
+#' @name simulMultiCoal
+#' @docType methods
+#' @rdname simulMultiCoal-methods
+#' @aliases simulMultiCoal,genealSimProb
+
+setMethod(
+  f="simulMultiCoal",
+  signature=c("genealSimProb","logical","numeric","logical","numeric"),
+  definition=function(ecoGenetSet,printCoal,iteration,multiCore=FALSE,cores = NULL){
+    if(multiCore){
+      if(is.null(cores)) { cores <- parallel::detectCores() }
+      tempGen <- parallel::mclapply(1:iteration,function(x) simulCoal(ecoGenetSet, FALSE), mc.cores = cores)
+    }
+    else {
+      tempGen <- lapply(1:iteration,function(x)simulCoal(ecoGenetSet,printCoal))
+    }
+    ecoGenetSet@genealogies <- append(ecoGenetSet@genealogies, tempGen)
   }
 )
 

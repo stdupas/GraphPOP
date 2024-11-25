@@ -4,7 +4,7 @@
 \alias{simulMultiCoal}
 \title{Method to simulate multiple coalSim.}
 \usage{
-simulMultiCoal(ecoGenetSet, printCoal, iteration)
+simulMultiCoal(ecoGenetSet, printCoal, iteration, multiCore, cores)
 }
 \arguments{
 \item{ecoGenetSet}{ecoGenetSet object that contains the spatial, demographic and genetic information.}
