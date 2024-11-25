@@ -7,9 +7,9 @@
 geneticProb(coalescent, ecoGenetData)
 }
 \arguments{
-\item{ecoGenetData}{ecoGenetSet object. This object should contain the genetic information of the samples.}
+\item{coalescent}{coalSim object. This object should contain the simulated genealogy.}
 
-\item{coalSim}{coalescent object. This object should contain the simulated genealogy.}
+\item{ecoGenetData}{ecoGenetSet object. This object should contain the genetic information of the samples.}
 }
 \value{
 numeric. The calculated probability of the genealogy given the genetic characterization of the samples.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/graphPOP.R
 \name{simulMultiCoal}
 \alias{simulMultiCoal}
-\title{Method to simulate multiple coalescent.}
+\title{Method to simulate multiple coalSim.}
 \usage{
 simulMultiCoal(ecoGenetSet, printCoal, iteration)
 }
@@ -14,7 +14,7 @@ simulMultiCoal(ecoGenetSet, printCoal, iteration)
 \item{iteration}{Int. The amount of simulations to perform.}
 }
 \value{
-list of coalescent objects.
+list of coalSim objects.
 }
 \description{
 This method is used to simulate multiple coalescents for parameter inference.

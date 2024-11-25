@@ -3,11 +3,11 @@
 \docType{methods}
 \name{coalescent_2_newick}
 \alias{coalescent_2_newick}
-\alias{coalescent_2_newick,coalescent}
-\title{coalescent_2_newick method for coalescent objects.}
+\alias{coalescent_2_newick,coalSim}
+\title{coalescent_2_newick method for coalSim objects.}
 \usage{
-\S4method{coalescent_2_newick}{coalescent}(object)
+\S4method{coalescent_2_newick}{coalSim}(object)
 }
 \description{
-coalescent_2_newick method for coalescent objects.
+coalescent_2_newick method for coalSim objects.
 }
