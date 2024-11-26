@@ -2401,10 +2401,11 @@ geneticProb<-function(coalescent, ecoGenetData) {
   genTransMat <- ecoGenetData@genetSample@transitionMatrix
   sampleMat <- ecoGenetData@genetSample@sampleMatrix
   for(tc in coalescent) {
-    tempProb <- (sampleMat[as.character(tc$coalescing[1]),] %*% matrixcalc::matrix.power(genTransMat,(tc$br_length[1]-1))) %*% t(sampleMat[as.character(tc$coalescing[2]),] %*% matrixcalc::matrix.power(genTransMat,(tc$br_length[2]-1)))
+    tempProb <- t(matrixcalc::matrix.power(genTransMat,(tc$br_length[1]-1)) %*% sampleMat[as.character(tc$coalescing[1]),]) %*% (matrixcalc::matrix.power(genTransMat,(tc$br_length[2]-1)) %*% sampleMat[as.character(tc$coalescing[2]),])
     probability <- probability * tempProb
     
-    newNode <- apply(rbind(sampleMat[as.character(tc$coalescing[1]),],sampleMat[as.character(tc$coalescing[2]),]), MARGIN = 2, FUN = mean)
+    newNode <- (t(sampleMat[as.character(tc$coalescing[1]),]) * sampleMat[as.character(tc$coalescing[2]),])
+    newNode <- newNode/sum(newNode)
     sampleMat <- rbind(sampleMat, newNode)
     rownames(sampleMat)[nrow(sampleMat)] <- tc$new_node
     
