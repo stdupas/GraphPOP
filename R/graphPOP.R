@@ -2383,8 +2383,8 @@ setMethod("show", "coalSim", function(object){
   cat(object@probForward)
   cat("\nGenetic probability:\n")
   cat(object@genetProb)
-  cat("\nCoalescent:\n")
-  show(object@coalescent)
+  # cat("\nCoalescent:\n")
+  # show(object@coalescent)
 })
 
 #' Genetic probability calculation for a genealogy
@@ -2580,7 +2580,7 @@ setMethod(
 
 setGeneric(
   name = "simulMultiCoal",
-  def=function(ecoGenetSet,printCoal,iteration,multiCore,cores){return(standardGeneric("simulMultiCoal"))}
+  def=function(ecoGenetSet,printCoal,iteration,multiCore=FALSE,cores=NULL){return(standardGeneric("simulMultiCoal"))}
 )
 
 #' simulMultiCoal method for ecoGenetData objects.
@@ -2588,7 +2588,7 @@ setGeneric(
 #' @name simulMultiCoal
 #' @docType methods
 #' @rdname simulMultiCoal-methods
-#' @aliases simulMultiCoal,ecoGenetSet
+#' @aliases simulMultiCoal,ecoGenetSet,logical,numeric
 #' @importFrom parallel detectCores
 #' @importFrom parallel mclapply
 
@@ -2606,46 +2606,54 @@ setMethod(
   }
 )
 
-#' simulCoal method for genealSimProb objects.
-#' 
-#' @name simulCoal
-#' @docType methods
-#' @rdname simulCoal-methods
-#' @aliases simulCoal,genealSimProb,boolean
-#' #' @description
-#' Simulates a coalescence from socioecological and geographical data.
-#' @param ecoGenetSet genealSimProb object. This object must contain all the information for the coalescence simulation.
-#' @param printCoal Boolean. If `TRUE` it prints the time elapsed during the simulations.
-#' @returns List. The first element is the coalescent, and the second is the summed forward probability. 
-
-setMethod(
-  f="simulCoal",
-  signature = c("genealSimProb", "logical"),
-  definition = function(ecoGenetSet, printCoal){
-    ecoGenetSet@genealogies <- append(ecoGenetSet@genealogies, simulCoal(ecoGenetSet, printCoal))
-  })
-
-#' simulMultiCoal method for genealSimProb objects.
+#' simulMultiCoal method for ecoGenetData objects.
 #' 
 #' @name simulMultiCoal
 #' @docType methods
 #' @rdname simulMultiCoal-methods
-#' @aliases simulMultiCoal,genealSimProb
+#' @aliases simulMultiCoal,ecoGenetSet,missing,ANY
+#' @importFrom parallel detectCores
+#' @importFrom parallel mclapply
 
 setMethod(
   f="simulMultiCoal",
-  signature=c("genealSimProb","logical","numeric","logical","numeric"),
+  signature=c("ecoGenetSet","logical","numeric","missing","ANY"),
   definition=function(ecoGenetSet,printCoal,iteration,multiCore=FALSE,cores = NULL){
     if(multiCore){
       if(is.null(cores)) { cores <- parallel::detectCores() }
-      tempGen <- parallel::mclapply(1:iteration,function(x) simulCoal(ecoGenetSet, FALSE), mc.cores = cores)
+      parallel::mclapply(1:iteration,function(x) simulCoal(ecoGenetSet, FALSE), mc.cores = cores)
     }
     else {
-      tempGen <- lapply(1:iteration,function(x)simulCoal(ecoGenetSet,printCoal))
+      lapply(1:iteration,function(x)simulCoal(ecoGenetSet,printCoal))
     }
-    ecoGenetSet@genealogies <- append(ecoGenetSet@genealogies, tempGen)
   }
 )
+
+#' Print the demographic and genetic probabilities of an object
+#' @description
+#' This function returns a data frame with the demographic and genetic probabilities for the genealigy simulations contained in an object.
+#' @param object the object containing the simulations.
+#' @returns data frame with the demographic and genetic probabilities.
+#' @export
+
+setGeneric(
+  name = "getGenealProb",
+  def=function(object){return(standardGeneric("getGenealProb"))}
+)
+
+#' getGenealProb method for genealSimProb objects.
+#' 
+#' @name getGenealProb
+#' @docType methods
+#' @rdname getGenealProb-methods
+#' @aliases getGenealProb,genealSimProb
+
+setMethod(
+  f="getGenealProb",
+  signature = "genealSimProb",
+  definition = function(object){
+    data.frame(Simulation = 1:length(object@genealogies), DemoProb = sapply(object@genealogies, FUN = function(x){return(x@probForward)}), GenetProb = sapply(object@genealogies, FUN = function(x) {return(x@genetProb)}))
+  })
 
 setGeneric(
   name = "getLaplacian",
