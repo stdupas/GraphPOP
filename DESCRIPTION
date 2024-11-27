@@ -9,7 +9,7 @@ Authors@R: c(
            )
 Description: Graph theory estimates of population genetics differentiation in heterogenous landscape.
 License: `use_mit_license()`
-Depends: R (>= 3.1.0), ape, stringr, MASS, raster, markovchain, matrixcalc
+Depends: R (>= 3.1.0), ape, stringr, MASS, raster, markovchain, matrixcalc, methods, sp
 Encoding: UTF-8
 Lazydata: TRUE
 Roxygen: list(markdown = TRUE)
