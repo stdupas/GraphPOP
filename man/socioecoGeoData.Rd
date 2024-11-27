@@ -2,7 +2,7 @@
 % Please edit documentation in R/graphPOP.R
 \name{socioecoGeoData}
 \alias{socioecoGeoData}
-\title{socioecoGeoData builder function}
+\title{Creates a socioecoGeoData object}
 \usage{
 socioecoGeoData(
   x = NULL,

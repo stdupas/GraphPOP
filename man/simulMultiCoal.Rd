@@ -15,9 +15,11 @@ simulMultiCoal(
 \arguments{
 \item{ecoGenetSet}{ecoGenetSet object that contains the spatial, demographic and genetic information.}
 
-\item{printCoal}{Boolean. \code{TRUE} if the time of each simulation should be displayed.}
+\item{printCoal}{boolean. \code{TRUE} if the time of each simulation should be displayed.}
 
-\item{iteration}{Int. The amount of simulations to perform.}
+\item{iteration}{int. The amount of simulations to perform.}
+
+\item{multiCore}{boolean. If \code{TRUE}}
 }
 \value{
 list of coalSim objects.

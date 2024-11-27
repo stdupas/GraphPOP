@@ -168,8 +168,6 @@ setMethod(
   }
 )
 
-new("geoEnvData",stack(x=c(temp=raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),pops=raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3))),layerConnectionTypes=c("geographic","grouping"))
-
 #' Builder function for geoEnvData objects
 #' 
 #' @description
@@ -185,7 +183,6 @@ geoEnvData <- function(rasterStack=NULL,Array=array(c(c(5,3,2,3,2,3,2,3,5),rep(1
   if (is.null(rasterStack)) rasterStack= raster::stack(apply(Array,3,function(x) raster::raster(matrix(x,nrow = dim(Array)[1]),xmn=xmn,xmx=xmx,ymn=ymn,ymx=ymx,crs=CRS)))
   new("geoEnvData",rasterStack,layerConnectionTypes=layerConnectionTypes)
 }
-
 
 #' Show method for geoEnvData.
 #' 
@@ -234,12 +231,21 @@ validitysocioecoGroupData=function(object){
 
 setValidity("socioecoGroupData",validitysocioecoGroupData)
 
-a=new("socioecoGroupData",stack(raster(matrix(1:4,nrow=1))),categories=c("susa","bogota","villapinzon","lacalera"))
+#' Creates a socioecoGroupData object
+#' @description
+#' This function creates a socioecoGroupData object.
+#' @param categories character. The categories of the socio-ecological groups.
+#' @param Values numeric. Values for the rasterStack.
+#' @param Array array. Array with the values of the socio-ecological groups per cell.
+#' @param rasterStack rasterStack object. This object contains the ordered values within a rasterStack object.
+#' @returns socioecoGroupData object.
+#' @importFrom raster stack
+#' @export
 
 socioecoGroupData<-function(categories=c("group1","group2"),Values=c(1:4), Nlayers= 2, layerNames=c("cuidado","alimentación"),Array=NULL,rasterStack=NULL){
   if (is.null(rasterStack)) {
     if (is.null(Array)) Array = array(Values,dim = c(1,length(categories),Nlayers),dimnames = list(1:1,categories,layerNames))
-    rasterStack = stack(apply(Array,3,function(x){raster(x)}))
+    rasterStack = raster::stack(apply(Array,3,function(x){raster(x)}))
   }
   new("socioecoGroupData",rasterStack,categories=categories)
 }
@@ -330,10 +336,7 @@ setValidity("socioecoGroupsData",validitysocioecoGroupsData)
 #listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
 #Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad","pesticidas","abono"),listofArray=NULL,listofRasterStack=NULL)
 
-a=new("socioecoGroupsData")
 
-
-      
 socioecoGroupsData<-function(listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
                               Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad",c("pesticidas","abono")),listofArray=NULL,listofRasterStack=NULL)
   {
@@ -506,7 +509,7 @@ connectionTypes=c("geographic","grouping","routes")
 # transition matrix individuals among demes defined 
 # by geographic and socioeconomic variables
 
-#' socioecoGeoData builder function
+#' Creates a socioecoGeoData object
 #' 
 #' @description
 #' Function to construct a socioecoGeoData object.
@@ -515,6 +518,10 @@ connectionTypes=c("geographic","grouping","routes")
 #' @param socioecoList socioecoGroupsData object containing the groups and connection types.
 #' @param stackConnectionType character. The name of the stack connection type. Default value `geographic`.
 #' @returns socioecoGeoData object.
+#' @importFrom raster stack
+#' @importFrom raster raster
+#' @importFrom raster extent
+#' @importFrom raster crs
 #' @export
 
 socioecoGeoData<-function(x=NULL,socioecoList=NULL,stackConnectionType=NULL,envLayerNames=NULL)
@@ -528,10 +535,10 @@ socioecoGeoData<-function(x=NULL,socioecoList=NULL,stackConnectionType=NULL,envL
       if (class(x)=="array") {
         if (is.null(stackConnectionType)) stackConnectionType=rep("geographic",dim(x)[3]) 
           geo=new("geoEnvData",
-          {Stack=stack(sapply(1:dim(x)[3],function(i) raster(x[,,i])),layers=envLayerNames)
+          {Stack= raster::stack(sapply(1:dim(x)[3],function(i) raster::raster(x[,,i])),layers=envLayerNames)
           names(Stack)=envLayerNames
-          extent(Stack)=Extent
-          crs(Stack) <- Crs
+          raster::extent(Stack)=Extent
+          raster::crs(Stack) <- Crs
           Stack})}
    else if (class(x)=="RasterStack") {
      if (is.null(stackConnectionType)) stackConnectionType=rep("geographic",dim(x)[3]) 
@@ -602,8 +609,6 @@ setMethod("nCellA",
             return(c(geoCells=nCellA(object@geoEnvData),socioCells=sapply(object@socioecoData,FUN = function(x) nCellA(x))))
             }
           )
-
-socioecoGeoData(x = geoEnvData(),socioecoList=socioecoGroupsData())
 
 reactionNorm = c("scaling","enveloppe","envelin","conQuadratic","conQuadraticSkw")
 
@@ -2574,8 +2579,9 @@ setMethod(
 #' @description
 #' This method is used to simulate multiple coalescents for parameter inference.
 #' @param ecoGenetSet ecoGenetSet object that contains the spatial, demographic and genetic information.
-#' @param printCoal Boolean. `TRUE` if the time of each simulation should be displayed.
-#' @param iteration Int. The amount of simulations to perform.
+#' @param printCoal boolean. `TRUE` if the time of each simulation should be displayed.
+#' @param iteration int. The amount of simulations to perform.
+#' @param multiCore boolean. If `TRUE` 
 #' @returns list of coalSim objects.
 #' @export
 
@@ -2612,7 +2618,30 @@ setMethod(
 #' @name simulMultiCoal
 #' @docType methods
 #' @rdname simulMultiCoal-methods
-#' @aliases simulMultiCoal,ecoGenetSet,missing,ANY
+#' @aliases simulMultiCoal,ecoGenetSet,logical,numeric,missing
+#' @importFrom parallel detectCores
+#' @importFrom parallel mclapply
+
+setMethod(
+  f="simulMultiCoal",
+  signature=c("ecoGenetSet","logical","numeric","logical","missing"),
+  definition=function(ecoGenetSet,printCoal,iteration,multiCore=FALSE,cores = NULL){
+    if(multiCore){
+      cores <- parallel::detectCores()
+      parallel::mclapply(1:iteration,function(x) simulCoal(ecoGenetSet, FALSE), mc.cores = cores)
+    }
+    else {
+      lapply(1:iteration,function(x)simulCoal(ecoGenetSet,printCoal))
+    }
+  }
+)
+
+#' simulMultiCoal method for ecoGenetData objects.
+#' 
+#' @name simulMultiCoal
+#' @docType methods
+#' @rdname simulMultiCoal-methods
+#' @aliases simulMultiCoal,ecoGenetSet,logical,numeric,missing,ANY
 #' @importFrom parallel detectCores
 #' @importFrom parallel mclapply
 
@@ -2620,13 +2649,7 @@ setMethod(
   f="simulMultiCoal",
   signature=c("ecoGenetSet","logical","numeric","missing","ANY"),
   definition=function(ecoGenetSet,printCoal,iteration,multiCore=FALSE,cores = NULL){
-    if(multiCore){
-      if(is.null(cores)) { cores <- parallel::detectCores() }
-      parallel::mclapply(1:iteration,function(x) simulCoal(ecoGenetSet, FALSE), mc.cores = cores)
-    }
-    else {
-      lapply(1:iteration,function(x)simulCoal(ecoGenetSet,printCoal))
-    }
+    lapply(1:iteration,function(x)simulCoal(ecoGenetSet,printCoal))
   }
 )
 
