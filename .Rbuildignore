@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 ^R/runlibrary\.R$
 ^GraphPOP\.sublime-workspace$
+^R/ex\.tre$
+^R/graphPOP\.drawio$

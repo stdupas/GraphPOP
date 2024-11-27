@@ -2653,7 +2653,8 @@ setMethod(
   f="getGenealProb",
   signature = "genealSimProb",
   definition = function(object){
-    data.frame(Simulation = 1:length(object@genealogies), DemoProb = sapply(object@genealogies, FUN = function(x){return(x@probForward)}), GenetProb = sapply(object@genealogies, FUN = function(x) {return(x@genetProb)}))
+    if(length(object@genealogies) < 1) {stop("There are no genealogies in this object!")}
+    matrix(c(sapply(object@genealogies, FUN = function(x){return(x@probForward)}), sapply(object@genealogies, FUN = function(x) {return(x@genetProb)})), nrow = 2, byrow = TRUE, dimnames = list(c("Demographic","Genetic"), 1:length(object@genealogies)))
   })
 
 setGeneric(
