@@ -15,14 +15,16 @@
 #' @slot layerConnectionTypes character vector establishing the types of connection types of each layer. The amount of connection types should be the same as the amount of layers.
 #' @importClassesFrom raster RasterStack
 #' @inherit raster::raster description
+#' @importFrom raster crs
+#' @importFrom raster raster
 #' @export
 
 setClass("geoEnvData",
          contains = "RasterStack",
          representation(layerConnectionTypes="character"),
          prototype=prototype(
-           raster::stack(x=c(temp= raster::raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")),
-                     pops= raster::raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=crs("+proj=longlat")))),
+           raster::stack(x=c(temp= raster::raster(matrix(c(5,3,2,3,2,3,2,3,5),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=raster::crs("+proj=longlat")),
+                     pops= raster::raster(matrix(rep(1:3,3),nrow=3),xmn=0,xmx=3,ymn=0,ymx=3,crs=raster::crs("+proj=longlat")))),
            layerConnectionTypes=c("geographic","grouping")
            )
          )
@@ -1270,11 +1272,12 @@ setMethod("getHaplotypes", "genotype", function(object, num = NULL) {
 #' @slot sampleTime Int. Times when the samples where collected. These times are used to integrate the past samples into the coalescence simulations.
 #' @slot socioecoCoordinates Character list. Socioecological coordinates for the samples.
 #' @importFrom sp SpatialPoints
+#' @importFrom sp CRS
 #' @export
 
 setClass("samplePoints",
          representation(geoCoordinates = "SpatialPoints",sampleCell = "numeric", sampleTime ="numeric", socioecoCoordinates="list"),
-         prototype(geoCoordinates = sp::SpatialPoints(data.frame(Lat = c(0 ,0 ,1 ,1 ,1 ,3 ,3 ,0, 1, 0, 2, 0, 2, 0, 1, 0), Long = c(2, 3, 2, 1, 0, 2, 2, 0, 3, 3, 1, 0, 3, 0, 2, 1)), proj4string = CRS(as.character("+proj=longlat +datum=WGS84 +no_defs"))), 
+         prototype(geoCoordinates = sp::SpatialPoints(data.frame(Lat = c(0 ,0 ,1 ,1 ,1 ,3 ,3 ,0, 1, 0, 2, 0, 2, 0, 1, 0), Long = c(2, 3, 2, 1, 0, 2, 2, 0, 3, 3, 1, 0, 3, 0, 2, 1)), proj4string = sp::CRS(as.character("+proj=longlat +datum=WGS84 +no_defs"))), 
                    sampleCell = NULL, 
                    sampleTime = c(0,0,0,0,0,-1,-3,-5,-15,-35,-50,-50,-72,-90,-90,-110)
                    )
@@ -1945,6 +1948,7 @@ setGeneric(
 #' @importFrom raster crs
 #' @importFrom raster stack
 #' @importFrom raster extent
+#' @importFrom raster setValues
 #' @aliases buildRKlandscape,socioecoGeoDataModel
 
 setMethod("buildRKlandscape",
@@ -1952,7 +1956,7 @@ setMethod("buildRKlandscape",
           definition = function(object){                  #X=object, p=,shape=
             Ki=lapply(1:length(object@Kmodel@varNiche),function(i){
               switch(object@Kmodel@reactNorms[[i]],
-                     scaling=setValues(object[[i]],object@Kmodel@pNiche[[i]]),
+                     scaling = raster::setValues(object[[i]],object@Kmodel@pNiche[[i]]),
                      enveloppe = enveloppe(object[[object@Kmodel@varNiche[i]]],object@Kmodel@pNiche[[i]]),
                      envelin=envelinear(object[[i]],object@Kmodel@pNiche[[i]]),
                      conQuadratic=conQuadratic(object[[i]],object@Kmodel@pNiche[[i]]),
@@ -1961,7 +1965,7 @@ setMethod("buildRKlandscape",
               )})
             Ri=lapply(1:length(object@Rmodel@varNiche),function(i){
               switch(object@Rmodel@reactNorms[[i]],
-                       scaling=setValues(object[[i]],object@Rmodel@pNiche[[i]]),
+                       scaling= raster::setValues(object[[i]],object@Rmodel@pNiche[[i]]),
                        enveloppe = enveloppe(object[[object@Rmodel@varNiche[i]]],object@Rmodel@pNiche[[i]]),
                        envelin=envelinear(object[[i]],object@Rmodel@pNiche[[i]]),
                        conQuadratic=conQuadratic(object[[i]],object@Rmodel@pNiche[[i]]),
