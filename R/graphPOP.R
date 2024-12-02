@@ -2419,7 +2419,7 @@ geneticProb<-function(coalescent, ecoGenetData) {
     rownames(sampleMat)[nrow(sampleMat)] <- tc$new_node
     
   }
-  return(as.numeric(probability))
+  return(as.numeric(log(probability)))
 }
 
 #' Coalescence simulation from socioecological and geographical data.
@@ -2887,6 +2887,7 @@ setMethod(
 #' @docType methods
 #' @rdname coalescent_2_newick-methods
 #' @aliases coalescent_2_newick,coalSim
+#' @importFrom stringr str_replace
 
 setMethod(
   f="coalescent_2_newick",
@@ -2898,7 +2899,7 @@ setMethod(
     {
       Time = object@coalescent[[i]]$time
       coalesc <- as.character(object@coalescent[[i]]$coalescing)
-      tree <- str_replace(tree,paste(" ",as.character(object@coalescent[[i]]$new_node)," ",sep=""),paste(" ( ",paste(" ",coalesc," :",object@coalescent[[i]]$br_length,collapse=" ,",sep=""),") ",sep=""))
+      tree <- stringr::str_replace(tree,paste(" ",as.character(object@coalescent[[i]]$new_node)," ",sep=""),paste(" ( ",paste(" ",coalesc," :",object@coalescent[[i]]$br_length,collapse=" ,",sep=""),") ",sep=""))
     }
     tree <- gsub(" ","",paste(tree,";",sep=""))
     tree
