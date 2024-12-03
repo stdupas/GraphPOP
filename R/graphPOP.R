@@ -2744,6 +2744,28 @@ setMethod(
   }
 )
 
+#' show method for ecogenetSetLik objects.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,ecogenetSetLik
+
+setMethod(
+  f="show",
+  signature = "ecogenetSetLik",
+  definition = function(object) {
+    cat("Object of the ecogenetSetLik class:\n\n")
+    cat("genealSimProb objects:\n")
+    show(matrix(c(1:length(object@genealSimProbList),sapply(object@genealSimProbList, function(x) {length(x@genealogies)})),nrow = 2, byrow = TRUE,dimnames = list(c("genealSimProb","Genealogies"))))
+    cat("\nParameters:\n")
+    show(object@likelihoodParams)
+    if(length(object@genealSimProbList) != length(object@likelihoodParams)) {
+      cat("\nWarning! The amount of genealSimProb objects should be the same to the amount of parameter values.")
+    }
+  }
+)
+
 setGeneric(
   name = "getLaplacian",
   def=function(object){return(standardGeneric("getLaplacian"))}

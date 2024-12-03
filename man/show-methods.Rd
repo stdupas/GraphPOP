@@ -19,6 +19,7 @@
 \alias{show,geoMigrationModel}
 \alias{show,socioecoGeoDataModel}
 \alias{show,coalSim}
+\alias{show,ecogenetSetLik}
 \title{Show method for geoEnvData.}
 \usage{
 \S4method{show}{geoEnvData}(object)
@@ -52,6 +53,8 @@
 \S4method{show}{socioecoGeoDataModel}(object)
 
 \S4method{show}{coalSim}(object)
+
+\S4method{show}{ecogenetSetLik}(object)
 }
 \description{
 Show method for geoEnvData.
@@ -85,4 +88,6 @@ show method for geoMigrationModel objects.
 show method for socioecoGeoDataModel objects.
 
 show method for coalSim objects.
+
+show method for ecogenetSetLik objects.
 }
