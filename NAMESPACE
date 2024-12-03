@@ -2,6 +2,7 @@
 
 S3method(plot,coalSim)
 export(TransitionBackward)
+export(addGenealSimProb)
 export(buildGeodist)
 export(buildMigrationMatrix)
 export(buildRKlandscape)

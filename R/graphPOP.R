@@ -2696,7 +2696,7 @@ setClass("ecogenetSetLik",
          prototype(genealSimProbList = list(genealSimProb(),genealSimProb(),genealSimProb(),genealSimProb()), likelihoodParams = runif(4,min = 0.5,max = 1.5)))
 
 ecogenetSetLikValidity <- function(object) {
-  if(any(!is(object@genealSimProbList, "genealSimProb"))) { stop("All objects of the genealSimProbList must be genealSimProb") }
+  if(any(!sapply(object@genealSimProbList, function(x) is(x,"genealSimProb")))) { stop("All objects of the genealSimProbList must be genealSimProb") }
 }
 
 setValidity("ecogenetSetLik", ecogenetSetLikValidity)
@@ -2714,6 +2714,35 @@ ecogenetSetLik <- function(genSimProb = NULL, likPar = NULL) {
   if(is.null(likPar)) { likPar = runif(4, min = 0.5,max = 1.5) }
   new("ecogenetSetLik", genealSimProbList = genSimProb, likelihoodParams = likPar)
 }
+
+#' Adds genealSimProb object to list
+#' @description
+#' This method adds a genealSimProb object to a list.
+#' @param object list to append the genealSimProb object.
+#' @param genSimProb genealSimProb object to append.
+#' @returns list plus the appended object.
+#' @export
+
+setGeneric(
+  name = "addGenealSimProb",
+  def = function(object,genSimProb){return(standardGeneric("addGenealSimProb"))}
+)
+
+#' addGenealSimProb method for ecogenetSetLik objects.
+#' 
+#' @name addGenealSimProb
+#' @docType methods
+#' @rdname addGenealSimProb-methods
+#' @aliases addGenealSimProb,ecogenetSetLik,genealSimProb
+
+setMethod(
+  f="addGenealSimProb",
+  signature = c("ecogenetSetLik", "genealSimProb"),
+  definition = function(object,genSimProb) {
+    object@genealSimProbList[[length(object@genealSimProbList)+1]] <- genSimProb
+    return(object)
+  }
+)
 
 setGeneric(
   name = "getLaplacian",
