@@ -2684,6 +2684,37 @@ setMethod(
     matrix(c(sapply(object@genealogies, FUN = function(x){return(x@probForward)}), sapply(object@genealogies, FUN = function(x) {return(x@genetProb)})), nrow = 2, byrow = TRUE, dimnames = list(c("Demographic","Genetic"), 1:length(object@genealogies)))
   })
 
+#' ecogenetSetLik class
+#' @description
+#' This class contains the different genealSimProb object generated with different values of a parameter that will be estimated using likelihood sampling.
+#' @slot genealSimProbList list of genealSimProb objects that contain the socio-ecologic, demogenetic information, and the simulated genealogies for each object.
+#' @slot likelihoodParams vector containing the different values for the parameters on which the likelihood is performed.
+#' @export
+
+setClass("ecogenetSetLik",
+         representation(genealSimProbList = "list", likelihoodParams = "numeric"),
+         prototype(genealSimProbList = list(genealSimProb(),genealSimProb(),genealSimProb(),genealSimProb()), likelihoodParams = runif(4,min = 0.5,max = 1.5)))
+
+ecogenetSetLikValidity <- function(object) {
+  if(any(!is(object@genealSimProbList, "genealSimProb"))) { stop("All objects of the genealSimProbList must be genealSimProb") }
+}
+
+setValidity("ecogenetSetLik", ecogenetSetLikValidity)
+
+#' Creates a ecogenetSetLik object
+#' @description
+#' This function creates an ecogenetSetLik object. This object is used for the inference of the probability distribution of a parameter from the likelihood sampling.
+#' @param genSimProb list of genealSimProb objects created with different values for the parameter of interest.
+#' @param likPar vector of the parameter values corresponding to the different genealSimProb objects.
+#' @returns ecogenetSetLik object.
+#' @export
+
+ecogenetSetLik <- function(genSimProb = NULL, likPar = NULL) {
+  if(is.null(genSimProb)) { genSimProb = list(genealSimProb(),genealSimProb(),genealSimProb(),genealSimProb()) }
+  if(is.null(likPar)) { likPar = runif(4, min = 0.5,max = 1.5) }
+  new("ecogenetSetLik", genealSimProbList = genSimProb, likelihoodParams = likPar)
+}
+
 setGeneric(
   name = "getLaplacian",
   def=function(object){return(standardGeneric("getLaplacian"))}
