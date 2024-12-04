@@ -1307,9 +1307,6 @@
             <mxPoint x="1" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="k3M8AutXpwCsEZZQdBd5-11" value="+likelihood(parametros)" style="text;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="319" y="-872" width="146" height="30" as="geometry" />
-        </mxCell>
         <mxCell id="V0l3lr5Ioc0ldBR_3YgJ-1" value="coalSim" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="353.5" y="-617" width="200" height="114" as="geometry" />
         </mxCell>
