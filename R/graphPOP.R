@@ -2684,6 +2684,80 @@ setMethod(
     matrix(c(sapply(object@genealogies, FUN = function(x){return(x@probForward)}), sapply(object@genealogies, FUN = function(x) {return(x@genetProb)})), nrow = 2, byrow = TRUE, dimnames = list(c("Demographic","Genetic"), 1:length(object@genealogies)))
   })
 
+#' Adds coalescent simulations to an object
+#' @description
+#' This function simulates multiple coalescents, calculates their corresponding log-likelihood and adds them to an object. 
+#' @param object the object to add the coalescent simulations.
+#' @param printCoal boolean. Whether or not print the coalescing times during the simulation.
+#' @param iter numeric. Amount of simulations to perform.
+#' @param multiCore boolean. Whether to use multicore execution. This cannot be done in Windows. Defaults to `FALSE`.
+#' @param cores numeric. Amount of cores to use for the simulations. 
+#' @export
+
+setGeneric(
+  name = "addSimulCoal",
+  def = function(object, printCoal,iter,multiCore=FALSE,cores = NULL) {return(standardGeneric("addSimulCoal"))}) 
+
+#' addSimulCoal method for genealSimProb object.
+#' 
+#' @name addSimulCoal
+#' @docType methods
+#' @param object genealSimProb object.
+#' @rdname addSimulCoal-methods
+#' @aliases addSimulCoal,genealSimProb,logical,numeric,logical
+#' @returns genealSimProb object with the added coalescent simulations.
+
+setMethod(
+  f="addSimulCoal",
+  signature = c("genealSimProb", "logical", "numeric","missing","ANY"),
+  definition = function(object,printCoal,iter,multiCore,cores) {
+    tempList <- simulMultiCoal(object,printCoal,iter)
+    tempObj <- object
+    tempObj@genealogies <- append(tempObj@genealogies, tempList)
+    return(tempObj)
+  }
+)
+
+#' addSimulCoal method for genealSimProb object.
+#' 
+#' @name addSimulCoal
+#' @docType methods
+#' @param object genealSimProb object.
+#' @rdname addSimulCoal-methods
+#' @aliases addSimulCoal,genealSimProb,logical,numeric
+#' @returns genealSimProb object with the added coalescent simulations.
+
+setMethod(
+  f="addSimulCoal",
+  signature = c("genealSimProb", "logical", "numeric","logical","missing"),
+  definition = function(object,printCoal,iter,multiCore,cores) {
+    tempList <- simulMultiCoal(object,printCoal,iter,multiCore)
+    tempObj <- object
+    tempObj@genealogies <- append(tempObj@genealogies, tempList)
+    return(tempObj)
+  }
+)
+
+#' addSimulCoal method for genealSimProb object.
+#' 
+#' @name addSimulCoal
+#' @docType methods
+#' @param object genealSimProb object.
+#' @rdname addSimulCoal-methods
+#' @aliases addSimulCoal,genealSimProb,logical,numeric
+#' @returns genealSimProb object with the added coalescent simulations.
+
+setMethod(
+  f="addSimulCoal",
+  signature = c("genealSimProb", "logical", "numeric","logical","numeric"),
+  definition = function(object,printCoal,iter,multiCore,cores) {
+    tempList <- simulMultiCoal(object,printCoal,iter,multiCore,cores)
+    tempObj <- object
+    tempObj@genealogies <- append(tempObj@genealogies, tempList)
+    return(tempObj)
+  }
+)
+
 #' ecogenetSetLik class
 #' @description
 #' This class contains the different genealSimProb object generated with different values of a parameter that will be estimated using likelihood sampling.
@@ -2763,6 +2837,72 @@ setMethod(
     if(length(object@genealSimProbList) != length(object@likelihoodParams)) {
       cat("\nWarning! The amount of genealSimProb objects should be the same to the amount of parameter values.")
     }
+  }
+)
+
+#' addSimulCoal method for ecogenetSetLik object.
+#' 
+#' @name addSimulCoal
+#' @docType methods
+#' @param object ecogenetSetLik object.
+#' @rdname addSimulCoal-methods
+#' @aliases addSimulCoal,ecogenetSetLik,logical,numeric,ANY
+#' @returns ecogenetSetLik object with the added coalescent simulations.
+
+setMethod(
+  f="addSimulCoal",
+  signature = c("ecogenetSetLik", "logical", "numeric","missing","ANY"),
+  definition = function(object,printCoal,iter,multiCore,cores) {
+    tempObj <- object
+    for(i in 1:length(tempObj@genealSimProbList)) {
+      tempList <- simulMultiCoal(tempObj@genealSimProbList[[i]],printCoal,iter)
+      tempObj@genealSimProbList[[i]]@genealogies <- append(tempObj@genealSimProbList[[i]]@genealogies,tempList)
+    }
+    return(tempObj)
+  }
+)
+
+#' addSimulCoal method for ecogenetSetLik object.
+#' 
+#' @name addSimulCoal
+#' @docType methods
+#' @param object ecogenetSetLik object.
+#' @rdname addSimulCoal-methods
+#' @aliases addSimulCoal,ecogenetSetLik,logical,numeric
+#' @returns ecogenetSetLik object with the added coalescent simulations.
+
+setMethod(
+  f="addSimulCoal",
+  signature = c("ecogenetSetLik", "logical", "numeric","logical","missing"),
+  definition = function(object,printCoal,iter,multiCore,cores) {
+    tempObj <- object
+    for(i in 1:length(tempObj@genealSimProbList)) {
+      tempList <- simulMultiCoal(tempObj@genealSimProbList[[i]],printCoal,iter,multiCore)
+      tempObj@genealSimProbList[[i]]@genealogies <- append(tempObj@genealSimProbList[[i]]@genealogies,tempList)
+    }
+    return(tempObj)
+  }
+)
+
+#' addSimulCoal method for ecogenetSetLik object.
+#' 
+#' @name addSimulCoal
+#' @docType methods
+#' @param object ecogenetSetLik object.
+#' @rdname addSimulCoal-methods
+#' @aliases addSimulCoal,ecogenetSetLik,logical,numeric
+#' @returns ecogenetSetLik object with the added coalescent simulations.
+
+setMethod(
+  f="addSimulCoal",
+  signature = c("ecogenetSetLik", "logical", "numeric","logical","numeric"),
+  definition = function(object,printCoal,iter,multiCore,cores) {
+    tempObj <- object
+    for(i in 1:length(tempObj@genealSimProbList)) {
+      tempList <- simulMultiCoal(tempObj@genealSimProbList[[i]],printCoal,iter,multiCore,cores)
+      tempObj@genealSimProbList[[i]]@genealogies <- append(tempObj@genealSimProbList[[i]]@genealogies,tempList)
+    }
+    return(tempObj)
   }
 )
 
