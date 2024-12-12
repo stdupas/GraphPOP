@@ -2906,6 +2906,38 @@ setMethod(
   }
 )
 
+#' Class to contain the likelihood inference
+#' @slot maxLik matrix. This object contains the log likelihood of the coalescent simulations made under the parameters tested. Each column corresponds to the log likelihoods obtained for the simulated coalescents under *one* parameter value. The number of columns should be equal to the number of parameter values tested.
+#' @slot params numeric. The parameter values under which the coalescent simulations were carried away. 
+#' @export
+
+setClass("ecoCoaLikInf",
+         contains = "ecogenetSetLik", 
+         representation(maxLik = "simll"))
+
+validityEcoCoaLikInf <- function(object) {
+  if(ncol(object@maxLik) != length(params)) {stop("The number of parameter values and the columns of the matrix should have the same length!")}
+}
+
+setValidity("ecoCoaLikInf", validityEcoCoaLikInf)
+
+#' Creates an ecoCoaLikInf object
+#' @description
+#' This function uses the information contained in an ecoGenetSetLik object to create a [sbi::simll] object. This object is then used to infer the probability distribution of the parameter of interest through the method proposed by Park [sbi]. 
+#' @param ecoGenetSetL ecoGenetSetLik object. This object should contain the simulated coalescents for various parameter values together with their corresponding values.
+#' @importFrom sbi simll
+#' @returns ecoCoalLikInf object. This object is used for the parameter inference.
+#' @export
+
+ecoCoaLikInf <- function(ecoGenetSetL) {
+  if(any(sapply(object@genealSimProbList, function(x) {length(x@genealogies)}) == 0)) {stop("There must be at least one simulated coalescent to infer the parameter probability distribution!")}
+  tempMat <- sapply(ecoGenetSetL@genealSimProbList, function(x) getGenealProb(x)[2,])
+  tempMat <- tempMat[-unlist(apply(tempMat,MARGIN = 2, function(x) which(is.infinite(x)))),]
+  tempMat <- tempMat[-unlist(apply(tempMat,MARGIN = 2, function(x) which(is.na(x)))),]
+  simMat <- sbi::simll(ll = tempMat, params = ecoGenetSetL@likelihoodParams)
+  new("ecoCoaLikInf", ecoGenetSetL, maxLik = simMat)
+}
+
 setGeneric(
   name = "getLaplacian",
   def=function(object){return(standardGeneric("getLaplacian"))}
