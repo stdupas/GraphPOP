@@ -2989,7 +2989,7 @@ setGeneric(
 #' @aliases hypTest,ecoCoaLikInf
 #' @param object ecoCoaLikInf object. This contains the parameter values, the simulations done with different parameter values and the log-likelihood of each simulation. 
 #' @inheritParams sbi::ht
-#' @seealso [sbi::ht()]
+#' @seealso [sbi::ht]
 
 setMethod("hypTest","ecoCoaLikInf", definition = function(object, null.value,
                                                           test = c("parameter", "MESLE", "moments"),
@@ -3002,7 +3002,7 @@ setMethod("hypTest","ecoCoaLikInf", definition = function(object, null.value,
                                                           plot_acf = FALSE,
                                                           MCcorrection = "none", ...) {
   simObj <- sbi::simll(ll = object@maxLik, params = object@likelihoodParams)
-  hyptest <- sbi::ht(simll = simObj, null.value,
+  hyptest <- sbi::ht(simll = simObj, as.list(null.value),
                      test,
                      case,
                      type,
@@ -3013,6 +3013,36 @@ setMethod("hypTest","ecoCoaLikInf", definition = function(object, null.value,
                      plot_acf,
                      MCcorrection, ...)
   return(hyptest)
+})
+
+#' One-dimensional confidence interval for the parameter estimation
+#' @description
+#' This method builds a one-dimensional confidence interval for the MLE estimation of the parameter of interest.
+#' @param object Object containing the simulations.
+#' @inheritParams sbi::ci
+#' @returns confidence interval.
+#' @export
+
+setGeneric(
+  name = "hypCi",
+  def = function(object,level = 0.95,ci = "MESLE") {return(standardGeneric("hypCi"))})
+
+#' hypCi method for ecoCoaLikInf objects
+#' 
+#' @name hypCi
+#' @docType methods
+#' @rdname hypCi-methods
+#' @importFrom sbi ci
+#' @importFrom sbi simll
+#' @aliases hypCi,ecoCoaLikInf
+#' @param object ecoCoaLikInf object. This contains the parameter values, the simulations done with different parameter values and the log-likelihood of each simulation. 
+#' @inheritParams sbi::ci
+#' @seealso [sbi::ci]
+
+setMethod("hypCi","ecoCoaLikInf", definition = function(object,level = 0.95 ,ci = "MESLE") {
+  simObj <- sbi::simll(ll = object@maxLik, params = object@likelihoodParams)
+  ciObj <- sbi::ci(simObj, level, ci)
+  return(ciObj)
 })
 
 setGeneric(

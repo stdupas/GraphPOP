@@ -50,5 +50,5 @@
 hypTest method for ecoCoaLikInf object.
 }
 \seealso{
-\code{\link[sbi:ht]{sbi::ht()}}
+\link[sbi:ht]{sbi::ht}
 }
