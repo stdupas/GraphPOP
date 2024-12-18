@@ -13,5 +13,5 @@ ecoCoaLikInf(ecoGenetSetL)
 ecoCoalLikInf object. This object is used for the parameter inference.
 }
 \description{
-This function uses the information contained in an ecoGenetSetLik object to create a \link[sbi:simll]{sbi::simll} object. This object is then used to infer the probability distribution of the parameter of interest through the method proposed by Park \link{sbi}.
+This function uses the information contained in an ecoGenetSetLik object to create a matrix where the . This object is then used to infer the probability distribution of the parameter of interest.
 }

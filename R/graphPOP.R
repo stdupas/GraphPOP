@@ -2913,30 +2913,107 @@ setMethod(
 
 setClass("ecoCoaLikInf",
          contains = "ecogenetSetLik", 
-         representation(maxLik = "simll"))
+         representation(maxLik = "matrix"))
 
 validityEcoCoaLikInf <- function(object) {
-  if(ncol(object@maxLik) != length(params)) {stop("The number of parameter values and the columns of the matrix should have the same length!")}
+  if(ncol(object@maxLik) != length(object@likelihoodParams)) {stop("The number of parameter values and the columns of the matrix should have the same length!")}
 }
 
 setValidity("ecoCoaLikInf", validityEcoCoaLikInf)
 
 #' Creates an ecoCoaLikInf object
 #' @description
-#' This function uses the information contained in an ecoGenetSetLik object to create a [sbi::simll] object. This object is then used to infer the probability distribution of the parameter of interest through the method proposed by Park [sbi]. 
+#' This function uses the information contained in an ecoGenetSetLik object to create a matrix where the . This object is then used to infer the probability distribution of the parameter of interest. 
 #' @param ecoGenetSetL ecoGenetSetLik object. This object should contain the simulated coalescents for various parameter values together with their corresponding values.
-#' @importFrom sbi simll
 #' @returns ecoCoalLikInf object. This object is used for the parameter inference.
 #' @export
 
 ecoCoaLikInf <- function(ecoGenetSetL) {
-  if(any(sapply(object@genealSimProbList, function(x) {length(x@genealogies)}) == 0)) {stop("There must be at least one simulated coalescent to infer the parameter probability distribution!")}
+  if(any(sapply(ecoGenetSetL@genealSimProbList, function(x) {length(x@genealogies)}) == 0)) {stop("There must be at least one simulated coalescent to infer the parameter probability distribution!")}
   tempMat <- sapply(ecoGenetSetL@genealSimProbList, function(x) getGenealProb(x)[2,])
-  tempMat <- tempMat[-unlist(apply(tempMat,MARGIN = 2, function(x) which(is.infinite(x)))),]
-  tempMat <- tempMat[-unlist(apply(tempMat,MARGIN = 2, function(x) which(is.na(x)))),]
-  simMat <- sbi::simll(ll = tempMat, params = ecoGenetSetL@likelihoodParams)
-  new("ecoCoaLikInf", ecoGenetSetL, maxLik = simMat)
+  if(any(is.infinite(tempMat))) {
+    tempMat <- tempMat[-unlist(apply(tempMat,MARGIN = 2, function(x) which(is.infinite(x)))),]
+  }
+  if(any(is.na(tempMat))) {
+    tempMat <- tempMat[-unlist(apply(tempMat,MARGIN = 2, function(x) which(is.na(x)))),]
+  }
+  new("ecoCoaLikInf", ecoGenetSetL, maxLik = tempMat)
 }
+
+#' show method for ecoCoaLikInf object.
+#' 
+#' @name show
+#' @docType methods
+#' @rdname show-methods
+#' @aliases show,ecoCoaLikInf
+
+setMethod("show","ecoCoaLikInf",definition = function(object) {
+  cat("Object of the ecoCoaLikInf class:\n\n")
+  cat("genealSimProb objects:\n")
+  show(matrix(c(1:length(object@genealSimProbList),sapply(object@genealSimProbList, function(x) {length(x@genealogies)})),nrow = 2, byrow = TRUE,dimnames = list(c("genealSimProb","Genealogies"))))
+  cat("\nParameters:\n")
+  show(object@likelihoodParams)
+  cat("\nLikelihood Matrix:\n")
+  show(object@maxLik)
+})
+
+#' hypTest generic method
+#' @description
+#' Used for hypothesis testing for models defined implicitly by a random simulator as described by [Park 2024](https://arxiv.org/abs/2311.09446).
+#' @param object The object containing the simulations to maximize the likelihood.
+#' @param ... Additional parameters to be passed on to [ht].
+#' @returns sbi::ht object.
+#' @export
+
+setGeneric(
+  name = "hypTest",
+  def=function(object, null.value,
+               test = c("parameter", "MESLE", "moments"),
+               case = NULL,
+               type = NULL,
+               weights = NULL,
+               K1_est_method = "batch",
+               batch_size = NULL,
+               max_lag = NULL,
+               plot_acf = FALSE,
+               MCcorrection = "none", ...){return(standardGeneric("hypTest"))}
+)
+
+#' hypTest method for ecoCoaLikInf object.
+#' 
+#' @name hypTest
+#' @docType methods
+#' @rdname hypTest-methods
+#' @importFrom sbi simll
+#' @importFrom sbi ht
+#' @aliases hypTest,ecoCoaLikInf
+#' @param object ecoCoaLikInf object. This contains the parameter values, the simulations done with different parameter values and the log-likelihood of each simulation. 
+#' @inheritParams sbi::ht
+#' @seealso [sbi::ht()]
+
+setMethod("hypTest","ecoCoaLikInf", definition = function(object, null.value,
+                                                          test = c("parameter", "MESLE", "moments"),
+                                                          case = NULL,
+                                                          type = NULL,
+                                                          weights = NULL,
+                                                          K1_est_method = "batch",
+                                                          batch_size = NULL,
+                                                          max_lag = NULL,
+                                                          plot_acf = FALSE,
+                                                          MCcorrection = "none", ...) {
+  simObj <- sbi::simll(ll = object@maxLik, params = object@likelihoodParams)
+  hyptest <- sbi::ht(simll = simObj, null.value,
+                     test,
+                     case,
+                     type,
+                     weights,
+                     K1_est_method,
+                     batch_size,
+                     max_lag,
+                     plot_acf,
+                     MCcorrection, ...)
+  return(hyptest)
+})
 
 setGeneric(
   name = "getLaplacian",
