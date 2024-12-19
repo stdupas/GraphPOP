@@ -2410,10 +2410,15 @@ geneticProb<-function(coalescent, ecoGenetData) {
   genTransMat <- ecoGenetData@genetSample@transitionMatrix
   sampleMat <- ecoGenetData@genetSample@sampleMatrix
   for(tc in coalescent) {
-    tempProb <- t(matrixcalc::matrix.power(genTransMat,(tc$br_length[1]-1)) %*% sampleMat[as.character(tc$coalescing[1]),]) %*% (matrixcalc::matrix.power(genTransMat,(tc$br_length[2]-1)) %*% sampleMat[as.character(tc$coalescing[2]),])
+    transMat_t1 <- matrixcalc::matrix.power(genTransMat,(tc$br_length[1]-1))
+    transMat_t2 <- matrixcalc::matrix.power(genTransMat,(tc$br_length[2]-1))
+    
+    tempProb <- t(transMat_t1 %*% sampleMat[as.character(tc$coalescing[1]),]) %*% (transMat_t2 %*% sampleMat[as.character(tc$coalescing[2]),])
     probability <- probability * tempProb
     
-    newNode <- apply(rbind(sampleMat[as.character(tc$coalescing[1]),],sampleMat[as.character(tc$coalescing[2]),]), MARGIN = 2, FUN = mean)
+    newNode <- t((transMat_t1 %*% sampleMat[as.character(tc$coalescing[1]),]) * (transMat_t2 %*% sampleMat[as.character(tc$coalescing[2]),]))
+    #Scale to 1 the probabilities
+    newNode <- newNode/sum(newNode)
     
     sampleMat <- rbind(sampleMat, newNode)
     rownames(sampleMat)[nrow(sampleMat)] <- tc$new_node
