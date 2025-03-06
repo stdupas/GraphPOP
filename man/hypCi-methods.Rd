@@ -19,5 +19,5 @@
 hypCi method for ecoCoaLikInf objects
 }
 \seealso{
-\link[sbi:ci]{sbi::ci}
+\link[sbim:ci]{sbim::ci}
 }

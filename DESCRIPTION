@@ -24,6 +24,6 @@ Imports:
     matrixcalc,
     methods,
     raster,
-    sbi,
+    sbim,
     sp,
     stringr

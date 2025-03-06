@@ -28,11 +28,11 @@
 
 \item{test}{A character string indicating which is to be tested about. One of "moments", "MESLE", or "parameter". See Details.}
 
-\item{case}{When \code{test} is "parameter", \code{case} needs to be either "iid" or "stationary". \code{case} = "iid" means that the observations are iid, and \code{case} = "stationary" means that the observations form a stationary sequence. The \code{case} argument affects how the variance of the slope of the mean function (=K_1 in Park (2023)) is estimated. The default value is "stationary".}
+\item{case}{When \code{test} is "parameter", \code{case} needs to be either "iid" or "stationary". \code{case} = "iid" means that the observations are iid, and \code{case} = "stationary" means that the observations form a stationary sequence. The \code{case} argument affects how the variance of the slope of the mean function (=K_1 in Park (2025)) is estimated. The default value is "stationary".}
 
-\item{type}{When \code{test} is "moments", the \code{type} argument needs to be specified. \code{type} = "point" means that the test about the mean and the variance of simulation log likelihoods at a given parameter point is considered. \code{type} = "regression" means that the test about the mean function and the variance of simulation log likelihoods at various parameter values is considered. See Details.}
+\item{type}{When \code{test} is "moments", the \code{type} argument needs to be specified. \code{type} = "point" means that the test about the mean and the variance of simulated log likelihoods at a given parameter point is considered. \code{type} = "regression" means that the test about the mean function and the variance of simulated log likelihoods at various parameter values is considered. See Details.}
 
-\item{weights}{An optional argument. The un-normalized weights of the simulation log likelihoods for regression. A numeric vector of length equal to the \code{params} attribute of the \code{simll} object. See Details below.}
+\item{weights}{An optional argument. The un-normalized weights of the simulated log likelihoods for regression. A numeric vector of length equal to the \code{params} attribute of the \code{simll} object. See Details below.}
 
 \item{K1_est_method}{Either "batch" or "autocov". Used when \code{test} is "parameter" and \code{case} is "stationary". The default is "batch". See Details for more information.}
 
@@ -42,7 +42,7 @@
 
 \item{plot_acf}{Logical. Should the autocorrelation plot be generated when estimating K1 for the case where \code{test} is "parameter" and \code{case} is "stationary"?}
 
-\item{MCcorrection}{For tests on the simulation based parameter surrogate (\code{test}="parameter"), \code{MCcorrection} determines if and how the sampling distribution of the test statistic will be corrected by a Monte Carlo method to account for the variability in the estimate of K1. Possible values are "none" (default) and "Wishart". See the Details section and Park (2023) for more details.}
+\item{MCcorrection}{For tests on the simulation based parameter surrogate (\code{test}="parameter"), \code{MCcorrection} determines if and how the sampling distribution of the test statistic will be corrected by a Monte Carlo method to account for the variability in the estimate of K1. Possible values are "none" (default) and "Wishart". See the Details section and Park (2025) for more details.}
 
 \item{...}{Other optional arguments, not currently used.}
 }
@@ -50,5 +50,5 @@
 hypTest method for ecoCoaLikInf object.
 }
 \seealso{
-\link[sbi:ht]{sbi::ht}
+\link[sbim:ht]{sbim::ht}
 }

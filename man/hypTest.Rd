@@ -25,8 +25,8 @@ hypTest(
 \item{...}{Additional parameters to be passed on to \link{ht}.}
 }
 \value{
-sbi::ht object.
+sbim::ht object.
 }
 \description{
-Used for hypothesis testing for models defined implicitly by a random simulator as described by \href{https://arxiv.org/abs/2311.09446}{Park 2024}.
+Used for hypothesis testing for models defined implicitly by a random simulator as described by \href{https://arxiv.org/abs/2311.09446}{Park 2025}.
 }

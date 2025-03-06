@@ -2964,10 +2964,10 @@ setMethod("show","ecoCoaLikInf",definition = function(object) {
 
 #' hypTest generic method
 #' @description
-#' Used for hypothesis testing for models defined implicitly by a random simulator as described by [Park 2024](https://arxiv.org/abs/2311.09446).
+#' Used for hypothesis testing for models defined implicitly by a random simulator as described by [Park 2025](https://arxiv.org/abs/2311.09446).
 #' @param object The object containing the simulations to maximize the likelihood.
 #' @param ... Additional parameters to be passed on to [ht].
-#' @returns sbi::ht object.
+#' @returns sbim::ht object.
 #' @export
 
 setGeneric(
@@ -2989,12 +2989,12 @@ setGeneric(
 #' @name hypTest
 #' @docType methods
 #' @rdname hypTest-methods
-#' @importFrom sbi simll
-#' @importFrom sbi ht
+#' @importFrom sbim simll
+#' @importFrom sbim ht
 #' @aliases hypTest,ecoCoaLikInf
 #' @param object ecoCoaLikInf object. This contains the parameter values, the simulations done with different parameter values and the log-likelihood of each simulation. 
-#' @inheritParams sbi::ht
-#' @seealso [sbi::ht]
+#' @inheritParams sbim::ht
+#' @seealso [sbim::ht]
 
 setMethod("hypTest","ecoCoaLikInf", definition = function(object, null.value,
                                                           test = c("parameter", "MESLE", "moments"),
@@ -3006,8 +3006,8 @@ setMethod("hypTest","ecoCoaLikInf", definition = function(object, null.value,
                                                           max_lag = NULL,
                                                           plot_acf = FALSE,
                                                           MCcorrection = "none", ...) {
-  simObj <- sbi::simll(ll = object@maxLik, params = object@likelihoodParams)
-  hyptest <- sbi::ht(simll = simObj, as.list(null.value),
+  simObj <- sbim::simll(ll = object@maxLik, params = object@likelihoodParams)
+  hyptest <- sbim::ht(simll = simObj, as.list(null.value),
                      test,
                      case,
                      type,
@@ -3024,7 +3024,7 @@ setMethod("hypTest","ecoCoaLikInf", definition = function(object, null.value,
 #' @description
 #' This method builds a one-dimensional confidence interval for the MLE estimation of the parameter of interest.
 #' @param object Object containing the simulations.
-#' @inheritParams sbi::ci
+#' @inheritParams sbim::ci
 #' @returns confidence interval.
 #' @export
 
@@ -3037,16 +3037,16 @@ setGeneric(
 #' @name hypCi
 #' @docType methods
 #' @rdname hypCi-methods
-#' @importFrom sbi ci
-#' @importFrom sbi simll
+#' @importFrom sbim ci
+#' @importFrom sbim simll
 #' @aliases hypCi,ecoCoaLikInf
 #' @param object ecoCoaLikInf object. This contains the parameter values, the simulations done with different parameter values and the log-likelihood of each simulation. 
-#' @inheritParams sbi::ci
-#' @seealso [sbi::ci]
+#' @inheritParams sbim::ci
+#' @seealso [sbim::ci]
 
 setMethod("hypCi","ecoCoaLikInf", definition = function(object,level = 0.95 ,ci = "MESLE") {
-  simObj <- sbi::simll(ll = object@maxLik, params = object@likelihoodParams)
-  ciObj <- sbi::ci(simObj, level, ci)
+  simObj <- sbim::simll(ll = object@maxLik, params = object@likelihoodParams)
+  ciObj <- sbim::ci(simObj, level, ci)
   return(ciObj)
 })
 
