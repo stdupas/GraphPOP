@@ -2409,11 +2409,11 @@ geneticProb<-function(coalescent, ecoGenetData) {
   #Ne <- mean(ecoGenetData["K"])
   genTransMat <- ecoGenetData@genetSample@transitionMatrix
   sampleMat <- ecoGenetData@genetSample@sampleMatrix
-  parsingTimes <- ecoGenetData@parsingTimes
+  parsingTimes <- abs(ecoGenetData@parsingTimes)
   parsingIntervals <- sapply(2:length(parsingTimes), function(x) parsingTimes[x] - parsingTimes[x-1])
   for(tc in coalescent) {
     
-    matExp <- lapply(tc@br_length, function(x) {
+    matExp <- lapply(tc$br_length, function(x) {
       interval <- findInterval(x,parsingTimes)
       if(interval > 1) {
         retVal <- c(parsingIntervals[1:(interval-1)], (x - (parsingTimes[(interval)])))
@@ -2427,13 +2427,13 @@ geneticProb<-function(coalescent, ecoGenetData) {
     
     if(length(tc$coalescing) == 2) {
       temprob <- (sampleMat[as.character(tc$coalescing[1]),] %*% transMat[[1]]) %*% t(sampleMat[as.character(tc$coalescing[2]),] %*% transMat[[2]])
-      probability <- probability * tempProb
+      probability <- probability * temprob
       newNode <- (sampleMat[as.character(tc$coalescing[1]),] %*% transMat[[1]]) * (sampleMat[as.character(tc$coalescing[2]),] %*% transMat[[2]])
     }
     else {
-      temprob <- sapply(lapply(1:(length(tc$coalescing)-1), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]]),FUN = prod) %*% t(sampleMat[as.character(tc$coalescing[length(tc$coalescing)]),] %*% transMat[length(tc$coalescing)])
+      temprob <- Reduce('*',lapply(1:(length(tc$coalescing)-1), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]])) %*% t(sampleMat[as.character(tc$coalescing[length(tc$coalescing)]),] %*% transMat[[length(tc$coalescing)]])
       probability <- temprob * probability
-      newNode <- sapply(lapply(1:length(tc$coalescing), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]]), FUN = prod)
+      newNode <- Reduce('*',lapply(1:length(tc$coalescing), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]]))
     }
     
     #Scale to 1 the probabilities
