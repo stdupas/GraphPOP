@@ -143,7 +143,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="euh3f-BjxaFIM77-lD3N-35" value="socioecoGeoDataModel" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="473.5" y="80" width="250" height="170" as="geometry" />
+          <mxGeometry x="375" y="70" width="250" height="170" as="geometry" />
         </mxCell>
         <mxCell id="euh3f-BjxaFIM77-lD3N-36" value="&lt;div&gt;+ Kmodel:nicheModel&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ Rmodel:nicheModel&lt;/div&gt;&lt;div&gt;+ geoMigModel: geoMigModel&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="euh3f-BjxaFIM77-lD3N-35" vertex="1">
           <mxGeometry y="26" width="250" height="64" as="geometry" />
@@ -1250,7 +1250,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="__1glaIduucKlwK_dSx6-2" value="SpatialPoints" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="253" y="19" width="160" height="34" as="geometry" />
+          <mxGeometry x="265" y="-15" width="160" height="34" as="geometry" />
         </mxCell>
         <mxCell id="__1glaIduucKlwK_dSx6-4" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="__1glaIduucKlwK_dSx6-2" vertex="1">
           <mxGeometry y="26" width="160" height="8" as="geometry" />
