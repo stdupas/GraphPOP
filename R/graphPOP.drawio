@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0" version="26.0.16">
   <diagram name="Page-1" id="Z6gb0_KSrEABv9Jm1-kw">
-    <mxGraphModel dx="4191" dy="3439" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="4435" dy="3597" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -142,7 +142,7 @@
             <mxPoint x="1407.5" y="374" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="euh3f-BjxaFIM77-lD3N-45" value="" style="endArrow=diamondThin;endFill=1;endSize=24;html=1;rounded=0;entryX=0.1;entryY=0.994;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.082;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="euh3f-BjxaFIM77-lD3N-35" target="euh3f-BjxaFIM77-lD3N-8" edge="1">
+        <mxCell id="euh3f-BjxaFIM77-lD3N-45" value="" style="endArrow=diamondThin;endFill=1;endSize=24;html=1;rounded=0;" parent="1" source="euh3f-BjxaFIM77-lD3N-35" target="euh3f-BjxaFIM77-lD3N-5" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="972" y="-197" as="sourcePoint" />
             <mxPoint x="894.275362318841" y="-456.99999999999955" as="targetPoint" />
@@ -237,7 +237,7 @@
           <mxGeometry y="118" width="180" height="82" as="geometry" />
         </mxCell>
         <mxCell id="c0SSLgtnGO3cboPd4Nja-11" value="genetSample" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
-          <mxGeometry x="980" y="-609" width="160" height="98" as="geometry" />
+          <mxGeometry x="955" y="-609" width="160" height="98" as="geometry" />
         </mxCell>
         <mxCell id="c0SSLgtnGO3cboPd4Nja-12" value="&lt;div&gt;+.Data: samplePoints&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ genetData: list(genotype)&lt;br&gt;&lt;/div&gt;+ recombMatrix: matrix" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="c0SSLgtnGO3cboPd4Nja-11" vertex="1">
           <mxGeometry y="26" width="160" height="64" as="geometry" />
@@ -1110,7 +1110,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="i0fWGM7OPVL89fXLRVSB-1" value="genetSet" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#36393d;" parent="1" vertex="1">
-          <mxGeometry x="440" y="-471" width="200" height="134" as="geometry" />
+          <mxGeometry x="440" y="-459" width="200" height="134" as="geometry" />
         </mxCell>
         <mxCell id="i0fWGM7OPVL89fXLRVSB-2" value="&lt;div&gt;+ .Data: &lt;br&gt;&lt;/div&gt;&lt;div&gt;+ mutationModel: &quot;character&quot;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ genetSample: &lt;br&gt;&lt;/div&gt;&lt;div&gt;+ transitionMatrix: float[]&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="i0fWGM7OPVL89fXLRVSB-1" vertex="1">
           <mxGeometry y="26" width="200" height="74" as="geometry" />
@@ -1163,7 +1163,7 @@
           <mxGeometry y="70" width="160" height="8" as="geometry" />
         </mxCell>
         <mxCell id="g2TlEguaIFGkeSYKOrQW-1" value="genotype" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
-          <mxGeometry x="760" y="-650" width="160" height="120" as="geometry" />
+          <mxGeometry x="737.5" y="-644" width="160" height="120" as="geometry" />
         </mxCell>
         <mxCell id="g2TlEguaIFGkeSYKOrQW-2" value="+ loci: &quot;list(locus)&quot;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="g2TlEguaIFGkeSYKOrQW-1" vertex="1">
           <mxGeometry y="26" width="160" height="26" as="geometry" />
@@ -1185,6 +1185,9 @@
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="513.5" y="-421" as="sourcePoint" />
             <mxPoint x="398.5" y="-600.6153846153845" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="920" y="-670" />
+            </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="g2TlEguaIFGkeSYKOrQW-13" value="" style="endArrow=diamondThin;endFill=0;endSize=24;html=1;rounded=0;" parent="1" source="c0SSLgtnGO3cboPd4Nja-11" target="g2TlEguaIFGkeSYKOrQW-1" edge="1">
@@ -1885,17 +1888,17 @@
             <mxPoint x="1" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="BvkF9H25nENo33llk2as-337" value="4" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
+        <mxCell id="BvkF9H25nENo33llk2as-337" value="8" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
           <mxGeometry x="751.5" y="-1150" width="50" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="BvkF9H25nENo33llk2as-338" value="3" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
+        <mxCell id="BvkF9H25nENo33llk2as-338" value="7" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
           <mxGeometry x="493" y="-1153.5" width="50" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="BvkF9H25nENo33llk2as-339" value="2" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
+        <mxCell id="BvkF9H25nENo33llk2as-339" value="6" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
           <mxGeometry x="276" y="-1153.5" width="50" height="50" as="geometry" />
         </mxCell>
         <mxCell id="g2TlEguaIFGkeSYKOrQW-9" value="locus" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
-          <mxGeometry x="728.5" y="-827" width="160" height="130" as="geometry" />
+          <mxGeometry x="729" y="-808" width="160" height="130" as="geometry" />
         </mxCell>
         <mxCell id="g2TlEguaIFGkeSYKOrQW-10" value="&lt;div&gt;+ name: char&lt;/div&gt;&lt;div&gt;+ markerType: char&lt;/div&gt;&lt;div&gt;+ alleles: int()&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="g2TlEguaIFGkeSYKOrQW-9" vertex="1">
           <mxGeometry y="26" width="160" height="54" as="geometry" />
@@ -1915,14 +1918,14 @@
         <mxCell id="BvkF9H25nENo33llk2as-343" value="Recombination" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=23;" vertex="1" parent="1">
           <mxGeometry x="803" y="-1158" width="166.5" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="BvkF9H25nENo33llk2as-344" value="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
+        <mxCell id="BvkF9H25nENo33llk2as-344" value="5" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
           <mxGeometry x="40" y="-1156" width="50" height="50" as="geometry" />
         </mxCell>
         <mxCell id="BvkF9H25nENo33llk2as-345" value="Max Likelihood" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=23;" vertex="1" parent="1">
           <mxGeometry x="89.75" y="-1160" width="173.25" height="30" as="geometry" />
         </mxCell>
         <mxCell id="euh3f-BjxaFIM77-lD3N-35" value="socioecoGeoDataModel" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-          <mxGeometry x="674.5" y="-250" width="250" height="170" as="geometry" />
+          <mxGeometry x="669" y="-243" width="250" height="170" as="geometry" />
         </mxCell>
         <mxCell id="euh3f-BjxaFIM77-lD3N-36" value="&lt;div&gt;+ Kmodel:nicheModel&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ Rmodel:nicheModel&lt;/div&gt;&lt;div&gt;+ geoMigModel: geoMigModel&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="euh3f-BjxaFIM77-lD3N-35" vertex="1">
           <mxGeometry y="26" width="250" height="64" as="geometry" />
@@ -1932,6 +1935,30 @@
         </mxCell>
         <mxCell id="euh3f-BjxaFIM77-lD3N-38" value="&lt;div&gt;&lt;div&gt;+ buildRKlandscape(): socioEcoGroupData&lt;/div&gt;&lt;div&gt;+ buildGeodist(): float[,]&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ buildMigrationMatrix(): float[,]&lt;/div&gt;+ buildRKlandscape(): geoEnvData&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="euh3f-BjxaFIM77-lD3N-35" vertex="1">
           <mxGeometry y="98" width="250" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="BvkF9H25nENo33llk2as-351" value="Sociecosystem data" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=23;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="-1160" width="270" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="BvkF9H25nENo33llk2as-352" value="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
+          <mxGeometry x="1079" y="-1157" width="50" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="BvkF9H25nENo33llk2as-353" value="&lt;div&gt;Sociecosystem model&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=23;" vertex="1" parent="1">
+          <mxGeometry x="1029" y="-140" width="256" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="BvkF9H25nENo33llk2as-354" value="2" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
+          <mxGeometry x="969.5" y="-150" width="50" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="BvkF9H25nENo33llk2as-355" value="Genetic model" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=23;" vertex="1" parent="1">
+          <mxGeometry x="480.5" y="-496" width="219.5" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="BvkF9H25nENo33llk2as-356" value="4" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
+          <mxGeometry x="448.5" y="-501" width="50" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="BvkF9H25nENo33llk2as-357" value="Genetic data" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=23;" vertex="1" parent="1">
+          <mxGeometry x="729" y="-843" width="219.5" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="BvkF9H25nENo33llk2as-358" value="3" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" vertex="1" parent="1">
+          <mxGeometry x="697" y="-848" width="50" height="50" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
