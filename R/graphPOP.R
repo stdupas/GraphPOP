@@ -2422,20 +2422,21 @@ geneticProb<-function(coalescent, ecoGenetData) {
         retVal <- x
       }
     })
-    
+
     transMat <- lapply(matExp, function(y) Reduce('%*%', lapply(y, function(z) matrixcalc::matrix.power(genTransMat,z-1))))
     
     if(length(tc$coalescing) == 2) {
       temprob <- (sampleMat[as.character(tc$coalescing[1]),] %*% transMat[[1]]) %*% t(sampleMat[as.character(tc$coalescing[2]),] %*% transMat[[2]])
-      probability <- probability * temprob
-      newNode <- (sampleMat[as.character(tc$coalescing[1]),] %*% transMat[[1]]) * (sampleMat[as.character(tc$coalescing[2]),] %*% transMat[[2]])
     }
     else {
       temprob <- Reduce('*',lapply(1:(length(tc$coalescing)-1), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]])) %*% t(sampleMat[as.character(tc$coalescing[length(tc$coalescing)]),] %*% transMat[[length(tc$coalescing)]])
-      probability <- temprob * probability
-      newNode <- Reduce('*',lapply(1:length(tc$coalescing), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]]))
     }
     
+    #Update probability for the current coalescence
+    probability <- temprob * probability
+    
+    #Calculate the allele distribution vector for the new internal node
+    newNode <- Reduce('*',lapply(1:length(tc$coalescing), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]]))
     #Scale to 1 the probabilities
     newNode <- newNode/sum(newNode)
     
