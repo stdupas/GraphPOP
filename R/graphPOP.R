@@ -2424,17 +2424,21 @@ geneticProb<-function(coalescent, ecoGenetData) {
     })
 
     transMat <- lapply(matExp, function(y) Reduce('%*%', lapply(y, function(z) matrixcalc::matrix.power(genTransMat,z-1))))
+    mintc <- min(tc$br_length)
     
     if(length(tc$coalescing) == 2) {
-      temprob <- (sampleMat[as.character(tc$coalescing[1]),] %*% transMat[[1]]) %*% t(sampleMat[as.character(tc$coalescing[2]),] %*% transMat[[2]])
+      t1 <- (sampleMat[as.character(tc$coalescing[1]),] %*% transMat[[1]]) %*% t(sampleMat[as.character(tc$coalescing[2]),] %*% transMat[[2]])
+      t2 <- Reduce('*',lapply(1:(tc$time - mintc + 1),function(y) {1-((sampleMat[as.character(tc$coalescing[1]),] %*% matrixcalc::matrix.power(genTransMat,y)) %*% t(sampleMat[as.character(tc$coalescing[2]),] %*% matrixcalc::matrix.power(genTransMat,y)))}))
+      temprob <- t1 * t2
     }
     else {
-      temprob <- Reduce('*',lapply(1:(length(tc$coalescing)-1), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]])) %*% t(sampleMat[as.character(tc$coalescing[length(tc$coalescing)]),] %*% transMat[[length(tc$coalescing)]])
+      t1 <- Reduce('*',lapply(1:(length(tc$coalescing)-1), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]])) %*% t(sampleMat[as.character(tc$coalescing[length(tc$coalescing)]),] %*% transMat[[length(tc$coalescing)]])
+      t2 <- Reduce('*',lapply(1:(tc$time - mintc + 1),function(y) {1-(Reduce('*',lapply(1:(length(tc$coalescing)-1), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% matrixcalc::matrix.power(genTransMat,y))) %*% t(sampleMat[as.character(tc$coalescing[length(tc$coalescing)]),] %*% matrixcalc::matrix.power(genTransMat,y)))}))
+      temprob <- t1 * t2
     }
     
     #Update probability for the current coalescence
     probability <- temprob * probability
-    
     #Calculate the allele distribution vector for the new internal node
     newNode <- Reduce('*',lapply(1:length(tc$coalescing), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]]))
     #Scale to 1 the probabilities
