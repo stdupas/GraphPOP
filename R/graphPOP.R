@@ -2604,7 +2604,7 @@ setMethod(
     }
     
     #Return a list with the coalescent and the total probability forward
-    new("coalSim",coalescent=coalescent,probForward=sum(prob_forward), genetProb = geneticProb(coalescent, ecoGenetSet))
+    new("coalSim",coalescent=coalescent,probForward=sum(prob_forward))#, genetProb = geneticProb(coalescent, ecoGenetSet))
   }
 )
 
