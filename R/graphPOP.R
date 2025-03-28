@@ -2483,6 +2483,10 @@ setMethod(
   {
     #Initialization of the objects that will store the information about the coalescent
     prob_forward=NA
+    genetic_prob<-1
+    sampleMatrix <- ecoGenetSet@genetSample@sampleMatrix
+    genetTransition <- ecoGenetSet@genetSample@transitionMatrix
+    currentGenotypes <- sampleMatrix[ecoGenetSet["Present"],]
     N <- round(ecoGenetSet["K"]);#N[N==0]<-1
     coalescent = list() #
     cell_number_of_nodes <- parent_cell_number_of_nodes <- ecoGenetSet["Present"]
@@ -2534,6 +2538,8 @@ setMethod(
       prob_forward[time] = sum(log(ecoGenetSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1;  if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
       
+      #Calculation of the new allele probability vectors for the current genotypes
+      
       #The coalescent events are calculated in this cycle accounting for the new cell position of each node
       for (cell in 1:nCellA(ecoGenetSet)[1])
       {
@@ -2559,7 +2565,6 @@ setMethod(
               nodes_that_coalesce = names(which(parentoffspringmatrix[,multiple]))
               nodes <- unlist(nodes_remaining_by_cell) 
               new_node <- max(unique(c(nodes,nodes_remaining)))+1; nodes = nodes[!(nodes %in% nodes_that_coalesce)]; nodes=append(nodes,new_node) 
-              #new_node <- max(nodes)+1;nodes=nodes[!(names(nodes)%in%nodes_that_coalesce)];nodes=append(nodes,new_node);names(nodes)[length(nodes)]=new_node ##Legacy code
               #The parent cell of the nodes that coalesced are removed from this list and the parent cell of the newly formed nodes are added
               parent_cell_number_of_nodes <- append(parent_cell_number_of_nodes[!(names(parent_cell_number_of_nodes)%in%nodes_that_coalesce)],cell);names(parent_cell_number_of_nodes)[length(parent_cell_number_of_nodes)]<-new_node
               #The coalescent events are accounted for
@@ -2570,6 +2575,8 @@ setMethod(
               nodes_remaining <- append(nodes_remaining[!(nodes_remaining %in% nodes_that_coalesce)], new_node)
               #The single and multiple coalescent events are counted by adding the number of nodes that coalesced minus 1
               single_and_multiple_coalescence_events = single_and_multiple_coalescence_events + length(nodes_that_coalesce) - 1
+              
+              #Calculation of the genetic probability of the present coalescence event 
             }
           }
         }
