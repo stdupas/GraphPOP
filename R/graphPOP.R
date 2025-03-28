@@ -2534,7 +2534,7 @@ setMethod(
               }
               else {
                 coalPos <- 1:(length(nodes_that_coalesce)-1)
-                temprob <- (apply(currentGenotypes[as.character(nodes_that_coalesce[coalPos]),], MARGIN = 2, FUN = prod) %*% currentGenotypes[nodes_that_coalesce[as.character(length(nodes_that_coalesce))],]) * (1-(apply(cumulGenotypes[as.character(nodes_that_coalesce[coalPos]),], MARGIN = 2, FUN = prod) %*% cumulGenotypes[nodes_that_coalesce[as.character(length(nodes_that_coalesce))],]))
+                temprob <- (apply(currentGenotypes[as.character(nodes_that_coalesce[coalPos]),], MARGIN = 2, FUN = prod) %*% currentGenotypes[nodes_that_coalesce[length(nodes_that_coalesce)],]) * (1-(apply(cumulGenotypes[as.character(nodes_that_coalesce[coalPos]),], MARGIN = 2, FUN = prod) %*% cumulGenotypes[nodes_that_coalesce[length(nodes_that_coalesce)],]))
               }
               #Added the genetic probability of the current coalescence event to the cumulative genetic probability
               genetic_prob <- genetic_prob * temprob
