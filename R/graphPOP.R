@@ -2396,61 +2396,6 @@ setMethod("show", "coalSim", function(object){
   # show(object@coalescent)
 })
 
-#' Genetic probability calculation for a genealogy
-#' @description
-#' This function calculates the probability of a genealogy given the genetic data of a sample. This function requires a coalescent (simulated genealogy) and a ecoGenetSet object containing the marker information for the samples as well as the genetic transition matrix.
-#' @param coalescent coalSim object. This object should contain the simulated genealogy.
-#' @param ecoGenetData ecoGenetSet object. This object should contain the genetic information of the samples.
-#' @importFrom matrixcalc matrix.power
-#' @returns numeric. The calculated probability of the genealogy given the genetic characterization of the samples.
-
-geneticProb<-function(coalescent, ecoGenetData) {
-  probability <- 1
-  #Ne <- mean(ecoGenetData["K"])
-  genTransMat <- ecoGenetData@genetSample@transitionMatrix
-  sampleMat <- ecoGenetData@genetSample@sampleMatrix
-  parsingTimes <- abs(ecoGenetData@parsingTimes)
-  parsingIntervals <- sapply(2:length(parsingTimes), function(x) parsingTimes[x] - parsingTimes[x-1])
-  for(tc in coalescent) {
-    
-    matExp <- lapply(tc$br_length, function(x) {
-      interval <- findInterval(x,parsingTimes)
-      if(interval > 1) {
-        retVal <- c(parsingIntervals[1:(interval-1)], (x - (parsingTimes[(interval)])))
-      }
-      else{
-        retVal <- x
-      }
-    })
-
-    transMat <- lapply(matExp, function(y) Reduce('%*%', lapply(y, function(z) matrixcalc::matrix.power(genTransMat,z-1))))
-    mintc <- min(tc$br_length)
-    
-    if(length(tc$coalescing) == 2) {
-      t1 <- (sampleMat[as.character(tc$coalescing[1]),] %*% transMat[[1]]) %*% t(sampleMat[as.character(tc$coalescing[2]),] %*% transMat[[2]])
-      t2 <- Reduce('*',lapply(1:(tc$time - mintc + 1),function(y) {1-((sampleMat[as.character(tc$coalescing[1]),] %*% matrixcalc::matrix.power(genTransMat,y)) %*% t(sampleMat[as.character(tc$coalescing[2]),] %*% matrixcalc::matrix.power(genTransMat,y)))}))
-      temprob <- t1 * t2
-    }
-    else {
-      t1 <- Reduce('*',lapply(1:(length(tc$coalescing)-1), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]])) %*% t(sampleMat[as.character(tc$coalescing[length(tc$coalescing)]),] %*% transMat[[length(tc$coalescing)]])
-      t2 <- Reduce('*',lapply(1:(tc$time - mintc + 1),function(y) {1-(Reduce('*',lapply(1:(length(tc$coalescing)-1), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% matrixcalc::matrix.power(genTransMat,y))) %*% t(sampleMat[as.character(tc$coalescing[length(tc$coalescing)]),] %*% matrixcalc::matrix.power(genTransMat,y)))}))
-      temprob <- t1 * t2
-    }
-    
-    #Update probability for the current coalescence
-    probability <- temprob * probability
-    #Calculate the allele distribution vector for the new internal node
-    newNode <- Reduce('*',lapply(1:length(tc$coalescing), function(x) sampleMat[as.character(tc$coalescing[x]),] %*% transMat[[x]]))
-    #Scale to 1 the probabilities
-    newNode <- newNode/sum(newNode)
-    
-    sampleMat <- rbind(sampleMat, newNode)
-    rownames(sampleMat)[nrow(sampleMat)] <- tc$new_node
-    
-  }
-  return(as.numeric(log(probability)))
-}
-
 #' Coalescence simulation from socioecological and geographical data.
 #' @description
 #' Simulates a coalescence from socioecological and geographical data.
