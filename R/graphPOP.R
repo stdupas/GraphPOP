@@ -2486,7 +2486,7 @@ setMethod(
     genetic_prob<-1
     sampleMatrix <- ecoGenetSet@genetSample@sampleMatrix
     genetTransition <- ecoGenetSet@genetSample@transitionMatrix
-    currentGenotypes <- sampleMatrix[ecoGenetSet["Present"],]
+    currentGenotypes <- cumulGenotypes <- sampleMatrix[names(ecoGenetSet["Present"]),]
     N <- round(ecoGenetSet["K"]);#N[N==0]<-1
     coalescent = list() #
     cell_number_of_nodes <- parent_cell_number_of_nodes <- ecoGenetSet["Present"]
@@ -2495,7 +2495,6 @@ setMethod(
     time=0
     single_coalescence_events=0
     single_and_multiple_coalescence_events=0
-    
     #Adds the remaining nodes per cell to the nodes_remaining_by_cell list for the coalescent simulation
     for (cell in 1:nCellA(ecoGenetSet)[1])
     {
@@ -2509,6 +2508,12 @@ setMethod(
       if(time > 0 && any(abs(ecoGenetSet["Times"]) == time)) 
       {
         past_nodes_remaining <- ecoGenetSet@genetSample@sampleCell[which(abs(ecoGenetSet["Times"]) == time)]
+        
+        #Add the genotypes of the past nodes to the current and cummulative genotype matrices
+        currentGenotypes <- rbind(currentGenotypes, sampleMatrix[names(past_nodes_remaining),])
+        rownames(currentGenotypes)[which(rownames(currentGenotypes) == "")] <- names(past_nodes_remaining)
+        cumulGenotypes <- rbind(cumulGenotypes, sampleMatrix[names(past_nodes_remaining),])
+        rownames(cumulGenotypes)[which(rownames(cumulGenotypes) == "")] <- names(past_nodes_remaining)
         
         #This cycle adds the past nodes present in each of the cells. It cycles only through the cells where the past nodes are
         for(cell in unique(past_nodes_remaining)) 
@@ -2538,7 +2543,9 @@ setMethod(
       prob_forward[time] = sum(log(ecoGenetSet["TransiForw"][parent_cell_number_of_nodes,cell_number_of_nodes]))
       time=time+1;  if(printCoal==TRUE){if (round(time/10)*10==time) {print(time)}}
       
-      #Calculation of the new allele probability vectors for the current genotypes
+      #Calculation of the new allele probability vectors for the current genotypes and the cummulative probability of non-coalescence
+      currentGenotypes <- currentGenotypes %*% genetTransition
+      cumulGenotypes <- cumulGenotypes * currentGenotypes
       
       #The coalescent events are calculated in this cycle accounting for the new cell position of each node
       for (cell in 1:nCellA(ecoGenetSet)[1])
@@ -2575,8 +2582,31 @@ setMethod(
               nodes_remaining <- append(nodes_remaining[!(nodes_remaining %in% nodes_that_coalesce)], new_node)
               #The single and multiple coalescent events are counted by adding the number of nodes that coalesced minus 1
               single_and_multiple_coalescence_events = single_and_multiple_coalescence_events + length(nodes_that_coalesce) - 1
-              
+
               #Calculation of the genetic probability of the present coalescence event 
+              if(length(nodes_that_coalesce) == 2) {
+                temprob <- (currentGenotypes[as.character(nodes_that_coalesce[1]),] %*% currentGenotypes[as.character(nodes_that_coalesce[2]),]) * (1-(cumulGenotypes[as.character(nodes_that_coalesce[1]),] %*% cumulGenotypes[as.character(nodes_that_coalesce[2]),]))
+              }
+              else {
+                coalPos <- 1:(length(nodes_that_coalesce)-1)
+                temprob <- (apply(currentGenotypes[as.character(nodes_that_coalesce[coalPos]),], MARGIN = 2, FUN = prod) %*% currentGenotypes[nodes_that_coalesce[as.character(length(nodes_that_coalesce))],]) * (1-(apply(cumulGenotypes[as.character(nodes_that_coalesce[coalPos]),], MARGIN = 2, FUN = prod) %*% cumulGenotypes[nodes_that_coalesce[as.character(length(nodes_that_coalesce))],]))
+              }
+              #Added the genetic probability of the current coalescence event to the cumulative genetic probability
+              genetic_prob <- genetic_prob * temprob
+              
+              #Calculate the genotype for the new node
+              new_geno <- apply(currentGenotypes[as.character(nodes_that_coalesce),], MARGIN = 2, FUN = prod)
+              new_geno <- new_geno/sum(new_geno)
+              
+              #Add the new genotype to the genotype and cumulative matrices
+              currentGenotypes <- rbind(currentGenotypes, new_geno)
+              rownames(currentGenotypes)[nrow(currentGenotypes)] <- new_node
+              cumulGenotypes <- rbind(cumulGenotypes,new_geno)
+              rownames(cumulGenotypes)[nrow(cumulGenotypes)] <- new_node
+              
+              #Remove coalesced nodes from the matrices
+              currentGenotypes <- currentGenotypes[!(rownames(currentGenotypes) %in% nodes_that_coalesce),]
+              cumulGenotypes <- cumulGenotypes[!(rownames(cumulGenotypes) %in% nodes_that_coalesce),]
             }
           }
         }
@@ -2611,7 +2641,7 @@ setMethod(
     }
     
     #Return a list with the coalescent and the total probability forward
-    new("coalSim",coalescent=coalescent,probForward=sum(prob_forward))#, genetProb = geneticProb(coalescent, ecoGenetSet))
+    new("coalSim",coalescent=coalescent,probForward=sum(prob_forward), genetProb = as.numeric(-log(genetic_prob)))
   }
 )
 
