@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0" version="26.1.1">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:137.0) Gecko/20100101 Firefox/137.0" version="26.2.4">
   <diagram name="Page-1" id="Z6gb0_KSrEABv9Jm1-kw">
-    <mxGraphModel dx="1405" dy="2139" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1317" dy="1883" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1960,19 +1960,19 @@
         <mxCell id="BvkF9H25nENo33llk2as-358" value="3" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=4;fontSize=34;" parent="1" vertex="1">
           <mxGeometry x="801" y="-808" width="50" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="JgPWAUFx1rsPAOXpoJlf-1" value="validación" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="28.5" y="-840" width="210" height="300" as="geometry" />
+        <mxCell id="JgPWAUFx1rsPAOXpoJlf-1" value="validación" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="28.5" y="-840" width="210" height="280" as="geometry" />
         </mxCell>
-        <mxCell id="JgPWAUFx1rsPAOXpoJlf-2" value="&lt;div&gt;+ argPopSample: SamplePoints&lt;/div&gt;&lt;div&gt;+ argMutationModel&lt;div&gt;+ argKmodel:nicheModel&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ argRmodel:nicheModel&lt;/div&gt;&lt;div&gt;+ argGeoMigModel: geoMigModel&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ validSocioGeodataModel:&lt;/div&gt;+ validgenealogy: list(coalSim)&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ validgensample: genetSample&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;+ validgenetSet: genetSet&lt;/div&gt;&lt;/div&gt;&lt;br&gt;&lt;br&gt;&lt;/div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=#23445d;fillColor=#bac8d3;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="JgPWAUFx1rsPAOXpoJlf-1">
-          <mxGeometry y="26" width="210" height="164" as="geometry" />
+        <mxCell id="JgPWAUFx1rsPAOXpoJlf-2" value="&lt;div&gt;+ argPopSample: SamplePoints&lt;/div&gt;&lt;div&gt;+ argMutationModel&lt;div&gt;+ argKmodel:nicheModel&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ argRmodel:nicheModel&lt;/div&gt;&lt;div&gt;+ argGeoMigModel: geoMigModel&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;+ validSocioGeodataModel:&lt;/div&gt;+ validgenealogy: list(coalSim)&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ validgensample: genetSample&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;+ validgenetSet: genetSet&lt;/div&gt;&lt;/div&gt;&lt;br&gt;&lt;br&gt;&lt;/div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=#23445d;fillColor=#bac8d3;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="JgPWAUFx1rsPAOXpoJlf-1" vertex="1">
+          <mxGeometry y="26" width="210" height="144" as="geometry" />
         </mxCell>
-        <mxCell id="JgPWAUFx1rsPAOXpoJlf-3" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="JgPWAUFx1rsPAOXpoJlf-1">
-          <mxGeometry y="190" width="210" height="8" as="geometry" />
+        <mxCell id="JgPWAUFx1rsPAOXpoJlf-3" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="JgPWAUFx1rsPAOXpoJlf-1" vertex="1">
+          <mxGeometry y="170" width="210" height="8" as="geometry" />
         </mxCell>
-        <mxCell id="JgPWAUFx1rsPAOXpoJlf-4" value="&lt;div&gt;+ socioGeoDataModel()&lt;/div&gt;&lt;div&gt;+ simulGenal()&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ simulGenetFromGeneal()&lt;/div&gt;&lt;div&gt;+ inferenciaLIk&lt;/div&gt;&lt;div&gt;+ inBayes&lt;/div&gt;&lt;div&gt;+ inferenciaGr&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="JgPWAUFx1rsPAOXpoJlf-1">
-          <mxGeometry y="198" width="210" height="102" as="geometry" />
+        <mxCell id="JgPWAUFx1rsPAOXpoJlf-4" value="&lt;div&gt;+ socioGeoDataModel()&lt;/div&gt;&lt;div&gt;+ simulGenal()&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ simulGenetFromGeneal()&lt;/div&gt;&lt;div&gt;+ inferenciaLIk&lt;/div&gt;&lt;div&gt;+ inBayes&lt;/div&gt;&lt;div&gt;+ inferenciaGr&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="JgPWAUFx1rsPAOXpoJlf-1" vertex="1">
+          <mxGeometry y="178" width="210" height="102" as="geometry" />
         </mxCell>
-        <mxCell id="JgPWAUFx1rsPAOXpoJlf-7" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" edge="1" parent="1" source="JgPWAUFx1rsPAOXpoJlf-1" target="c0SSLgtnGO3cboPd4Nja-6">
+        <mxCell id="JgPWAUFx1rsPAOXpoJlf-7" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" parent="1" source="JgPWAUFx1rsPAOXpoJlf-1" target="c0SSLgtnGO3cboPd4Nja-6" edge="1">
           <mxGeometry x="0.3861" y="1" width="160" relative="1" as="geometry">
             <mxPoint x="219" y="-873" as="sourcePoint" />
             <mxPoint x="234" y="-820" as="targetPoint" />
@@ -1980,7 +1980,7 @@
             <mxPoint x="1" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="JgPWAUFx1rsPAOXpoJlf-9" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" edge="1" parent="1" source="JgPWAUFx1rsPAOXpoJlf-1" target="BvkF9H25nENo33llk2as-1">
+        <mxCell id="JgPWAUFx1rsPAOXpoJlf-9" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" parent="1" source="JgPWAUFx1rsPAOXpoJlf-1" target="BvkF9H25nENo33llk2as-1" edge="1">
           <mxGeometry x="0.3861" y="1" width="160" relative="1" as="geometry">
             <mxPoint x="205" y="-830" as="sourcePoint" />
             <mxPoint x="223" y="-873" as="targetPoint" />
