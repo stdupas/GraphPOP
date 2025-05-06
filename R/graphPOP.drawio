@@ -1910,7 +1910,7 @@
           <mxGeometry y="88" width="160" height="42" as="geometry" />
         </mxCell>
         <mxCell id="BvkF9H25nENo33llk2as-340" value="Bayesian" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=23;" parent="1" vertex="1">
-          <mxGeometry x="450.75" y="-1116" width="106.5" height="30" as="geometry" />
+          <mxGeometry x="468.75" y="-1130" width="106.5" height="30" as="geometry" />
         </mxCell>
         <mxCell id="BvkF9H25nENo33llk2as-341" value="Graph theory" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=23;" parent="1" vertex="1">
           <mxGeometry x="642" y="-1120" width="166.5" height="30" as="geometry" />
@@ -1988,7 +1988,7 @@
             <mxPoint x="223" y="-873" as="targetPoint" />
             <Array as="points">
               <mxPoint x="130" y="-1150" />
-              <mxPoint x="420" y="-1150" />
+              <mxPoint x="450" y="-1150" />
             </Array>
             <mxPoint x="1" as="offset" />
           </mxGeometry>
