@@ -138,10 +138,10 @@ setMethod("xyA",
 
 #' n Cells A.
 #' 
-#' @name nCellsA
+#' @name nCellA
 #' @docType methods
-#' @rdname nCellsA-methods
-#' @aliases nCellsA,geoEnvData
+#' @rdname nCellA-methods
+#' @aliases nCellA,geoEnvData
 
 setMethod(
   f = "nCellA",
@@ -497,13 +497,6 @@ setClass("socioecoGeoData",
 )
 
 connectionTypes=c("geographic","grouping","routes")
-
-#setValidity("socioecoGeoData",
- #           function(object){
-  #            if (length(object@stackConnectionType)!=nlayers(object)) return("the length of stackConnectionType slot informing the type of connection data and the number of layers of stack differ")
-   #           if (!all(object@stackConnectionType%in%connectionTypes)) return("stackConnectionType argument character value was not any of 'raster', 'vector', or 'group'")
-    #            return(TRUE)
-     #       })
 
 #
 # socioecoGeoData has 2 components
@@ -982,8 +975,11 @@ setClass("locus",
 #' @param object locus object.
 #' @returns boolean. 
 
-validityLocus<-function(object) {
-  if(!is.vector(object@alleles)) stop("The alleles must be given in the form of a numeric vector")
+validityLocus <- function(object) {
+  if (!is.integer(object@alleles)) {
+    return("The slot 'alleles' must be an integer vector")
+  }
+  TRUE
 }
 
 setValidity("locus", validityLocus)
