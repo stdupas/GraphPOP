@@ -4,7 +4,18 @@
 #library(matrixcalc)
 #library(MASS)
 #library(raster)
-
+#' @import methods
+#' @importClassesFrom raster RasterStack RasterLayer Raster
+#' @importClassesFrom sp SpatialPoints CRS
+#' @importMethodsFrom raster values cellFromXY res extent ncell
+#' @importMethodsFrom sp coordinates proj4string
+#' @importFrom raster stack raster xyFromCell values
+#' @importFrom sp SpatialPoints CRS
+#' @importFrom ape read.tree cophenetic bionj
+#' @importFrom stats runif rmultinom setNames
+#' @importFrom graphics par plot title
+#' @importFrom grDevices pdf
+NULL
 
 ############## CLASS AND VALIDITY ####
 
@@ -91,6 +102,8 @@ setGeneric(
   def=function(object){return(standardGeneric("valuesA"))}
 )
 
+
+
 #' NA cells.
 #' 
 #' @name NAcells
@@ -164,9 +177,11 @@ setMethod(
   signature = "geoEnvData",
   definition = function(object){
     select <- Acells(object)
-    x=raster::values(object)[select]
-    names(x) <- select
-    x
+    # Extraction par lignes [select, , drop = FALSE]
+    vals <- raster::values(object)[select, , drop = FALSE]
+    rownames(vals) <- select
+    colnames(vals) <- names(object)
+    return(vals)
   }
 )
 
@@ -181,11 +196,41 @@ setMethod(
 #' @importFrom raster raster
 #' @export
 
-geoEnvData <- function(rasterStack=NULL,Array=array(c(c(5,3,2,3,2,3,2,3,5),rep(1:3,3)),dim=c(3,3,2),dimnames = list(1:3,1:3,c("temp","pops"))),CRS="+proj=longlat",xmn=0,xmx=3,ymn=0,ymx=3,layerConnectionTypes=c("geographic","grouping")){
-  if (is.null(rasterStack)) rasterStack= raster::stack(apply(Array,3,function(x) raster::raster(matrix(x,nrow = dim(Array)[1]),xmn=xmn,xmx=xmx,ymn=ymn,ymx=ymx,crs=CRS)))
-  new("geoEnvData",rasterStack,layerConnectionTypes=layerConnectionTypes)
+geoEnvData <- function(rasterStack = NULL,
+                       Array = array(c(c(5,3,2,3,2,3,2,3,5), rep(1:3, 3)), 
+                                     dim = c(3, 3, 2), 
+                                     dimnames = list(1:3, 1:3, c("temp", "pops"))),
+                       CRS = "+proj=longlat",
+                       xmn = 0, xmx = 3,
+                       ymn = 0, ymx = 3,
+                       layerConnectionTypes = c("geographic", "grouping")) {
+  
+  if (is.null(rasterStack)) {
+    # Si l'utilisateur passe une matrice 2D, on la convertit en array 3D (1 couche)
+    if (is.matrix(Array)) {
+      Array <- array(Array, dim = c(nrow(Array), ncol(Array), 1), 
+                     dimnames = list(rownames(Array), colnames(Array), "layer1"))
+    }
+    
+    n_layers <- dim(Array)[3]
+    layers_list <- lapply(seq_len(n_layers), function(i) {
+      raster::raster(
+        matrix(Array[, , i], nrow = dim(Array)[1], ncol = dim(Array)[2]),
+        xmn = xmn, xmx = xmx, ymn = ymn, ymx = ymx,
+        crs = CRS
+      )
+    })
+    rasterStack <- raster::stack(layers_list)
+    if (!is.null(dimnames(Array)[[3]])) {
+      names(rasterStack) <- dimnames(Array)[[3]]
+    }
+  }
+  
+  # Construction S4 avec slots nommés
+  new("geoEnvData", 
+      rasterStack, 
+      layerConnectionTypes = layerConnectionTypes)
 }
-
 #' Show method for geoEnvData.
 #' 
 #' @name show
@@ -216,8 +261,9 @@ setMethod("show",
 
 setClass("socioecoGroupData",
          contains = "RasterStack",
-         representation(categories="character")
-         )
+         representation(categories = "character"),
+         prototype(raster::stack(), categories = character(0))
+)
 
 #' Validity function for socioecoGroupData
 #' @description
@@ -225,31 +271,53 @@ setClass("socioecoGroupData",
 #' @param object socioecoGroupData object.
 #' @importFrom raster ncell
 
-validitysocioecoGroupData=function(object){
-  #if (ncell(object)!=dim(object)[2]) stop("the socioecoClass must be one dimentional rasterStack : ncategories cols and 1 row")
-  if (raster::ncell(object)!=length(object@categories)) stop("the number of cells and the number of categories should not differ in socioecoGroupData")
+validitysocioecoGroupData <- function(object) {
+  if (raster::ncell(object) != length(object@categories)) {
+    return("the number of cells and the number of categories should not differ in socioecoGroupData")
+  }
   return(TRUE)
 }
 
-setValidity("socioecoGroupData",validitysocioecoGroupData)
+setValidity("socioecoGroupData", validitysocioecoGroupData)
 
 #' Creates a socioecoGroupData object
 #' @description
 #' This function creates a socioecoGroupData object.
 #' @param categories character. The categories of the socio-ecological groups.
 #' @param Values numeric. Values for the rasterStack.
+#' @param Nlayers numeric. Number of layers.
+#' @param layerNames character. Names of the layers.
 #' @param Array array. Array with the values of the socio-ecological groups per cell.
 #' @param rasterStack rasterStack object. This object contains the ordered values within a rasterStack object.
 #' @returns socioecoGroupData object.
-#' @importFrom raster stack
+#' @importFrom raster stack raster
 #' @export
 
-socioecoGroupData<-function(categories=c("group1","group2"),Values=c(1:4), Nlayers= 2, layerNames=c("cuidado","alimentación"),Array=NULL,rasterStack=NULL){
+socioecoGroupData <- function(categories = c("group1", "group2"),
+                              Values = 1:4, 
+                              Nlayers = 2, 
+                              layerNames = c("cuidado", "alimentacion"),
+                              Array = NULL,
+                              rasterStack = NULL) {
+  
   if (is.null(rasterStack)) {
-    if (is.null(Array)) Array = array(Values,dim = c(1,length(categories),Nlayers),dimnames = list(1:1,categories,layerNames))
-    rasterStack = raster::stack(apply(Array,3,function(x){raster(x)}))
+    if (is.null(Array)) {
+      Array <- array(Values, 
+                     dim = c(1, length(categories), Nlayers), 
+                     dimnames = list("1", categories, layerNames))
+    }
+    
+    # Rasterise chaque couche de l'array
+    layers_list <- lapply(seq_len(dim(Array)[3]), function(i) {
+      raster::raster(matrix(Array[, , i], nrow = dim(Array)[1], ncol = dim(Array)[2]))
+    })
+    rasterStack <- raster::stack(layers_list)
+    if (!is.null(dimnames(Array)[[3]])) {
+      names(rasterStack) <- dimnames(Array)[[3]]
+    }
   }
-  new("socioecoGroupData",rasterStack,categories=categories)
+  
+  new("socioecoGroupData", rasterStack, categories = categories)
 }
 
 #' Show method for socioecoGroupData.
@@ -265,10 +333,11 @@ setMethod("show",
           "socioecoGroupData",
           function(object) {
             cat("class\t\t: socioecoGroupData\n")
-            cat("# of categ.\t:",raster::ncell(object), "\n")
-            cat("# of layers\t:",raster::nlayers(object),"\n")
-            cat("categories\t:",object@categories,"\n")
-            cat("var names\t:",names(object),"\n")}
+            cat("# of categ.\t:", raster::ncell(object), "\n")
+            cat("# of layers\t:", raster::nlayers(object), "\n")
+            cat("categories\t:", object@categories, "\n")
+            cat("var names\t:", names(object), "\n")
+          }
 )
 
 #' Acells method for socioecoGroupData.
@@ -279,9 +348,9 @@ setMethod("show",
 #' @aliases Acells,socioecoGroupData
 
 setMethod("Acells",
-          signature=c("socioecoGroupData"),
-          definition = function(object){
-            which(!is.na(values(object[[1]])))
+          signature = c("socioecoGroupData"),
+          definition = function(object) {
+            which(!is.na(raster::values(object[[1]])))
           }
 )
 
@@ -290,16 +359,16 @@ setMethod("Acells",
 #' @name valuesA
 #' @docType methods
 #' @rdname valuesA-methods
-#' @aliases valuesA,geoEnvData
+#' @aliases valuesA,socioecoGroupData
 #' @importFrom raster values
 
 setMethod(
   f = "valuesA",
   signature = "socioecoGroupData",
-  definition = function(object){
+  definition = function(object) {
     select <- Acells(object)
-    x=raster::values(object)[select]
-    names(x) <- select
+    x <- raster::values(object)[select, , drop = FALSE]
+    rownames(x) <- select
     x
   }
 )
@@ -314,43 +383,82 @@ setMethod(
 setMethod(
   f = "nCellA",
   signature = "socioecoGroupData",
-  definition = function(object){
+  definition = function(object) {
     length(Acells(object))
   }
 )
 
 
+# ==============================================================================
+# socioecoGroupsData (Pluriel)
+# ==============================================================================
+
 setClass("socioecoGroupsData",
          contains = "list",
-         prototype = prototype(list(mercado=new("socioecoGroupData",stack(list(probabilidadEnfermedad=raster(matrix(1:2,nrow=1)))),categories=c("Corrabastos","Semillas identidad")),
-           sistema=new("socioecoGroupData",stack(list(pesticidas=raster(matrix(c(0,2,0),nrow=1)),abono=raster(matrix(c(0,2,2),nrow=1)))),categories=c("ageoeco","convencional","pequeño"))
-              )
-         )
-        )
+         prototype = prototype(list(
+           mercado = new("socioecoGroupData",
+                         raster::stack(list(probabilidadEnfermedad = raster::raster(matrix(1:2, nrow = 1)))),
+                         categories = c("Corrabastos", "Semillas identidad")),
+           sistema = new("socioecoGroupData",
+                         raster::stack(list(pesticidas = raster::raster(matrix(c(0, 2, 0), nrow = 1)),
+                                            abono      = raster::raster(matrix(c(0, 2, 2), nrow = 1)))),
+                         categories = c("ageoeco", "convencional", "pequeño"))
+         ))
+)
 
-validitysocioecoGroupsData=function(object){
-if (any(unlist(lapply(object,FUN = function(x) (class(x)!="socioecoGroupData"))))) stop("socioecoGroupsData is a list of object of class socioecoGroupData")
+validitysocioecoGroupsData <- function(object) {
+  if (length(object) > 0) {
+    if (any(unlist(lapply(object, function(x) !is(x, "socioecoGroupData"))))) {
+      return("socioecoGroupsData is a list of objects of class socioecoGroupData")
+    }
+  }
   return(TRUE)
 }
 
+setValidity("socioecoGroupsData", validitysocioecoGroupsData)
 
-setValidity("socioecoGroupsData",validitysocioecoGroupsData)
-#listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
-#Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad","pesticidas","abono"),listofArray=NULL,listofRasterStack=NULL)
+#' Creates a socioecoGroupsData object
+#' @description
+#' This function creates a socioecoGroupsData object.
+#' @export
 
-
-socioecoGroupsData<-function(listofsocioecoGroupData=NULL,listofCategories=list(c("Corrabastos","Semillas_identidad"),c("ageoeco","convencional","pequeño")),
-                              Names=c("mercado","sistema"),listofValues=list(c(1,2),matrix(c(0,2,0,0,2,2),ncol=2)), Nlayers= c(1,2), listofLayerNames=list("probabilidadEnfermedad",c("pesticidas","abono")),listofArray=NULL,listofRasterStack=NULL)
-  {
-  if (is.null(listofsocioecoGroupData)) {
-    if (is.null(listofRasterStack)) {
-      if (is.null(listofArray)) listofArray = lapply(1:length(Nlayers),function(i) array(data = listofValues[[i]],dim=c(1,length(listofCategories[[i]]),Nlayers[i]) , dimnames= list(1,listofCategories[[i]],listofLayerNames[[i]])))
-    }
-    listofRasterStack = lapply(1:length(listofArray),function(i) {stack(apply(listofArray[[i]],3,function(x){raster(x)}))})
+socioecoGroupsData <- function(listofsocioecoGroupData = NULL,
+                               listofCategories = list(c("Corrabastos", "Semillas_identidad"), c("ageoeco", "convencional", "pequeño")),
+                               Names = c("mercado", "sistema"),
+                               listofValues = list(c(1, 2), matrix(c(0, 2, 0, 0, 2, 2), ncol = 2)),
+                               Nlayers = c(1, 2),
+                               listofLayerNames = list("probabilidadEnfermedad", c("pesticidas", "abono")),
+                               listofArray = NULL,
+                               listofRasterStack = NULL) {
+  
+  if (!is.null(listofsocioecoGroupData)) {
+    names(listofsocioecoGroupData) <- Names[seq_along(listofsocioecoGroupData)]
+    return(new("socioecoGroupsData", listofsocioecoGroupData))
   }
-  listofsocioecoGroupData = lapply(1:length(listofRasterStack),function(i) socioecoGroupData(categories = listofCategories[[i]],rasterStack = listofRasterStack[[i]]))
-  names(listofsocioecoGroupData)=Names
-  new("socioecoGroupsData",listofsocioecoGroupData)
+  
+  if (is.null(listofRasterStack)) {
+    if (is.null(listofArray)) {
+      listofArray <- lapply(seq_along(Nlayers), function(i) {
+        array(data = listofValues[[i]], 
+              dim = c(1, length(listofCategories[[i]]), Nlayers[i]), 
+              dimnames = list("1", listofCategories[[i]], listofLayerNames[[i]]))
+      })
+    }
+    listofRasterStack <- lapply(seq_along(listofArray), function(i) {
+      arr <- listofArray[[i]]
+      layers <- lapply(seq_len(dim(arr)[3]), function(k) raster::raster(matrix(arr[, , k], nrow = 1)))
+      st <- raster::stack(layers)
+      if (!is.null(dimnames(arr)[[3]])) names(st) <- dimnames(arr)[[3]]
+      st
+    })
+  }
+  
+  listofsocioecoGroupData <- lapply(seq_along(listofRasterStack), function(i) {
+    socioecoGroupData(categories = listofCategories[[i]], rasterStack = listofRasterStack[[i]])
+  })
+  
+  names(listofsocioecoGroupData) <- Names[seq_along(listofsocioecoGroupData)]
+  new("socioecoGroupsData", listofsocioecoGroupData)
 }
 
 #' show method for socioecoGroupsData.
@@ -367,15 +475,15 @@ setMethod("show",
           "socioecoGroupsData",
           function(object) {
             cat("class\t\t: socioecoGroupsData\n")
-            cat("# of elements\t:",length(object), "\n\n")
-            for (i in 1:length(object))
-              {
-              cat("element",i,"\t:",names(object)[i],"\n")
-              cat("class\t\t:",class(object[[i]]),"\n")
-              cat("# of categ.\t:",raster::ncell(object[[i]]), "\n")
-              cat("# of layers\t:",raster::nlayers(object[[i]]),"\n")
-              cat("categories\t:",object[[i]]@categories,"\n")
-              cat("var names\t:",names(object[[i]]),"\n\n")}
+            cat("# of elements\t:", length(object), "\n\n")
+            for (i in seq_along(object)) {
+              cat("element", i, "\t:", names(object)[i], "\n")
+              cat("class\t\t:", class(object[[i]]), "\n")
+              cat("# of categ.\t:", raster::ncell(object[[i]]), "\n")
+              cat("# of layers\t:", raster::nlayers(object[[i]]), "\n")
+              cat("categories\t:", object[[i]]@categories, "\n")
+              cat("var names\t:", names(object[[i]]), "\n\n")
+            }
           }
 )
 
@@ -387,9 +495,9 @@ setMethod("show",
 #' @aliases Acells,socioecoGroupsData
 
 setMethod("Acells",
-          signature=c("socioecoGroupsData"),
-          definition = function(object){
-            lapply(object, function(x){Acells(x)})
+          signature = c("socioecoGroupsData"),
+          definition = function(object) {
+            lapply(object, function(x) { Acells(x) })
           }
 )
 
@@ -401,11 +509,15 @@ setMethod("Acells",
 #' @aliases nCellA,socioecoGroupsData
 
 setMethod("nCellA",
-          signature=c("socioecoGroupsData"),
-          definition = function(object){
-            lapply(object, function(x){nCellA(x)})
+          signature = c("socioecoGroupsData"),
+          definition = function(object) {
+            vapply(object, nCellA, numeric(1))
           }
 )
+
+setMethod("nCellA", signature = "Raster", function(object) {
+  raster::ncell(object) - length(NAcells(object))
+})
 
 #' Method to obtain the category names of the connection types.
 #' 
@@ -416,7 +528,7 @@ setMethod("nCellA",
 #' @export
 
 setGeneric("categories",
-           def=function(object){return(standardGeneric("categories"))})
+           def = function(object) { return(standardGeneric("categories")) })
 
 #' Categories method for socioecoGroupData.
 #' 
@@ -427,7 +539,7 @@ setGeneric("categories",
 
 setMethod("categories",
           "socioecoGroupData",
-          function(object){list(socioeco=object@categories)}
+          function(object) { list(socioeco = object@categories) }
 )
 
 #' Categories method for socioecoGroupsData.
@@ -439,7 +551,7 @@ setMethod("categories",
 
 setMethod("categories",
           "socioecoGroupsData",
-          function(object) {lapply(object, function(x){categories(x)})}
+          function(object) { lapply(object, function(x) { categories(x) }) }
 )
 
 #' Categories method for geoEnvData objects.
@@ -451,7 +563,6 @@ setMethod("categories",
 
 setMethod("categories",
           "geoEnvData",
-          #function(object) {apply(xyFromCell(object,1:nCellA(object)),1,function(x) paste(x,collapse ="_"))}
           function(object) Acells(object)
 )
 
@@ -464,19 +575,20 @@ setMethod("categories",
 
 setMethod("variable.names",
           "socioecoGroupData",
-          function(object) {names(object)})
+          function(object) { names(object) })
 
 #' Variable.names method for socioecoGroupsData.
 #' 
 #' @name variable.names
 #' @docType methods
 #' @rdname variable.names-methods
-#' @aliases variable.names,socioecoGroupData
+#' @aliases variable.names,socioecoGroupsData
 
 setMethod("variable.names",
           "socioecoGroupsData",
-          function(object) {lapply(object, function(x){names(x)})}
+          function(object) { lapply(object, function(x) { names(x) }) }
 )
+
 
 #' Class to contain the socio-ecological and the geographical data.
 #' 
@@ -491,10 +603,25 @@ setMethod("variable.names",
 #' @slot socioecoData socioecoGroupsData object. This object contains the data for the socio-ecological grouping data.
 #' @export
 
-setClass("socioecoGeoData",
-         representation("geoEnvData","socioecoGroupsData"),
-         prototype = prototype(geoEnvData=geoEnvData(),socioecoData=socioecoGroupsData())
+setClass(
+  "socioecoGeoData",
+  slots = c(
+    geoEnvData    = "geoEnvData",
+    socioecoData  = "socioecoGroupsData"
+  ),
+  prototype = prototype(
+    geoEnvData   = new("geoEnvData"),
+    socioecoData = new("socioecoGroupsData")
+  )
 )
+
+
+socioecoGeoData <- function(geoEnvData = new("geoEnvData"), 
+                            socioecoData = new("socioecoGroupsData")) {
+  new("socioecoGeoData", 
+      geoEnvData   = geoEnvData, 
+      socioecoData = socioecoData)
+}
 
 connectionTypes=c("geographic","grouping","routes")
 
@@ -519,28 +646,27 @@ connectionTypes=c("geographic","grouping","routes")
 #' @importFrom raster crs
 #' @export
 
-socioecoGeoData<-function(x=NULL,socioecoList=NULL,stackConnectionType=NULL,envLayerNames=NULL)
-{
-  #
-  # socioecoGeoData has 2 components
-  # a geographic and/or a socioeconomic that permits to generate 
-  # transition matrix individuals among demes defined 
-  # by geographic and socioeconomic variables
-  if (is.null(x)) geo=new("geoEnvData") else {
-      if (class(x)=="array") {
-        if (is.null(stackConnectionType)) stackConnectionType=rep("geographic",dim(x)[3]) 
-          geo=new("geoEnvData",
-          {Stack= raster::stack(sapply(1:dim(x)[3],function(i) raster::raster(x[,,i])),layers=envLayerNames)
-          names(Stack)=envLayerNames
-          raster::extent(Stack)=Extent
-          raster::crs(Stack) <- Crs
-          Stack})}
-   else if (class(x)=="RasterStack") {
-     if (is.null(stackConnectionType)) stackConnectionType=rep("geographic",dim(x)[3]) 
-     geo=new("geoEnvData",rasterstack,stackConnectionType)} else if (class(x)=="geoEnvData") {geo=x} else stop("x should be raster, RasterStack, array or empty")
+
+socioecoGeoDataHistory <- function(SocioecoGeoData = socioecoGeoData(),
+                                   PastSocioecoGeoData = list(socioecoGeoData(), socioecoGeoData(), socioecoGeoData()),
+                                   ParsingTimes = c(0, -200, -500, -2000),
+                                   TimeUnit = "days",
+                                   ZeroTime = as.POSIXlt('2005-4-19 7:01:00')) {
+  
+  # Si jamais SocioecoGeoData passé est un geoEnvData seul, on l'encapsule :
+  if (is(SocioecoGeoData, "geoEnvData")) {
+    SocioecoGeoData <- socioecoGeoData(geoEnvData = SocioecoGeoData)
   }
-  if (is.null(socioecoList)) socioecoList=socioecoGroupsData()
-  new("socioecoGeoData",geo,socioecoList)
+  
+  # Instanciation explicite des slots hérités (geoEnvData, socioecoData) 
+  # et des slots propres à History
+  new("socioecoGeoDataHistory",
+      geoEnvData          = SocioecoGeoData@geoEnvData,
+      socioecoData        = SocioecoGeoData@socioecoData,
+      pastSocioecoGeoData = PastSocioecoGeoData,
+      parsingTimes        = ParsingTimes,
+      timeUnit            = TimeUnit,
+      zeroTime            = ZeroTime)
 }
 
 #' Variable.names method for socioecoGeoData.
@@ -598,13 +724,17 @@ setMethod("show",
 #' @rdname nCellA-methods
 #' @aliases nCellA,socioecoGroupData
 
+
 setMethod("nCellA",
           signature = "socioecoGeoData",
           function(object) {
-            return(c(geoCells=nCellA(object@geoEnvData),socioCells=sapply(object@socioecoData,FUN = function(x) nCellA(x))))
-            }
-          )
-
+            # On appelle directement nCellA sur chaque sous-composant
+            c(
+              geoCells = nCellA(object@geoEnvData),
+              unlist(nCellA(object@socioecoData))
+            )
+          }
+)
 reactionNorm = c("scaling","enveloppe","envelin","conQuadratic","conQuadraticSkw")
 
 #' Function for the amount of parameters of a niche model.
@@ -632,13 +762,13 @@ npNiche <- function(x) {unlist(lapply(x,function(x) switch(x[],
 #' @returns boolean.
 
 validityNicheModel=function(object){
-  if(!is(object@varNiche,"character"))stop("error in NicheModel variables : variables just accept character!")
-  if(!is.list(object@pNiche))stop("error in NicheModel pNiche : pNiche just accept list!")
-  if (!all(object@reactNorms%in%reactionNorm))stop(paste("reaction norm should be one of the following :",paste(reactionNorm,collapse = ", ")))
-  if(FALSE%in%lapply(object@pNiche,is.numeric))stop("error in NicheModel parameter list : Parameter list just accept numeric!")
-# if(!all(names(object@reactNorms)%in%object@varNiche))stop("error in NicheModel : names of reactionNorm slot are not all included in var slot")
+  if(!is(object@varNiche,"character"))return("error in NicheModel variables : variables just accept character!")
+  if(!is.list(object@pNiche))return("error in NicheModel pNiche : pNiche just accept list!")
+  if (!all(object@reactNorms%in%reactionNorm))return(paste("reaction norm should be one of the following :",paste(reactionNorm,collapse = ", ")))
+  if(FALSE%in%lapply(object@pNiche,is.numeric))return("error in NicheModel parameter list : Parameter list just accept numeric!")
+# if(!all(names(object@reactNorms)%in%object@varNiche))return("error in NicheModel : names of reactionNorm slot are not all included in var slot")
   notMatching <- (unlist(lapply(1:length(object@pNiche),function(x) npNiche(object@reactNorms[x]) != length(object@pNiche[[x]]))))
-  if (any(notMatching)) stop(paste("
+  if (any(notMatching)) return(paste("
                                             error in number of parameter given in nicheModel pNiche 
                                             according to reactionNorm:
                                             scaling=1,
@@ -647,10 +777,10 @@ validityNicheModel=function(object){
                                             conQuadratic=2,
                                             conQuadraticSkw=2
                                             number of paremeters and reactionNorm do not match for variable ",which(notMatching),". ",sep=""))
-  if (length(object@varNiche)!=length(object@reactNorms)) stop("there should be the same number of elements in reactNorms and varNiche since reactNorms[i] is applied to varNiche[i]")
-  if (length(object@reactNorms)!=length(object@pNiche)) stop("there should be the same number of elements in pNiche and reactNorms since pNiche[[i]] is used in reactNorms[i] function")
+  if (length(object@varNiche)!=length(object@reactNorms)) return("there should be the same number of elements in reactNorms and varNiche since reactNorms[i] is applied to varNiche[i]")
+  if (length(object@reactNorms)!=length(object@pNiche)) return("there should be the same number of elements in pNiche and reactNorms since pNiche[[i]] is used in reactNorms[i] function")
 #  if (length(object@varNiche)>=2 stop("niche must be shape x scale")
-      TRUE
+  TRUE
 }
 
 #' nicheModel class.
@@ -719,24 +849,23 @@ migrationShapes<-c("popSep","fat_tail1","gaussian","exponential","contiguous","c
 #' @returns boolean.
 
 validitygeoMigrationModel=function(object){
-  #if(!is.character(object@shapeMig))stop("error in  migrationModel shapeMig : shapeMig just accept character!")
   whichSlotHasDifferentSize = sapply(c("varMig","shapeMig","pMig"),FUN = function(x) {length(slot(object,x))!=length(object@modelConnectionType)})
   if (sum(object@pMixt)!=1) warning("pMixt parameter should sum to 1")
-  if(any(whichSlotHasDifferentSize)) stop(paste("error in  migrationModel; the slot(s)",
+  if(any(whichSlotHasDifferentSize)) return(paste("error in  migrationModel; the slot(s)",
                                                paste(c("varMig","shapeMig","pMig","pMixt")[whichSlotHasDifferentSize],collapse = " and "), 
                                                " is not valid because it has different length than modelConnectionType slot, which is ",
                                                length(object@modelConnectionType),sep = ""))
   whichIsNotShapeMig = sapply(1:length(object@modelConnectionType),FUN = function(i) {
     !object@shapeMig[i]%in%migrationShapes})
   if(any(whichIsNotShapeMig)) {
-    stop(paste("the shapeMig '",paste(object@shapeMig[whichIsNotShapeMig],collapse="' and '"),
+    return(paste("the shapeMig '",paste(object@shapeMig[whichIsNotShapeMig],collapse="' and '"),
                "' is not a valid shapeMig",sep=""))
     }
-  if(!any(object@shapeMig%in%migrationShapes))stop(paste("error in  migrationModel : the parameter shapeMig must have one of the following values: '",paste(migrationShapes,collapse=", "),"'",sep=""))
-  if(FALSE%in%lapply(object@pMig,is.numeric))stop("error in migrationModel pMig : pMig just accept numeric vectors")
+  if(!any(object@shapeMig%in%migrationShapes))return(paste("error in  migrationModel : the parameter shapeMig must have one of the following values: '",paste(migrationShapes,collapse=", "),"'",sep=""))
+  if(FALSE%in%lapply(object@pMig,is.numeric))return("error in migrationModel pMig : pMig just accept numeric vectors")
   for (i in 1:length(object@varMig)) {# checks for correct number of migration parameters
     if(npMig(object@shapeMig[i])!=length(object@pMig[[i]])) {
-      stop(paste("error in migrationModel : number of paremeters and shapeMig do not match for varMig",object@shapeMig[i]))}
+      return(paste("error in migrationModel : number of paremeters and shapeMig do not match for varMig",object@shapeMig[i]))}
   }
   TRUE
 }
@@ -800,10 +929,11 @@ socioecoMigrationShapes=c("euclideanInverse") # Invers
 #' @returns boolean.
 
 validitysocioecoMigrationModel=function(object){
-  #if(!is.character(object@shapeMig))stop("error in  migrationModel shapeMig : shapeMig just accept character!")
-  if (length(object@varMig)!=length(object@pMig)) stop("length of pMig list is different from length of varMig list")
-  if (!(object@shapeMig%in%socioecoMigrationShapes)) stop("migrationShape must be one of the following(s): ",socioecoMigrationShapes,collapse = ", ")
-  if (any(names(object@pMig)!=object@varMig)) stop("names of pMig list should equal varMig")
+  #if(!is.character(object@shapeMig))return("error in  migrationModel shapeMig : shapeMig just accept character!")
+  if (length(object@varMig)!=length(object@pMig)) return("length of pMig list is different from length of varMig list")
+  if (!(object@shapeMig%in%socioecoMigrationShapes)) return("migrationShape must be one of the following(s): ",socioecoMigrationShapes,collapse = ", ")
+  if (any(names(object@pMig)!=object@varMig)) return("names of pMig list should equal varMig")
+  TRUE
 }
 
 #' Class to describe a migration model given by the socioecological variables.
@@ -949,10 +1079,6 @@ setMethod("model",
              list(reactNorms=object@reactNorms,varNiche=object@varNiche)
            })
 
-a=socioecoGeoData(x = geoEnvData(),socioecoList=socioecoGroupsData())
-b=nicheModel(varNiche=c("temp","temp"),reactNorms=c(temp="envelin",temp="scaling"),pNiche=list(envelin=c(3,4),scaling=100))
-c=geoMigrationModel(modelConnectionType=c("geographic","grouping"),varMig=c("temp","pops"),shapeMig=c("gaussian","popSep"),pMig=list(gaussian=1/1.96,popSep=numeric(0)),pMixt=c(.5,.5))
-d=socioecoMigrationModel()
 #stack(x=c(temp=raster(matrix(2:5,nrow=2),xmn=0,xmx=2,ymn=0,ymx=2),pops=raster(matrix(rep(1:2,2),nrow=2),xmn=0,xmx=2,ymn=0,ymx=2)))
 
 #connectionType=c("geographic","grouping") # two types of connection geo is related to geographic distance, grouping
@@ -1052,8 +1178,9 @@ setClass("genotype",
          prototype(loci=list(locus("SSR1",c(125,127)),locus("SSR2", c(127,132)), locus("SSR3",c(200,188)))))
 
 validityGenotype <- function(object){
-  if(!any(sapply(object@loci,FUN= is, class2 = "locus"))) { stop("All objects in the genotype must be locus objects!")}
-  if(anyDuplicated(sapply(object@loci,FUN = function(x) x@name))) { stop("The names of the markers cannot be repeated!") }
+  if(!any(sapply(object@loci,FUN= is, class2 = "locus"))) { return("All objects in the genotype must be locus objects!")}
+  if(anyDuplicated(sapply(object@loci,FUN = function(x) x@name))) { return("The names of the markers cannot be repeated!") }
+  TRUE
 }
 
 setValidity("genotype", validityGenotype)
@@ -1116,7 +1243,8 @@ setClass("haplotype",
          prototype(loci=list(locus("SSR1",128), locus("SSR2", 102), locus("SSR3",115))))
 
 validityHaplotype <- function(object) {
-  if(any(getPloidy(object) != 1)) {stop("All markers must be haploid in a haplotype!")}
+  if(any(getPloidy(object) != 1)) {return("All markers must be haploid in a haplotype!")}
+  TRUE
 }
 
 setValidity("haplotype",validityHaplotype)
@@ -1288,8 +1416,9 @@ setClass("samplePoints",
 #' @returns Boolean. 
 
 validitysamplePoints <- function(object) {
-  if(!is(object@geoCoordinates,"SpatialPoints")) stop("The geoCoordinates slot must be an object of the SpatialPoints class")
-  if(!is(object@sampleTime,"numeric")) stop("The sampling times must be numeric")
+  if(!is(object@geoCoordinates,"SpatialPoints")) return("The geoCoordinates slot must be an object of the SpatialPoints class")
+  if(!is(object@sampleTime,"numeric")) return("The sampling times must be numeric")
+  TRUE
 }
 
 setValidity("samplePoints", validitysamplePoints)
@@ -1322,21 +1451,25 @@ setMethod("show", "samplePoints", function(object) {
 #' @export
 
 samplePoints <- function(sCoordinates, sTimes, proj4 = NULL) {
+  if (is.null(proj4)) { 
+    proj4 <- sp::CRS("+proj=longlat +datum=WGS84 +no_defs") 
+  }
   
-  if(is.null(proj4)) { proj4 <- sp::CRS(as.character("+proj=longlat +datum=WGS84 +no_defs")) }
+  if (inherits(sCoordinates, "SpatialPoints")) { 
+    sampleCoords <- sCoordinates 
+  } else { 
+    sampleCoords <- tryCatch(
+      sp::SpatialPoints(sCoordinates, proj4string = proj4),
+      error = function(cond) {
+        stop("There is a problem with the format of your coordinates: ", conditionMessage(cond))
+      }
+    )
+  }
   
-  if(is(sCoordinates, "SpatialPoints")) { sampleCoords = sCoordinates }
-  else { tryCatch(
-                  {sampleCoords = sp::SpatialPoints(sCoordinates, proj4string = proj4)},
-                  error = function(cond) {
-                      message("There is a problem with the format of your coordinates")
-                      message("Here is the original error message:")
-                      message(conditionMessage(cond))
-                  }
-                )
-        }
-  
-  new("samplePoints", geoCoordinates = sampleCoords,sampleCell = 0, sampleTime = sTimes)
+  new("samplePoints", 
+      geoCoordinates = sampleCoords, 
+      sampleCell = integer(length(sampleCoords), 
+      sampleTime = sTimes))
 }
 
 #' Class that contains the genetic data of the samples
@@ -1355,8 +1488,9 @@ setClass("genetSample",
          )
 
 validityGenetSample <- function(object) {
-  if(length(object@geoCoordinates) != length(object@genetData)) {stop("All sampled points should have its corresponding genetic data")}
-  if(!(object@markerType %in% c("microsatellite", "snp"))) {stop("The marker is not within the accepted values: 'microsatellite' or 'snp'")}
+  if(length(object@geoCoordinates) != length(object@genetData)) {return("All sampled points should have its corresponding genetic data")}
+  if(!(object@markerType %in% c("microsatellite", "snp"))) {return("The marker is not within the accepted values: 'microsatellite' or 'snp'")}
+  TRUE
 }
 
 setValidity("genetSample", validityGenetSample)
@@ -1420,8 +1554,9 @@ setClass("mutationModel",
          contains="character")
 
 validityMutationModel <- function(object){
-  if(!(object %in% c("simple","geometric"))) {stop("The mutation model should be either 'simple' or 'geometric")}
-  if(length(object) > 1) {stop("The mutation model should contain only one value")}
+  if(!(object %in% c("simple","geometric"))) {return("The mutation model should be either 'simple' or 'geometric")}
+  if(length(object) > 1) {return("The mutation model should contain only one value")}
+  TRUE
 }
 
 setValidity("mutationModel", validityMutationModel)
@@ -1549,10 +1684,11 @@ setClass("genetSet",
          representation(sampleMatrix = "matrix",mutationModel = "character", transitionMatrix = "matrix"))
 
 validityGenetSet <- function(object) {
-  if(any(colnames(object@sampleMatrix) != colnames(object@transitionMatrix))) {stop("The same marker-allele combinations should be both on the sample matrix and the transition matrix")}
-  if(any(colnames(object@sampleMatrix) != rownames(object@transitionMatrix))) {stop("The same marker-allele combinations should be both on the sample matrix and the transition matrix")}
-  if(any(rowSums(object@transitionMatrix) < 0.9999)) {stop("The sum of probabilities should be 1 for all rows")}
-  if(any(colSums(object@transitionMatrix) < 0.9999)) {stop("The sum of probabilities should be 1 for all columns")}
+  if(any(colnames(object@sampleMatrix) != colnames(object@transitionMatrix))) {return("The same marker-allele combinations should be both on the sample matrix and the transition matrix")}
+  if(any(colnames(object@sampleMatrix) != rownames(object@transitionMatrix))) {return("The same marker-allele combinations should be both on the sample matrix and the transition matrix")}
+  if(any(rowSums(object@transitionMatrix) < 0.9999)) {return("The sum of probabilities should be 1 for all rows")}
+  if(any(colSums(object@transitionMatrix) < 0.9999)) {return("The sum of probabilities should be 1 for all columns")}
+  TRUE
 }
 
 setValidity("genetSet", validityGenetSet)
@@ -1627,9 +1763,10 @@ setClass("socioecoGeoDataHistory",
 )
 
 validitysocioecoGeoDataHistory = function(object){
-  if (any(object@parsingTimes>0)) stop("the pastStartingTimes should be negative")
-  if ((length(object@parsingTimes)-1)!=(length(object@pastSocioecoGeoData))) stop("slot pastStartingTimes should include all the starting dates between period, which is length(object)")
-  if (length(object@parsingTimes)>1) for (i in 2:length(object@parsingTimes)) {if (object@parsingTimes[i]>=object@parsingTimes[i-1]) stop("the socioecoGeoDataList should order from recent to past")}
+  if (any(object@parsingTimes>0)) return("the pastStartingTimes should be negative")
+  if ((length(object@parsingTimes)-1)!=(length(object@pastSocioecoGeoData))) return("slot pastStartingTimes should include all the starting dates between period, which is length(object)")
+  if (length(object@parsingTimes)>1) for (i in 2:length(object@parsingTimes)) {if (object@parsingTimes[i]>=object@parsingTimes[i-1]) return("the socioecoGeoDataList should order from recent to past")}
+  TRUE
 }
 
 setValidity("socioecoGeoDataHistory", validitysocioecoGeoDataHistory)
@@ -1647,9 +1784,6 @@ setValidity("socioecoGeoDataHistory", validitysocioecoGeoDataHistory)
 #' @returns An object of the socioecoGeoDataHistory class.
 #' @export
 
-socioecoGeoDataHistory <- function(SocioecoGeoData=socioecoGeoData(),PastSocioecoGeoData=list(socioecoGeoData(),socioecoGeoData(),socioecoGeoData()),ParsingTimes=c(0,-200,-500,-2000),TimeUnit="days",ZeroTime=as.POSIXlt('2005-4-19 7:01:00')) {
-  new("socioecoGeoDataHistory",SocioecoGeoData,pastSocioecoGeoData=PastSocioecoGeoData,parsingTimes=ParsingTimes,timeUnit=TimeUnit,zeroTime=ZeroTime)
-}
 
 #' show method for socioecoGeoDataHistory objects.
 #' 
@@ -1707,9 +1841,10 @@ setMethod("show",
 #' @returns Boolean.
 
 validitysocioecoGeoDataModel=function(object){
-  if(!is(object@Kmodel,"nicheModel"))stop("Error in socioecoGeoDataModel Kmodel: Kmodel only accepts NicheModel !")
-  if(!is(object@Rmodel,"nicheModel"))stop("Error in socioecoGeoDataModel Rmodel: Rmodel only accepts NicheModel !")
-  if(!is(object@geoMigModel,"geoMigrationModel"))stop("Error in socioecoGeoDataModel migration: migration only accepts migrationModel !")
+  if(!is(object@Kmodel,"nicheModel"))return("Error in socioecoGeoDataModel Kmodel: Kmodel only accepts NicheModel !")
+  if(!is(object@Rmodel,"nicheModel"))return("Error in socioecoGeoDataModel Rmodel: Rmodel only accepts NicheModel !")
+  if(!is(object@geoMigModel,"geoMigrationModel"))return("Error in socioecoGeoDataModel migration: migration only accepts migrationModel !")
+  TRUE
 }
 
 #' Class to contain the socioecoGeoDataModel built on the historical information
@@ -1781,6 +1916,21 @@ socioecoGeoDataModel<-function(socioecoGeoDataHistory=NULL,
 
 setValidity("socioecoGeoDataModel", validitysocioecoGeoDataModel)
 
+setMethod(
+  f = "[[",
+  signature = signature(x = "socioecoGeoDataModel"),
+  definition = function(x, i, j, ...) {
+    # Permet d'accéder par nom : obj[["geoEnvData"]] ou obj[["socioecoData"]]
+    if (i %in% slotNames(x)) {
+      return(slot(x, i))
+    }
+    # Ou si i est un nom de couche dans les données environnementales / socioéco :
+    if (i %in% names(x@geoEnvData)) {
+      return(x@geoEnvData[[i]])
+    }
+    stop(paste("L'élément ou la variable", i, "n'existe pas dans l'objet."))
+  }
+)
 #' show method for nicheModel objects.
 #' 
 #' @name show
@@ -1858,6 +2008,16 @@ setMethod("show",
             show(object@socioecoMigModel)
           }
 ) 
+
+setMethod(
+  f = "valuesA",
+  signature = "socioecoGeoDataModel",
+  definition = function(object) {
+    # On délègue la récupération des valeurs actives aux données spatiales/socio-éco
+    # Utiliser object@socioecoGeoData ou object@geoEnvData selon le slot contenant l'ensemble des couches
+    valuesA(object@geoEnvData)
+  }
+)
 
 #' Envelope reaction norm
 #' @description
@@ -1948,35 +2108,55 @@ setGeneric(
 #' @aliases buildRKlandscape,socioecoGeoDataModel
 
 setMethod("buildRKlandscape",
-          signature=c("socioecoGeoDataModel"),
-          definition = function(object){                  #X=object, p=,shape=
-            Ki=lapply(1:length(object@Kmodel@varNiche),function(i){
-              switch(object@Kmodel@reactNorms[[i]],
-                     scaling = raster::setValues(object[[i]],object@Kmodel@pNiche[[i]]),
-                     enveloppe = enveloppe(object[[object@Kmodel@varNiche[i]]],object@Kmodel@pNiche[[i]]),
-                     envelin=envelinear(object[[i]],object@Kmodel@pNiche[[i]]),
-                     conQuadratic=conQuadratic(object[[i]],object@Kmodel@pNiche[[i]]),
-                     conQuadraticSkw=conQuadraticSkw(object[[i]],object@Kmodel@pNiche[[i]]),
-                     stop("This reaction norm does not exist for a niche object !")
-              )})
-            Ri=lapply(1:length(object@Rmodel@varNiche),function(i){
-              switch(object@Rmodel@reactNorms[[i]],
-                       scaling= raster::setValues(object[[i]],object@Rmodel@pNiche[[i]]),
-                       enveloppe = enveloppe(object[[object@Rmodel@varNiche[i]]],object@Rmodel@pNiche[[i]]),
-                       envelin=envelinear(object[[i]],object@Rmodel@pNiche[[i]]),
-                       conQuadratic=conQuadratic(object[[i]],object@Rmodel@pNiche[[i]]),
-                       conQuadraticSkw=conQuadraticSkw(object[[i]],object@Rmodel@pNiche[[i]]),
-                       stop("This variable does not exist for Nicheobject !")
-              )})
-            if (length(Ri)==1) R=Ri[[1]] else R=prod(stack(Ri))
-            if (length(Ki)==1) K=Ki[[1]] else K=prod(stack(Ki))
-            raster::crs(R)<-raster::crs(object)
-            raster::extent(R)<-object@extent
-            result=raster::stack(R,K)
-            names(result)<-c("R","K")
-            result
-            # the niche function makes the product of the different layers results
-            # typically the scaling times the shape (enveloppe, envelin, ocnQuadratic or conQuadraticSkw)
+          signature = c("socioecoGeoDataModel"),
+          definition = function(object) {
+            
+            # Fonction interne pour calculer les couches de niche (R ou K)
+            .compute_niche_layer <- function(niche_mod) {
+              layers <- lapply(seq_along(niche_mod@varNiche), function(i) {
+                
+                var_name <- niche_mod@varNiche[i]
+                layer    <- object[[var_name]]   # On extrait toujours par le nom de la variable
+                param    <- niche_mod@pNiche[[i]]
+                norm     <- niche_mod@reactNorms[[i]]
+                
+                switch(norm,
+                       scaling         = raster::setValues(layer, param),
+                       enveloppe       = enveloppe(layer, param),
+                       envelin         = envelinear(layer, param),
+                       conQuadratic    = conQuadratic(layer, param),
+                       conQuadraticSkw = conQuadraticSkw(layer, param),
+                       stop(paste("Norme de réaction inconnue :", norm))
+                )
+              })
+              
+              # Si une seule couche -> on la garde, sinon produit multiplicatif des composantes
+              if (length(layers) == 1) layers[[1]] else prod(raster::stack(layers))
+            }
+            
+            # Calcul de R et K
+            K <- .compute_niche_layer(object@Kmodel)
+            R <- .compute_niche_layer(object@Rmodel)
+            
+            # Application de l'emprise spatiale et du CRS
+            # Application de l'emprise spatiale et du CRS
+            if (.hasSlot(object, "extent") && !is.null(object@extent)) {
+              raster::extent(R) <- object@extent
+              raster::extent(K) <- object@extent
+            } else {
+              raster::extent(R) <- raster::extent(object@geoEnvData)
+              raster::extent(K) <- raster::extent(object@geoEnvData)
+            }
+            
+            # Pour le CRS : on le récupère sur les rasters internes
+            raster::crs(R) <- raster::crs(object@geoEnvData)
+            raster::crs(K) <- raster::crs(object@geoEnvData)
+            
+            # Assemblage en un RasterStack nommé c("R", "K")
+            result <- raster::stack(R, K)
+            names(result) <- c("R", "K")
+            
+            return(result)
           }
 )
 
@@ -2002,23 +2182,37 @@ setGeneric(
 #' @aliases buildGeodist,socioecoGeoDataModel
 
 setMethod(
-  f="buildGeodist",
-  signature=c("socioecoGeoDataModel"),
-  definition=function(object)
+  f = "buildGeodist",
+  signature = c("socioecoGeoDataModel"),
+  definition = function(object)
   {
-    Ndim = 1+all(ncell(object)!=dim(object)[1:2]) # if the landscape is a line one cell width Ndim=1, otherwise Ndim=2
-    #if model["shapeMig"]=="contiguous" matrix()
-    geoDist = unlist(apply(xyA(object),1,
-                           function(x){
-                             values(raster::distanceFromPoints(object@geoEnvData,x))
-                             }))[Acells(object),]
-    geoDist[which(geoDist==0)]<-sqrt(2*min(geoDist[which(geoDist!=0)])^2)/3
-    # The distance between points within the same cell is one third 
-    #
+    geo_data <- object@geoEnvData
+    
+    # 1. Dimension du paysage
+    Ndim <- 1 + all(raster::ncell(geo_data) != dim(geo_data)[1:2])
+    
+    # 2. Coordonnées et cellules actives
+    coords <- xyA(geo_data)
+    cells  <- Acells(geo_data)
+    
+    # 3. Calcul des distances (apply renvoie une matrice : cellules x points)
+    dist_mat <- apply(coords, 1, function(pt) {
+      raster::values(raster::distanceFromPoints(geo_data, pt))
+    })
+    
+    # 4. Restriction aux cellules actives (lignes)
+    geoDist <- dist_mat[cells, , drop = FALSE]
+    
+    # 5. Correction intra-cellule (diagonale / distance nulle)
+    non_zero <- geoDist[geoDist > 0]
+    if (length(non_zero) > 0) {
+      d_min <- min(non_zero)
+      geoDist[geoDist == 0] <- sqrt(2 * d_min^2) / 3
+    }
+    
     return(geoDist)
   }
 )
-
 #' Build Migration Matrix
 #' @description
 #' Build a migration probability matrix for the landscape described in a raster.
@@ -2055,7 +2249,7 @@ setMethod(
                                                 exponential = (dexp(x, rate = 1/object@geoMigModel@pMig[[i]][1], log = FALSE)),
                                                 contiguous = apply(xyA(object),1,function(x){((abs(xyA(object)[,"x"]-x["x"])==res(object)[1])&(xyA(object)[,"y"]==x["y"])|(abs(xyA(object)[,"y"]-x["y"])==res(object)[1])&(xyA(object)[,"x"]==x["x"]))*object@geoMigModel@pMig[[1]][1]/4})+diag(nCellA(object))*(1-object@geoMigModel@pMig[[1]][1]),
                                                 contiguous8 = apply(xyA(object),1,function(x){((abs(xyA(object)[,"x"]-x["x"])==res(object)[1])&(xyA(object)[,"y"]==x["y"])|(abs(xyA(object)[,"y"]-x["y"])==res(object)[1])&(xyA(object)[,"x"]==x["x"]|(abs(xyA(object)[,"x"]-x["x"])==res(object)[1])))*object@geoMigModel@pMig[[1]][1]/8})+diag(nCellA(object))*(1-object@geoMigModel@pMig[[1]][1]),
-                                                island = diag(nCellA(object))*(1-object@geoMigModel@pMig[[i]][1])+(1-diag(nCellA(object)))*(object@geoMigModel@pMig[[i]][1])/(nCellA(object)-1),
+                                                island = diag(nCellA(object@geoEnvData))*(1-object@geoMigModel@pMig[[i]][1])+(1-diag(nCellA(object)))*(object@geoMigModel@pMig[[i]][1])/(nCellA(object)-1),
                                                 fat_tail2 = x^object@geoMigModel@pMig[[i]][2]*exp(-2*x/(object@geoMigModel@pMig[[i]][1]^0.5))
                                                 #contiguous_long_dist_mixt = model["pMig"]["plongdist"]/nCellA(object)+(x==0)*(1-model["pMig"]["pcontiguous"]-model["pMig"]["plongdist"])+((x>0)-(x>1.4*res(object)[1]))*(model["pMig"]["pcontiguous"]/2),
                                                 #gaussian_long_dist_mixt = model["pMig"][2]/nCellA(object) + (dnorm(x, mean = 0, sd = object@geoMigModel@pMig[[i]][1], log = FALSE))
@@ -2065,7 +2259,7 @@ setMethod(
     for (i in which(object@geoMigModel@modelConnectionType=="grouping"))
     {
       migration[[i]] = switch(object@geoMigModel@shapeMig[i],
-                                                popSep = sapply(valuesA(object)[i],function(x) {x==valuesA(object)[i]})
+                                                popSep = sapply(valuesA(object)[,i],function(x) {x==valuesA(object)[i]})
                              )
       migration[[i]]<-migration[[i]]/sum(migration[[i]])
     }
@@ -2082,9 +2276,10 @@ setMethod(
 setClass("TransitionBackward",
          contains = "matrix",
          validity = function(object){
-           if (all(nrow(object)==0))stop("The matrix is empty.")
-           if (nrow(object)!=ncol(object))stop("The matrix is not square")
-           if (!all(rowSums(object)>0.999999999) && !all(rowSums(object)<1.000000001)) {stop("The sum of probabilities in each row is not 1")}
+           if (all(nrow(object)==0))return("The matrix is empty.")
+           if (nrow(object)!=ncol(object))return("The matrix is not square")
+           if (!all(rowSums(object)>0.999999999) && !all(rowSums(object)<1.000000001)) {return("The sum of probabilities in each row is not 1")}
+           TRUE
          }
 )
 
@@ -2105,6 +2300,19 @@ TransitionBackward<- function(matrix){
   new(Class="TransitionBackward",matrix)
 }
 
+validityTransitionBackward <- function(object) {
+  rs <- rowSums(object)
+  if (any(is.na(rs)) || any(is.nan(rs))) {
+    return("La matrice de transition contient des valeurs NA ou NaN (division par zéro probable).")
+  }
+  if (any(abs(rs - 1) > 1e-6)) {
+    return("Toutes les lignes de la matrice de transition doivent sommer à 1.")
+  }
+  TRUE
+}
+
+setvalidity("TransitionBackward",validityTransitionBackward)
+
 #' Forward transition probabilities matrix
 #' 
 #' @description
@@ -2114,8 +2322,9 @@ TransitionBackward<- function(matrix){
 setClass("TransitionForward",
          contains = "matrix",
          validity = function(object){
-           if (all(nrow(object)==0))stop("The matrix is empty.")
-           if (nrow(object)!=ncol(object))stop("The matrix is not square")
+           if (all(nrow(object)==0))return("The matrix is empty.")
+           if (nrow(object)!=ncol(object))return("The matrix is not square")
+           TRUE
          }
 )
 
@@ -2310,10 +2519,13 @@ setClass("ecoGenetSet",
 #' @export
 
 ecoGenetSet <- function(envDyn = NULL, genetData = NULL) {
-  if(is.null(envDyn)) {envDyn <- envDynSet()}
-  if(is.null(genetData)) {genetData <- genetSet()}
-  genetData@sampleCell <- setNames(raster::cellFromXY(envDyn,genetData@geoCoordinates),1:length(genetData@genetData))
-  new("ecoGenetSet",envDyn, genetSample = genetData)
+  if (is.null(envDyn))    envDyn <- envDynSet()
+  if (is.null(genetData)) genetData <- genetSet()
+
+  cells <- raster::cellFromXY(envDyn, genetData@geoCoordinates)
+  genetData@sampleCell <- setNames(cells, seq_along(genetData@genetData))
+
+  new("ecoGenetSet", envDyn, genetSample = genetData)
 }
 
 #' Extracts data from ecoGenetSet objects
@@ -2777,7 +2989,8 @@ setClass("ecogenetSetLik",
          prototype(genealSimProbList = list(genealSimProb(),genealSimProb(),genealSimProb(),genealSimProb()), likelihoodParams = runif(4,min = 0.5,max = 1.5)))
 
 ecogenetSetLikValidity <- function(object) {
-  if(any(!sapply(object@genealSimProbList, function(x) is(x,"genealSimProb")))) { stop("All objects of the genealSimProbList must be genealSimProb") }
+  if(any(!sapply(object@genealSimProbList, function(x) is(x,"genealSimProb")))) { return("All objects of the genealSimProbList must be genealSimProb") }
+  TRUE
 }
 
 setValidity("ecogenetSetLik", ecogenetSetLikValidity)
@@ -2923,7 +3136,8 @@ setClass("ecoCoaLikInf",
          representation(maxLik = "matrix"))
 
 validityEcoCoaLikInf <- function(object) {
-  if(ncol(object@maxLik) != length(object@likelihoodParams)) {stop("The number of parameter values and the columns of the matrix should have the same length!")}
+  if(ncol(object@maxLik) != length(object@likelihoodParams)) {return("The number of parameter values and the columns of the matrix should have the same length!")}
+  TRUE
 }
 
 setValidity("ecoCoaLikInf", validityEcoCoaLikInf)
